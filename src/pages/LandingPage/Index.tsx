@@ -14,13 +14,6 @@ export default function LandingPage() {
     ProposalsTableRef.current?.scrollIntoView({behavior: "smooth"});
   };
 
-  if (!proposalTableData) {
-    // TODO: handle errors
-    return <>No Data</>;
-  }
-
-  const {nextProposalId} = proposalTableData;
-
   return (
     <Grid item xs={12}>
       <Header />
@@ -28,10 +21,12 @@ export default function LandingPage() {
       <Hidden smDown>
         <Instructions onVoteProposalButtonClick={scrollTableIntoView} />
       </Hidden>
-      <ProposalsTable
-        nextProposalId={nextProposalId}
-        ProposalsTableRef={ProposalsTableRef}
-      />
+      {proposalTableData && (
+        <ProposalsTable
+          nextProposalId={proposalTableData.nextProposalId}
+          ProposalsTableRef={ProposalsTableRef}
+        />
+      )}
     </Grid>
   );
 }
