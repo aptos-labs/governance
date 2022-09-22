@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {BrowserRouter} from "react-router-dom";
 import {QueryClient, QueryClientProvider} from "react-query";
-import ExplorerRoutes from "./ExplorerRoutes";
+import GovernanceRoutes from "./GovernanceRoutes";
 import ReactGA from "react-ga4";
 
 ReactGA.initialize(process.env.GA_TRACKING_ID || "G-8XH7V50XK7");
@@ -24,7 +24,7 @@ window.addEventListener("load", () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <ExplorerRoutes />
+          <GovernanceRoutes />
         </BrowserRouter>
       </QueryClientProvider>
     </React.StrictMode>,

@@ -133,7 +133,7 @@ function ProposalRow({proposal_id, columns}: ProposalRowProps) {
   const navigate = RRD.useNavigate();
 
   const onTableRowClick = () => {
-    navigate(`${proposal_id}`);
+    navigate(`/proposal/${proposal_id}`);
   };
 
   if (!proposalData) {

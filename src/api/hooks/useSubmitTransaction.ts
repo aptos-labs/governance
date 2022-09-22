@@ -45,7 +45,7 @@ const useSubmitTransaction = () => {
       setTransactionResponse({
         transactionSubmitted: false,
         message:
-          "Wallet and Explorer should use the same network to submit a transaction",
+          "Wallet and Governance should use the same network to submit a transaction",
       });
       return;
     }
