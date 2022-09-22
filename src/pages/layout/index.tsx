@@ -12,7 +12,7 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-export default function ExplorerLayout({children}: LayoutProps) {
+export default function GovernanceLayout({children}: LayoutProps) {
   return (
     <ProvideColorMode>
       <CssBaseline />
