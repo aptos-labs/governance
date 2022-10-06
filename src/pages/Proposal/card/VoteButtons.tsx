@@ -74,7 +74,7 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
   return (
     <>
       <Stack spacing={2}>
-        {renderAddressTextField("Owner Account Address")}
+        {renderAddressTextField("Stake Pool Address")}
         <Button
           fullWidth
           size="large"
