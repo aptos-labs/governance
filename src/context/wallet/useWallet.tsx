@@ -7,6 +7,7 @@ import {
   isUpdatedVersion,
   isAccountCreated,
   isWalletConnected,
+  disconnectWallet,
 } from "../../api/wallet";
 import {WalletNetworks} from "./context";
 
@@ -55,6 +56,10 @@ export function useWallet() {
     connectToWallet().then(setIsConnected);
   };
 
+  const disconnect = async () => {
+    disconnectWallet().then(() => setIsConnected(false));
+  };
+
   return {
     isInstalled,
     isAccountSet,
@@ -62,5 +67,6 @@ export function useWallet() {
     accountAddress,
     walletNetwork,
     connect,
+    disconnect,
   };
 }

@@ -1,14 +1,18 @@
-import React from "react";
+import React, {useState} from "react";
 
 import {
   Button,
   ButtonBaseProps,
   ButtonProps,
   Link,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Popover,
   Stack,
   Tooltip,
   Typography,
-  useTheme,
 } from "@mui/material";
 import {useWalletContext} from "../context/wallet/context";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
@@ -16,7 +20,6 @@ import AddCardIcon from "@mui/icons-material/AddCard";
 import ErrorIcon from "@mui/icons-material/Error";
 import {truncateAddress} from "../pages/utils";
 import {isUpdatedVersion} from "../api/wallet";
-import {teal, grey} from "../themes/colors/aptosColorPalette";
 import {installWalletUrl} from "../constants";
 
 type WalletButtonWrapperProps = {
@@ -31,27 +34,60 @@ const WalletButtonWrapper = ({
   icon,
   ...props
 }: WalletButtonWrapperProps & ButtonBaseProps & ButtonProps): JSX.Element => {
-  const theme = useTheme();
+  const {disconnect} = useWalletContext();
+  const [popoverAnchor, setPopoverAnchor] = useState<HTMLButtonElement | null>(
+    null,
+  );
+  const popoverOpen = Boolean(popoverAnchor);
+  const id = popoverOpen ? "wallet-popover" : undefined;
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setPopoverAnchor(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setPopoverAnchor(null);
+  };
+
   return (
-    <Button
-      variant="outlined"
-      sx={{
-        padding: "10px 25px",
-        backgroundColor: theme.palette.mode === "dark" ? grey[800] : "white",
-        color: theme.palette.mode === "dark" ? teal[400] : grey[900],
-      }}
-      {...props}
-    >
-      {icon}
-      <Typography
-        variant="body2"
-        color={theme.palette.mode === "dark" ? "white" : grey[900]}
-        ml={2}
+    <>
+      <Button
+        variant="primary"
+        onClick={handleClick}
+        sx={{
+          padding: "10px 25px",
+        }}
+        {...props}
       >
-        {text}
-      </Typography>
-      {children}
-    </Button>
+        {icon}
+        <Typography variant="body2" ml={2}>
+          {text}
+        </Typography>
+        {children}
+      </Button>
+      <Popover
+        id={id}
+        open={popoverOpen}
+        anchorEl={popoverAnchor}
+        onClose={handlePopoverClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+      >
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton
+              disableGutters
+              sx={{px: "8px"}}
+              onClick={disconnect}
+            >
+              <ListItemText primary="Logout" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Popover>
+    </>
   );
 };
 

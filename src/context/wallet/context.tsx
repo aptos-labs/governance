@@ -7,6 +7,7 @@ export interface walletContext {
   walletNetwork: WalletNetworks;
   accountAddress: string | null;
   connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
 }
 
 export const walletContext = createContext<walletContext | null>(null);

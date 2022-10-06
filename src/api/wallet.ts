@@ -41,6 +41,14 @@ export const connectToWallet = async (): Promise<boolean> => {
   return false;
 };
 
+export const disconnectWallet = async (): Promise<void> => {
+  try {
+    await window.aptos?.disconnect?.();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const getAccountAddress: () => Promise<string | null> = async () => {
   try {
     const data = await window.aptos?.account?.();
