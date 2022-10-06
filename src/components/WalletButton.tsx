@@ -75,7 +75,7 @@ const WalletButtonWrapper = ({
           horizontal: "left",
         }}
       >
-        <List>
+        <List sx={{minWidth: "10rem"}}>
           <ListItem disablePadding>
             <ListItemButton
               disableGutters
