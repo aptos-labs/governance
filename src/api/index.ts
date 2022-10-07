@@ -65,6 +65,27 @@ export function getAccountResources(
   );
 }
 
+export function getAccountResource(
+  requestParameters: {
+    address: string;
+    resourceType: string;
+    ledgerVersion?: number;
+  },
+  nodeUrl: string,
+): Promise<Types.MoveResource> {
+  const client = new AptosClient(nodeUrl, config);
+  const {address, resourceType, ledgerVersion} = requestParameters;
+  let ledgerVersionBig;
+  if (ledgerVersion) {
+    ledgerVersionBig = BigInt(ledgerVersion);
+  }
+  return withResponseError(
+    client.getAccountResource(address, resourceType, {
+      ledgerVersion: ledgerVersionBig,
+    }),
+  );
+}
+
 export function getAccountModules(
   requestParameters: {address: string; ledgerVersion?: number},
   nodeUrl: string,

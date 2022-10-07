@@ -1,4 +1,4 @@
-import {Button, Stack} from "@mui/material";
+import {Box, Button, Stack} from "@mui/material";
 import React, {useState} from "react";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
@@ -12,28 +12,21 @@ import {
 } from "../../constants";
 import ConfirmationModal from "./ConfirmationModal";
 import TransactionResponseSnackbar from "../../../components/snackbar/TransactionResponseSnackbar";
-import useAddressInput from "../../../api/hooks/useAddressInput";
 import LoadingModal from "../../../components/LoadingModal";
 import useSubmitVote from "../../../api/hooks/useSubmitVote";
 
-// TODO:
-// 1. check if voted
-// 2. check if eligible to vote
-
 type VoteButtonsProps = {
   proposalId: string;
+  stakeAccount: string;
 };
 
-export default function VoteButtons({proposalId}: VoteButtonsProps) {
+export default function VoteButtons({
+  proposalId,
+  stakeAccount,
+}: VoteButtonsProps) {
   const [voteForModalIsOpen, setVoteForModalIsOpen] = useState<boolean>(false);
   const [voteAgainstModalIsOpen, setVoteAgainstModalIsOpen] =
     useState<boolean>(false);
-
-  const {
-    addr: accountAddr,
-    renderAddressTextField,
-    validateAddressInput,
-  } = useAddressInput();
 
   const {
     submitVote,
@@ -43,13 +36,11 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
   } = useSubmitVote();
 
   const openModal = (shouldPass: boolean) => {
-    const isValid = validateAddressInput();
-    if (isValid) {
-      if (shouldPass) {
-        setVoteForModalIsOpen(true);
-      } else {
-        setVoteAgainstModalIsOpen(true);
-      }
+    console.log("here");
+    if (shouldPass) {
+      setVoteForModalIsOpen(true);
+    } else {
+      setVoteAgainstModalIsOpen(true);
     }
   };
 
@@ -62,7 +53,7 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
   };
 
   const onVote = (shouldPass: boolean) => {
-    submitVote(proposalId, shouldPass, accountAddr);
+    submitVote(proposalId, shouldPass, stakeAccount);
     closeVoteForModal();
     closeVoteAgainstModal();
   };
@@ -72,9 +63,8 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
   };
 
   return (
-    <>
-      <Stack spacing={2}>
-        {renderAddressTextField("Stake Pool Address")}
+    <Box>
+      <Stack spacing={2} direction="row">
         <Button
           fullWidth
           size="large"
@@ -126,6 +116,6 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
         onClose={closeVoteAgainstModal}
       />
       <LoadingModal open={transactionInProcess} />
-    </>
+    </Box>
   );
 }

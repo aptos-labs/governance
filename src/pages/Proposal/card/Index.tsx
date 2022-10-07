@@ -14,8 +14,6 @@ type ProposalCardProps = {
 };
 
 export function ProposalCard({proposal}: ProposalCardProps) {
-  const accountHasVoted = useAccountHasVoted(proposal.proposal_id);
-
   return (
     <Card>
       <Stack
@@ -27,10 +25,7 @@ export function ProposalCard({proposal}: ProposalCardProps) {
           />
         }
       >
-        {!isVotingClosed(proposal) && !accountHasVoted && (
-          <CastVoteSection proposalId={proposal.proposal_id} />
-        )}
-        {accountHasVoted && <YourVoteSection />}
+        <CastVoteSection proposalId={proposal.proposal_id} />
         <ResultsSection proposal={proposal} />
       </Stack>
     </Card>
