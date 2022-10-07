@@ -26,7 +26,7 @@ export default function CastVoteSection({proposalId}: CastVoteSectionProps) {
           variant="primary"
           onClick={onVoteButtonClick}
         >
-          See Votes
+          Vote
         </Button>
       ) : (
         <ConnectWalletInfo />

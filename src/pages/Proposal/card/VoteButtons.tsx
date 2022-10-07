@@ -17,12 +17,12 @@ import useSubmitVote from "../../../api/hooks/useSubmitVote";
 
 type VoteButtonsProps = {
   proposalId: string;
-  stakeAccount: string;
+  stakePoolAddress: string;
 };
 
 export default function VoteButtons({
   proposalId,
-  stakeAccount,
+  stakePoolAddress,
 }: VoteButtonsProps) {
   const [voteForModalIsOpen, setVoteForModalIsOpen] = useState<boolean>(false);
   const [voteAgainstModalIsOpen, setVoteAgainstModalIsOpen] =
@@ -36,7 +36,6 @@ export default function VoteButtons({
   } = useSubmitVote();
 
   const openModal = (shouldPass: boolean) => {
-    console.log("here");
     if (shouldPass) {
       setVoteForModalIsOpen(true);
     } else {
@@ -53,7 +52,7 @@ export default function VoteButtons({
   };
 
   const onVote = (shouldPass: boolean) => {
-    submitVote(proposalId, shouldPass, stakeAccount);
+    submitVote(proposalId, shouldPass, stakePoolAddress);
     closeVoteForModal();
     closeVoteAgainstModal();
   };
@@ -108,12 +107,14 @@ export default function VoteButtons({
         shouldPass={true}
         onConfirm={() => onVote(true)}
         onClose={closeVoteForModal}
+        stakePoolAddress={stakePoolAddress}
       />
       <ConfirmationModal
         open={voteAgainstModalIsOpen}
         shouldPass={false}
         onConfirm={() => onVote(false)}
         onClose={closeVoteAgainstModal}
+        stakePoolAddress={stakePoolAddress}
       />
       <LoadingModal open={transactionInProcess} />
     </Box>

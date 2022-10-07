@@ -38,7 +38,7 @@ const CardBox = ({theme, children}: CardBoxProps) => {
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        width: 350,
+        width: 500,
         backgroundColor: `${
           theme.palette.mode === "dark" ? grey[700] : grey[100]
         }`,
@@ -56,6 +56,7 @@ type ConfirmationModalProps = {
   shouldPass: boolean;
   onConfirm: () => void;
   onClose: () => void;
+  stakePoolAddress: string;
 };
 
 export default function ConfirmationModal({
@@ -63,6 +64,7 @@ export default function ConfirmationModal({
   shouldPass,
   onConfirm,
   onClose,
+  stakePoolAddress,
 }: ConfirmationModalProps) {
   const theme = useTheme();
 
@@ -100,7 +102,7 @@ export default function ConfirmationModal({
       ) : (
         <CancelOutlinedIcon fontSize="large" sx={{color: negativeColor}} />
       )}
-      <Stack direction="column">
+      <Stack direction="column" sx={{wordBreak: "break-all"}}>
         <Stack direction="row">
           <Typography variant="body1">You are voting</Typography>
           <Typography
@@ -111,7 +113,12 @@ export default function ConfirmationModal({
             {shouldPass ? voteFor : voteAgainst}
           </Typography>
         </Stack>
-        <Typography variant="body1">this proposal.</Typography>
+        <Typography variant="body1">
+          this proposal for stake pool address
+        </Typography>
+        <Typography variant="body1" fontWeight="900">
+          {stakePoolAddress}.
+        </Typography>
       </Stack>
     </Stack>
   );
