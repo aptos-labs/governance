@@ -16,13 +16,7 @@ declare global {
   }
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 // delay rendering the application until the window.onload event has fired when integrating with the window.aptos API
 window.addEventListener("load", () => {
