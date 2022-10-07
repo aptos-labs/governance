@@ -42,7 +42,7 @@ export default function AddressesList({
                   stakePoolAddress={account.address}
                 />
               )}
-              {isVotingClosed(proposal) && (
+              {!account.voted && isVotingClosed(proposal) && (
                 <Button
                   disabled
                   fullWidth
@@ -52,7 +52,7 @@ export default function AddressesList({
                     backgroundColor: grey[500],
                   }}
                 >
-                  Voting Close
+                  didn't vote
                 </Button>
               )}
             </Grid>
