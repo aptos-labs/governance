@@ -29,7 +29,7 @@ const fetchTableItem = async (
       state.network_value,
     );
   } catch (e: any) {
-    // fetchTableItem returns a 404 error if the item does not exist, which mean address has not voted
+    // fetchTableItem returns a 404 error if the item does not exist, which means address has not voted, therefore return `false`
     if (e.type == "Not found") {
       console.log("hasAddressVoted", e);
       return false;
@@ -37,7 +37,7 @@ const fetchTableItem = async (
       Sentry.captureException(`hasAddressVoted ${e}`);
     }
   }
-  // return `false` if the item exists, which means address has voted
+  // return `true` if the item exists, which means address has voted
   return true;
 };
 

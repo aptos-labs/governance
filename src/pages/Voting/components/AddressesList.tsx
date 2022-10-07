@@ -2,12 +2,8 @@ import {Button, Grid, Stack, TextField} from "@mui/material";
 import {grey} from "@mui/material/colors";
 import React from "react";
 import VoteButtons from "../../Proposal/card/VoteButtons";
-import {
-  AddressToVoteMap,
-  Proposal,
-  ProposalStatus,
-  ProposalVotingState,
-} from "../../Types";
+import {AddressToVoteMap, Proposal} from "../../Types";
+import {isVotingClosed} from "../../utils";
 
 type AddressesListProps = {
   addressVoteMap: AddressToVoteMap[] | undefined;
@@ -40,13 +36,13 @@ export default function AddressesList({
                   Voted
                 </Button>
               )}
-              {!account.voted && !proposal.is_voting_closed && (
+              {!account.voted && !isVotingClosed(proposal) && (
                 <VoteButtons
                   proposalId={proposal.proposal_id}
                   stakePoolAddress={account.address}
                 />
               )}
-              {proposal.is_voting_closed && (
+              {isVotingClosed(proposal) && (
                 <Button
                   disabled
                   fullWidth

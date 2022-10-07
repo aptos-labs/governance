@@ -98,6 +98,7 @@ export default function StakePoolAddressInput({
         fullWidth
         onClick={onStakePoolAddressesSubmit}
         sx={{mt: 2}}
+        disabled={stakePoolAddressesInput.length === 0}
       >
         Validate
       </Button>
