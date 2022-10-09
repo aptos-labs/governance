@@ -72,21 +72,26 @@ export default function StakePoolAddressInput({
 
   const onStakePoolAddressesSubmit = (): void => {
     setLoadingModalIsOpen(true);
-    setAddressVoteMap([]);
+    //setAddressVoteMap([]);
     const stakePoolAddressesInputTrimmed = stakePoolAddressesInput.trim();
     const stakePoolAddressesArray = stakePoolAddressesInputTrimmed.split(" ");
     validateAddresses(stakePoolAddressesArray);
   };
 
   return (
-    <Grid item xs={12} mb={4}>
+    <Grid item xs={12} mb={10} mt={6}>
       <LoadingModal open={loadingModalIsOpen} />
+      <Typography variant="h5" mb={2}>
+        Input Stake Pool Addresses
+      </Typography>
       <TextField
         fullWidth
         variant="outlined"
         multiline={true}
         rows={4}
-        placeholder={"Input Stake Pool addresses seperated by space"}
+        placeholder={
+          "Input the stake pool addresses you want to vote for seperated by space"
+        }
         onChange={onStakePoolAddressesInputChange}
       />
       {addressHasError && (

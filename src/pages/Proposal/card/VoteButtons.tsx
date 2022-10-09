@@ -1,5 +1,5 @@
 import {Box, Button, Stack} from "@mui/material";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import {
@@ -18,11 +18,13 @@ import useSubmitVote from "../../../api/hooks/useSubmitVote";
 type VoteButtonsProps = {
   proposalId: string;
   stakePoolAddress: string;
+  onTransactionSuccess: () => void;
 };
 
 export default function VoteButtons({
   proposalId,
   stakePoolAddress,
+  onTransactionSuccess,
 }: VoteButtonsProps) {
   const [voteForModalIsOpen, setVoteForModalIsOpen] = useState<boolean>(false);
   const [voteAgainstModalIsOpen, setVoteAgainstModalIsOpen] =
@@ -60,6 +62,12 @@ export default function VoteButtons({
   const onCloseSnackbar = () => {
     clearTransactionResponse();
   };
+
+  useEffect(() => {
+    if (transactionResponse?.transactionSubmitted) {
+      onTransactionSuccess();
+    }
+  }, [transactionResponse]);
 
   return (
     <Box>
