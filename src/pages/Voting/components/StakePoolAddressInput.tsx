@@ -1,4 +1,4 @@
-import {Button, Grid, TextField, Typography} from "@mui/material";
+import {Button, Grid, Stack, TextField, Typography} from "@mui/material";
 import React, {useState} from "react";
 import LoadingModal from "../../../components/LoadingModal";
 import {useGlobalState} from "../../../GlobalState";
@@ -72,7 +72,7 @@ export default function StakePoolAddressInput({
 
   const onStakePoolAddressesSubmit = (): void => {
     setLoadingModalIsOpen(true);
-    //setAddressVoteMap([]);
+    setAddressVoteMap([]);
     const stakePoolAddressesInputTrimmed = stakePoolAddressesInput.trim();
     const stakePoolAddressesArray = stakePoolAddressesInputTrimmed.split(" ");
     validateAddresses(stakePoolAddressesArray);
@@ -97,16 +97,17 @@ export default function StakePoolAddressInput({
       {addressHasError && (
         <Typography color="red">{addressHasError}</Typography>
       )}
-      <Button
-        variant="primary"
-        size="large"
-        fullWidth
-        onClick={onStakePoolAddressesSubmit}
-        sx={{mt: 2}}
-        disabled={stakePoolAddressesInput.length === 0}
-      >
-        Validate
-      </Button>
+      <Stack alignItems="flex-end">
+        <Button
+          variant="primary"
+          size="large"
+          onClick={onStakePoolAddressesSubmit}
+          sx={{mt: 2}}
+          disabled={stakePoolAddressesInput.length === 0}
+        >
+          Validate
+        </Button>
+      </Stack>
     </Grid>
   );
 }
