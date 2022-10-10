@@ -22,20 +22,24 @@ export default function StakePoolAddressInput({
   proposalId,
 }: StakePoolAddressInputProps) {
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
-  const [notPartOfStakingPool, setNotPartOfStakingPool] = useState<string[]>(
-    [],
-  );
+  const [notPartOfStakingPool, setNotPartOfStakingPool] = useState<
+    string | null
+  >(null);
   const [stakePoolAddressesInput, setStakePoolAddressesInput] =
     useState<string>("");
   const [loadingModalIsOpen, setLoadingModalIsOpen] = useState<boolean>(false);
   const [state, _] = useGlobalState();
   const {accountAddress} = useWalletContext();
 
+  const resetErrors = () => {
+    setAddressHasError(null);
+    setNotPartOfStakingPool(null);
+  };
+
   const onStakePoolAddressesInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ): void => {
-    setAddressHasError(null);
-    setNotPartOfStakingPool([]);
+    resetErrors();
     const addresses = event.target.value;
     setStakePoolAddressesInput(addresses);
   };
@@ -80,18 +84,16 @@ export default function StakePoolAddressInput({
     const isVoter = await validateIsVoter(poolAdddress);
     if (!isVoter) {
       setLoadingModalIsOpen(false);
-      setNotPartOfStakingPool((notPartOfStakingPool) => [
-        ...notPartOfStakingPool,
-        poolAdddress,
-      ]);
+      setNotPartOfStakingPool(
+        `you are not part of staking pool ${poolAdddress}`,
+      );
       return false;
     }
     return true;
   };
 
   const validateAddresses = async (stakePoolAddressesArray: string[]) => {
-    setAddressHasError(null);
-    setNotPartOfStakingPool([]);
+    resetErrors();
     let addresses: string[] = [];
     stakePoolAddressesArray = Array.from(new Set(stakePoolAddressesArray));
     for (let count = 0; count < stakePoolAddressesArray.length; count++) {
@@ -99,7 +101,7 @@ export default function StakePoolAddressInput({
       const stakePoolAddressTrimmed = stakePoolAddress.trim();
       if (stakePoolAddressTrimmed.length === 0) continue;
       if (!validateStakePoolAddress(stakePoolAddressTrimmed)) break;
-      if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) continue;
+      if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) break;
       addresses.push(stakePoolAddressTrimmed);
     }
 
@@ -137,12 +139,9 @@ export default function StakePoolAddressInput({
           <p>{addressHasError}</p>
         </Typography>
       )}
-      {notPartOfStakingPool.length > 0 && (
+      {notPartOfStakingPool && (
         <Typography color="red">
-          you are not part of staking pool
-          {notPartOfStakingPool.map((address) => (
-            <p> {address} </p>
-          ))}
+          <p>{notPartOfStakingPool} </p>
         </Typography>
       )}
       <Stack alignItems="flex-end">
