@@ -93,14 +93,11 @@ export default function StakePoolAddressInput({
     setAddressHasError(null);
     setNotPartOfStakingPool([]);
     let addresses: string[] = [];
+    stakePoolAddressesArray = Array.from(new Set(stakePoolAddressesArray));
     for (let count = 0; count < stakePoolAddressesArray.length; count++) {
       const stakePoolAddress = stakePoolAddressesArray[count];
       const stakePoolAddressTrimmed = stakePoolAddress.trim();
-      if (
-        stakePoolAddressTrimmed.length === 0 ||
-        addresses.includes(stakePoolAddressTrimmed)
-      )
-        continue;
+      if (stakePoolAddressTrimmed.length === 0) continue;
       if (!validateStakePoolAddress(stakePoolAddressTrimmed)) break;
       if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) continue;
       addresses.push(stakePoolAddressTrimmed);
@@ -136,7 +133,9 @@ export default function StakePoolAddressInput({
         onChange={onStakePoolAddressesInputChange}
       />
       {addressHasError && (
-        <Typography color="red">{addressHasError}</Typography>
+        <Typography color="red">
+          <p>{addressHasError}</p>
+        </Typography>
       )}
       {notPartOfStakingPool.length > 0 && (
         <Typography color="red">
