@@ -1,4 +1,4 @@
-import {Box, Button, Stack} from "@mui/material";
+import {Box, Button, Chip, Stack} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
@@ -71,39 +71,41 @@ export default function VoteButtons({
 
   return (
     <Box>
-      <Stack spacing={2} direction="row">
-        <Button
-          fullWidth
-          size="large"
-          variant="primary"
+      <Stack spacing={2} direction="row" justifyContent="end">
+        <Chip
+          label={voteFor}
+          variant="outlined"
+          icon={
+            <CheckCircleOutlinedIcon
+              sx={{
+                fill: primaryColor,
+              }}
+            />
+          }
           sx={{
             justifyContent: "start",
-            backgroundColor: primaryColor,
-            "&:hover": {
-              backgroundColor: primaryColorOnHover,
-            },
+            borderColor: primaryColor,
+            color: primaryColor,
           }}
-          startIcon={<CheckCircleOutlinedIcon />}
           onClick={() => openModal(true)}
-        >
-          {voteFor}
-        </Button>
-        <Button
-          fullWidth
-          size="large"
-          variant="primary"
+        />
+        <Chip
+          label={voteAgainst}
+          icon={
+            <CancelOutlinedIcon
+              sx={{
+                fill: negativeColor,
+              }}
+            />
+          }
+          variant="outlined"
           sx={{
             justifyContent: "start",
-            backgroundColor: negativeColor,
-            "&:hover": {
-              backgroundColor: negativeColorOnHover,
-            },
+            borderColor: negativeColor,
+            color: negativeColor,
           }}
-          startIcon={<CancelOutlinedIcon />}
           onClick={() => openModal(false)}
-        >
-          {voteAgainst}
-        </Button>
+        />
       </Stack>
       <TransactionResponseSnackbar
         transactionResponse={transactionResponse}

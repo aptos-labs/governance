@@ -93,7 +93,7 @@ export default function ConfirmationModal({
     <Stack
       direction="row"
       marginX={2}
-      marginY={6}
+      marginY={3}
       spacing={1.5}
       alignItems="center"
     >

@@ -1,10 +1,14 @@
 import {Button, Grid, Stack, TextField, Typography} from "@mui/material";
 import React, {useState} from "react";
 import LoadingModal from "../../../components/LoadingModal";
+import {useWalletContext} from "../../../context/wallet/context";
 import {useGlobalState} from "../../../GlobalState";
 import {AddressToVoteMap} from "../../Types";
 import {isValidAccountAddress} from "../../utils";
 import hasAddressVoted from "../api/hasAddressVoted";
+import isDelegatedVoter from "../api/isDelegatedVoter";
+import {alpha} from "@mui/material";
+import {primaryColor} from "../../constants";
 
 type StakePoolAddressInputProps = {
   setAddressVoteMap: React.Dispatch<
@@ -18,33 +22,43 @@ export default function StakePoolAddressInput({
   proposalId,
 }: StakePoolAddressInputProps) {
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
+  const [notPartOfStakingPool, setNotPartOfStakingPool] = useState<string[]>(
+    [],
+  );
   const [stakePoolAddressesInput, setStakePoolAddressesInput] =
     useState<string>("");
   const [loadingModalIsOpen, setLoadingModalIsOpen] = useState<boolean>(false);
   const [state, _] = useGlobalState();
+  const {accountAddress} = useWalletContext();
 
   const onStakePoolAddressesInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ): void => {
     setAddressHasError(null);
+    setNotPartOfStakingPool([]);
     const addresses = event.target.value;
     setStakePoolAddressesInput(addresses);
   };
 
   const fetchHasAccountVoted = async (
-    address: string,
+    poolAddress: string,
   ): Promise<AddressToVoteMap> => {
-    const result = await hasAddressVoted(address, proposalId, state);
+    const result = await hasAddressVoted(poolAddress, proposalId, state);
     const addressToVotemap = {
-      address,
+      poolAddress,
       voted: result,
     };
     return addressToVotemap;
   };
 
-  const fetchAccounts = async (addresses: string[]): Promise<void> => {
-    const map = addresses.map(async (address) => {
-      const result = await fetchHasAccountVoted(address);
+  const validateIsVoter = async (poolAddress: string): Promise<boolean> => {
+    const isVoter = await isDelegatedVoter(poolAddress, accountAddress, state);
+    return isVoter;
+  };
+
+  const fetchAccounts = async (poolAddresses: string[]): Promise<void> => {
+    const map = poolAddresses.map(async (poolAddress) => {
+      const result = await fetchHasAccountVoted(poolAddress);
       return result;
     });
 
@@ -53,17 +67,42 @@ export default function StakePoolAddressInput({
     setLoadingModalIsOpen(false);
   };
 
-  const validateAddresses = (stakePoolAddressesArray: string[]) => {
+  const validateStakePoolAddress = (poolAdddress: string) => {
+    if (!isValidAccountAddress(poolAdddress)) {
+      setAddressHasError(`${poolAdddress} is not a valid address`);
+      setLoadingModalIsOpen(false);
+      return false;
+    }
+    return true;
+  };
+
+  const validateAccountIsVoter = async (poolAdddress: string) => {
+    const isVoter = await validateIsVoter(poolAdddress);
+    if (!isVoter) {
+      setLoadingModalIsOpen(false);
+      setNotPartOfStakingPool((notPartOfStakingPool) => [
+        ...notPartOfStakingPool,
+        poolAdddress,
+      ]);
+      return false;
+    }
+    return true;
+  };
+
+  const validateAddresses = async (stakePoolAddressesArray: string[]) => {
+    setAddressHasError(null);
+    setNotPartOfStakingPool([]);
     let addresses: string[] = [];
     for (let count = 0; count < stakePoolAddressesArray.length; count++) {
       const stakePoolAddress = stakePoolAddressesArray[count];
-      if (stakePoolAddress.length === 0) continue;
       const stakePoolAddressTrimmed = stakePoolAddress.trim();
-      if (!isValidAccountAddress(stakePoolAddressTrimmed)) {
-        setAddressHasError(`${stakePoolAddressTrimmed} is not a valid address`);
-        setLoadingModalIsOpen(false);
-        break;
-      }
+      if (
+        stakePoolAddressTrimmed.length === 0 ||
+        addresses.includes(stakePoolAddressTrimmed)
+      )
+        continue;
+      if (!validateStakePoolAddress(stakePoolAddressTrimmed)) break;
+      if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) continue;
       addresses.push(stakePoolAddressTrimmed);
     }
 
@@ -82,27 +121,43 @@ export default function StakePoolAddressInput({
     <Grid item xs={12} mb={10} mt={6}>
       <LoadingModal open={loadingModalIsOpen} />
       <Typography variant="h5" mb={2}>
-        Input Stake Pool Addresses
+        Stake Pool Addresses
+      </Typography>
+      <Typography variant="body1" mb={2}>
+        Input the staking pool addresses you would like to vote for, sepearted
+        by space.
       </Typography>
       <TextField
         fullWidth
         variant="outlined"
         multiline={true}
         rows={4}
-        placeholder={
-          "Input the stake pool addresses you want to vote for seperated by space"
-        }
+        placeholder={"0x123456789 0x987654321 0x123459876"}
         onChange={onStakePoolAddressesInputChange}
       />
       {addressHasError && (
         <Typography color="red">{addressHasError}</Typography>
       )}
+      {notPartOfStakingPool.length > 0 && (
+        <Typography color="red">
+          you are not part of staking pool
+          {notPartOfStakingPool.map((address) => (
+            <p> {address} </p>
+          ))}
+        </Typography>
+      )}
       <Stack alignItems="flex-end">
         <Button
-          variant="primary"
-          size="large"
+          variant="contained"
           onClick={onStakePoolAddressesSubmit}
-          sx={{mt: 2}}
+          sx={{
+            mt: 2,
+            color: "black",
+            backgroundColor: alpha(primaryColor, 1),
+            "&:hover": {
+              backgroundColor: alpha(primaryColor, 1),
+            },
+          }}
           disabled={stakePoolAddressesInput.length === 0}
         >
           Validate

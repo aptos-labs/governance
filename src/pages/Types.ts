@@ -57,6 +57,6 @@ export enum ProposalVotingState {
 }
 
 export type AddressToVoteMap = {
-  address: string;
+  poolAddress: string;
   voted: boolean;
 };
