@@ -55,3 +55,8 @@ export enum ProposalVotingState {
   FAILED = "Failed",
   REJECTED = "Rejected",
 }
+
+export type AddressToVoteMap = {
+  poolAddress: string;
+  voted: boolean;
+};

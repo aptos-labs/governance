@@ -1,5 +1,5 @@
-import {Button, Stack} from "@mui/material";
-import React, {useState} from "react";
+import {Box, Button, Chip, Stack} from "@mui/material";
+import React, {useEffect, useState} from "react";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import {
@@ -12,28 +12,23 @@ import {
 } from "../../constants";
 import ConfirmationModal from "./ConfirmationModal";
 import TransactionResponseSnackbar from "../../../components/snackbar/TransactionResponseSnackbar";
-import useAddressInput from "../../../api/hooks/useAddressInput";
 import LoadingModal from "../../../components/LoadingModal";
 import useSubmitVote from "../../../api/hooks/useSubmitVote";
 
-// TODO:
-// 1. check if voted
-// 2. check if eligible to vote
-
 type VoteButtonsProps = {
   proposalId: string;
+  stakePoolAddress: string;
+  onTransactionSuccess: () => void;
 };
 
-export default function VoteButtons({proposalId}: VoteButtonsProps) {
+export default function VoteButtons({
+  proposalId,
+  stakePoolAddress,
+  onTransactionSuccess,
+}: VoteButtonsProps) {
   const [voteForModalIsOpen, setVoteForModalIsOpen] = useState<boolean>(false);
   const [voteAgainstModalIsOpen, setVoteAgainstModalIsOpen] =
     useState<boolean>(false);
-
-  const {
-    addr: accountAddr,
-    renderAddressTextField,
-    validateAddressInput,
-  } = useAddressInput();
 
   const {
     submitVote,
@@ -43,13 +38,10 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
   } = useSubmitVote();
 
   const openModal = (shouldPass: boolean) => {
-    const isValid = validateAddressInput();
-    if (isValid) {
-      if (shouldPass) {
-        setVoteForModalIsOpen(true);
-      } else {
-        setVoteAgainstModalIsOpen(true);
-      }
+    if (shouldPass) {
+      setVoteForModalIsOpen(true);
+    } else {
+      setVoteAgainstModalIsOpen(true);
     }
   };
 
@@ -62,7 +54,7 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
   };
 
   const onVote = (shouldPass: boolean) => {
-    submitVote(proposalId, shouldPass, accountAddr);
+    submitVote(proposalId, shouldPass, stakePoolAddress);
     closeVoteForModal();
     closeVoteAgainstModal();
   };
@@ -71,42 +63,49 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
     clearTransactionResponse();
   };
 
+  useEffect(() => {
+    if (transactionResponse?.transactionSubmitted) {
+      onTransactionSuccess();
+    }
+  }, [transactionResponse]);
+
   return (
-    <>
-      <Stack spacing={2}>
-        {renderAddressTextField("Stake Pool Address")}
-        <Button
-          fullWidth
-          size="large"
-          variant="primary"
+    <Box>
+      <Stack spacing={2} direction="row" justifyContent="end">
+        <Chip
+          label={voteFor}
+          variant="outlined"
+          icon={
+            <CheckCircleOutlinedIcon
+              sx={{
+                fill: primaryColor,
+              }}
+            />
+          }
           sx={{
             justifyContent: "start",
-            backgroundColor: primaryColor,
-            "&:hover": {
-              backgroundColor: primaryColorOnHover,
-            },
+            borderColor: primaryColor,
+            color: primaryColor,
           }}
-          startIcon={<CheckCircleOutlinedIcon />}
           onClick={() => openModal(true)}
-        >
-          {voteFor}
-        </Button>
-        <Button
-          fullWidth
-          size="large"
-          variant="primary"
+        />
+        <Chip
+          label={voteAgainst}
+          icon={
+            <CancelOutlinedIcon
+              sx={{
+                fill: negativeColor,
+              }}
+            />
+          }
+          variant="outlined"
           sx={{
             justifyContent: "start",
-            backgroundColor: negativeColor,
-            "&:hover": {
-              backgroundColor: negativeColorOnHover,
-            },
+            borderColor: negativeColor,
+            color: negativeColor,
           }}
-          startIcon={<CancelOutlinedIcon />}
           onClick={() => openModal(false)}
-        >
-          {voteAgainst}
-        </Button>
+        />
       </Stack>
       <TransactionResponseSnackbar
         transactionResponse={transactionResponse}
@@ -118,14 +117,16 @@ export default function VoteButtons({proposalId}: VoteButtonsProps) {
         shouldPass={true}
         onConfirm={() => onVote(true)}
         onClose={closeVoteForModal}
+        stakePoolAddress={stakePoolAddress}
       />
       <ConfirmationModal
         open={voteAgainstModalIsOpen}
         shouldPass={false}
         onConfirm={() => onVote(false)}
         onClose={closeVoteAgainstModal}
+        stakePoolAddress={stakePoolAddress}
       />
       <LoadingModal open={transactionInProcess} />
-    </>
+    </Box>
   );
 }
