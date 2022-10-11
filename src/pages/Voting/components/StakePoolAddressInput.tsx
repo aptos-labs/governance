@@ -123,7 +123,7 @@ export default function StakePoolAddressInput({
         Stake Pool Addresses
       </Typography>
       <Typography variant="body1" mb={2}>
-        Input the staking pool addresses you would like to vote for, sepearted
+        Input the staking pool addresses you would like to vote for, separated
         by space.
       </Typography>
       <TextField
