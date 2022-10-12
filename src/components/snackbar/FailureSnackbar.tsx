@@ -3,6 +3,7 @@ import React from "react";
 import {Snackbar, Alert, Typography, Link} from "@mui/material";
 import {CloseAction} from "./TransactionResponseSnackbar";
 import {Types} from "aptos";
+import {explorerUrl} from "../../constants";
 
 type FailureSnackbarProps = {
   onCloseSnackbar: () => void;
@@ -31,8 +32,7 @@ export default function FailureSnackbar({
         <Typography variant="inherit">
           Transaction {""}
           <Link
-            component={RRD.Link}
-            to={`/txn/${hash}`}
+            href={`${explorerUrl}/txn/${hash}`}
             color="inherit"
             target="_blank"
           >

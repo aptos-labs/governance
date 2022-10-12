@@ -60,3 +60,5 @@ export const defaultFeature = features[defaultFeatureName];
  */
 export const installWalletUrl =
   "https://chrome.google.com/webstore/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci";
+
+export const explorerUrl = "https://explorer.aptoslabs.com";
