@@ -3,6 +3,7 @@ import React from "react";
 import {Snackbar, Alert, Box, Button, Typography, Link} from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import {CloseAction} from "./TransactionResponseSnackbar";
+import {explorerUrl} from "../../constants";
 
 function RefreshAction() {
   // TODO: update the vote results section without refreshing the page
@@ -58,8 +59,7 @@ export default function SuccessSnackbar({
         <Typography variant="inherit">
           Succeeded with transaction {""}
           <Link
-            component={RRD.Link}
-            to={`/txn/${transactionHash}`}
+            href={`${explorerUrl}/txn/${transactionHash}`}
             color="inherit"
             target="_blank"
           >

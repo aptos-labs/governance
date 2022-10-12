@@ -5,7 +5,7 @@ export const devnetUrl =
   process.env.APTOS_DEVNET_URL || "https://fullnode.devnet.aptoslabs.com/";
 
 export const networks = {
-  local: "http://localhost:8080",
+  local: "http://0.0.0.0:59552/v1",
   Devnet: devnetUrl,
   testnet: "https://testnet.aptoslabs.com",
   premainnet: "https://premainnet.aptosdev.com/",
@@ -60,3 +60,5 @@ export const defaultFeature = features[defaultFeatureName];
  */
 export const installWalletUrl =
   "https://chrome.google.com/webstore/detail/petra-aptos-wallet/ejjladinnckdgjemekebdpeokbikhfci";
+
+export const explorerUrl = "https://explorer.aptoslabs.com";
