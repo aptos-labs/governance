@@ -1,15 +1,15 @@
 import React from "react";
 
 import {useWalletContext} from "../../context/wallet/context";
-import Header from "../../components/Header";
 import {CreateOrEdit} from "./components/CreateOrEdit";
+import {IndividualPageHeader} from "../../components/Header";
 
-export function Staking() {
+export default function StakingPage() {
   const {isConnected, accountAddress} = useWalletContext();
 
   return (
     <>
-      <Header />
+      <IndividualPageHeader title="Staking" />
       <CreateOrEdit
         isWalletConnected={isConnected}
         accountAddress={accountAddress}
