@@ -12,18 +12,21 @@ import {MaybeHexString} from "aptos";
 type AddressesListProps = {
   proposal: Proposal;
   accountAddress: MaybeHexString | null;
+  abilityToVote?: boolean;
 };
 
 type AddressVotingStateProps = {
   account: AddressToVoteMap;
   index: number;
   proposal: Proposal;
+  abilityToVote?: boolean;
 };
 
 function AddressVotingState({
   account,
   index,
   proposal,
+  abilityToVote,
 }: AddressVotingStateProps) {
   const [voted, setVoted] = useState<boolean>(account.voted);
   const onTransactionSuccess = () => {
@@ -48,14 +51,15 @@ function AddressVotingState({
             <Chip label="Voted" />
           </Stack>
         )}
-        {!voted && !isVotingClosed(proposal) && (
+        {abilityToVote && !voted && !isVotingClosed(proposal) && (
           <VoteButtons
             proposalId={proposal.proposal_id}
             stakePoolAddress={account.poolAddress}
             onTransactionSuccess={onTransactionSuccess}
           />
         )}
-        {!voted && isVotingClosed(proposal) && (
+        {((!voted && isVotingClosed(proposal)) ||
+          (!voted && !abilityToVote)) && (
           <Stack alignItems="flex-end">
             <Chip label="didn't vote" />
           </Stack>
@@ -85,6 +89,7 @@ type CurrentStakingPoolVoter = {
 export default function AddressesList({
   proposal,
   accountAddress,
+  abilityToVote,
 }: AddressesListProps) {
   const [state, _] = useGlobalState();
   const [mapLoading, setMapLoading] = useState<boolean>(false);
@@ -181,6 +186,7 @@ export default function AddressesList({
               account={account}
               index={index}
               proposal={proposal}
+              abilityToVote={abilityToVote}
             />
           </Stack>
         );

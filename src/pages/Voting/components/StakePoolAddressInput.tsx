@@ -15,11 +15,13 @@ type StakePoolAddressInputProps = {
     React.SetStateAction<AddressToVoteMap[] | undefined>
   >;
   proposalId: string;
+  applyStakeVoterValidation?: boolean;
 };
 
 export default function StakePoolAddressInput({
   setAddressVoteMap,
   proposalId,
+  applyStakeVoterValidation,
 }: StakePoolAddressInputProps) {
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
   const [notPartOfStakingPool, setNotPartOfStakingPool] = useState<
@@ -101,7 +103,9 @@ export default function StakePoolAddressInput({
       const stakePoolAddressTrimmed = stakePoolAddress.trim();
       if (stakePoolAddressTrimmed.length === 0) continue;
       if (!validateStakePoolAddress(stakePoolAddressTrimmed)) break;
-      if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) break;
+      if (applyStakeVoterValidation) {
+        if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) break;
+      }
       addresses.push(stakePoolAddressTrimmed);
     }
 
