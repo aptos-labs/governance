@@ -16,6 +16,18 @@ export default function Nav() {
       <Button
         variant="nav"
         component={NavLink}
+        to="/proposals"
+        title="Proposals"
+        sx={{
+          color: "inherit",
+          fontSize: {sm: ".875rem", md: "1rem"},
+        }}
+      >
+        Proposals
+      </Button>
+      <Button
+        variant="nav"
+        component={NavLink}
         to="/staking"
         title="Staking"
         sx={{

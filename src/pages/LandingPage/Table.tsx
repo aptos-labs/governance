@@ -189,7 +189,8 @@ type ProposalsTableProps = {
   proposals?: Proposal[];
   columns?: ProposalColumn[];
   nextProposalId: string;
-  ProposalsTableRef: React.MutableRefObject<HTMLDivElement | null>;
+  ProposalsTableRef?: React.MutableRefObject<HTMLDivElement | null>;
+  hideTitle?: boolean;
 };
 
 // TODO: generalize Table component for transactions and proposals
@@ -197,6 +198,7 @@ export function ProposalsTable({
   nextProposalId,
   columns = DEFAULT_COLUMNS,
   ProposalsTableRef,
+  hideTitle,
 }: ProposalsTableProps) {
   const proposalRows = [];
   // we need to iterate from (0...nextProposalId)
@@ -228,7 +230,7 @@ export function ProposalsTable({
   return (
     <Grid ref={ProposalsTableRef}>
       <Stack spacing={1}>
-        <Title>Proposals</Title>
+        {hideTitle !== true && <Title>Proposals</Title>}
         <Box sx={{width: "auto", overflowX: "auto"}}>{tableComponent}</Box>
       </Stack>
     </Grid>
