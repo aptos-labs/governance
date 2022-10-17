@@ -5,11 +5,10 @@ export const devnetUrl =
   process.env.APTOS_DEVNET_URL || "https://fullnode.devnet.aptoslabs.com/";
 
 export const networks = {
-  local: "http://localhost:8080",
-  Devnet: devnetUrl,
+  mainnet: "https://fullnode.mainnet.aptoslabs.com/",
   testnet: "https://testnet.aptoslabs.com",
-  premainnet: "https://premainnet.aptosdev.com/",
-  test: "https://fullnode.mainnet.aptoslabs.com/",
+  Devnet: devnetUrl,
+  local: "http://localhost:8080",
 };
 
 export type NetworkName = keyof typeof networks;
@@ -22,7 +21,7 @@ for (const key of Object.keys(networks)) {
   }
 }
 
-export const defaultNetworkName: NetworkName = "testnet" as const;
+export const defaultNetworkName: NetworkName = "mainnet" as const;
 
 if (!(defaultNetworkName in networks)) {
   throw `defaultNetworkName '${defaultNetworkName}' not in Networks!`;
