@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {useParams} from "react-router-dom";
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GoBack from "../../components/GoBack";
-import Header from "../../components/Header";
+import {IndividualPageHeader} from "../../components/Header";
 import {EmptyProposal} from "../Proposal/EmptyProposal";
 import {ProposalHeader} from "../Proposal/Header";
 import {AddressToVoteMap} from "../Types";
@@ -26,7 +26,7 @@ export default function Voting() {
 
   return (
     <Grid container>
-      <Header />
+      <IndividualPageHeader title="Vote" />
       <GoBack to={"/"} />
       <Grid item xs={12}>
         <ProposalHeader proposal={proposal} />

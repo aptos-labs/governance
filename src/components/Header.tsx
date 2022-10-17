@@ -4,7 +4,7 @@ import DividerHero from "./DividerHero";
 import HeadingSub from "./HeadingSub";
 import {WalletButton} from "./WalletButton";
 
-export default function Header() {
+export function HomePageHeader() {
   return (
     <>
       <Grid container alignItems="center">

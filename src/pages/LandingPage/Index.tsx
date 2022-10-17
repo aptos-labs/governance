@@ -1,6 +1,6 @@
 import React, {useRef} from "react";
 import {Grid, Hidden} from "@mui/material";
-import Header from "../../components/Header";
+import {HomePageHeader} from "../../components/Header";
 import {Header as ProposalsHeader} from "./Header";
 import {ProposalsTable} from "./Table";
 import {Instructions} from "./Instructions";
@@ -16,7 +16,7 @@ export default function LandingPage() {
 
   return (
     <Grid item xs={12}>
-      <Header />
+      <HomePageHeader />
       <ProposalsHeader onVoteProposalButtonClick={scrollTableIntoView} />
       <Hidden smDown>
         <Instructions onVoteProposalButtonClick={scrollTableIntoView} />
