@@ -26,7 +26,7 @@ const addresses = [
 ];
 
 test.each(addresses)(
-  "voter address %i matches current wallet address %i",
+  "current wallet address %i matches delegated voter address %i",
   async (walletAddress, delegatedVoterAddress) => {
     const sdk = require("../../../../api");
 
