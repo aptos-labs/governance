@@ -16,12 +16,14 @@ type StakePoolAddressInputProps = {
   >;
   proposalId: string;
   applyStakeVoterValidation?: boolean;
+  subtitle: string;
 };
 
 export default function StakePoolAddressInput({
   setAddressVoteMap,
   proposalId,
   applyStakeVoterValidation,
+  subtitle,
 }: StakePoolAddressInputProps) {
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
   const [notPartOfStakingPool, setNotPartOfStakingPool] = useState<
@@ -127,8 +129,7 @@ export default function StakePoolAddressInput({
         Stake Pool Addresses
       </Typography>
       <Typography variant="body1" mb={2}>
-        Input the staking pool addresses you would like to vote for, separated
-        by space.
+        {subtitle}
       </Typography>
       <TextField
         fullWidth

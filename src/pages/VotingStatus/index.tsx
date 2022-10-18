@@ -34,6 +34,8 @@ export default function VotingStatus() {
       <StakePoolAddressInput
         setAddressVoteMap={setAddressVoteMap}
         proposalId={proposalId}
+        subtitle="Input the staking pool addresses you would like to see the voting status for, separated
+        by space."
       />
       {addressVoteMap && (
         <AddressesList addressVoteMap={addressVoteMap} proposal={proposal} />
