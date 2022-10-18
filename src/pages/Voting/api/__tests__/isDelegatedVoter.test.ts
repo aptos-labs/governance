@@ -1,4 +1,14 @@
-import {BCS, HexString, TxnBuilderTypes} from "aptos";
+import {GlobalState} from "../../../../GlobalState";
+import isDelegatedVoter from "../isDelegatedVoter";
+
+const stakePoolAddress =
+  "0x114c5bbd46d2de2ab364649f483bf3d645656fb5509f26e47db9c8446ca2c9af";
+
+const mockState: GlobalState = {
+  network_name: "local",
+  network_value: "mock-url",
+  feature_name: "prod",
+};
 
 const addresses = [
   [
@@ -15,16 +25,22 @@ const addresses = [
   ],
 ];
 
-test.each(addresses)("address %i matches %i", (addressA, addressB) => {
-  const addressAFromHex = TxnBuilderTypes.AccountAddress.fromHex(addressA);
-  const addressBFromHex = TxnBuilderTypes.AccountAddress.fromHex(addressB);
+test.each(addresses)(
+  "voter address %i matches current wallet address %i",
+  async (walletAddress, delegatedVoterAddress) => {
+    const sdk = require("../../../../api");
 
-  const addressABcs = HexString.fromUint8Array(
-    BCS.bcsToBytes(addressAFromHex),
-  ).hex();
-  const addressBBcs = HexString.fromUint8Array(
-    BCS.bcsToBytes(addressBFromHex),
-  ).hex();
+    jest.spyOn(sdk, "getAccountResource").mockReturnValue({
+      data: {
+        delegated_voter: delegatedVoterAddress,
+      },
+    });
 
-  expect(addressABcs).toMatch(addressBBcs);
-});
+    const result = await isDelegatedVoter(
+      stakePoolAddress,
+      walletAddress,
+      mockState,
+    );
+    expect(result).toBe(true);
+  },
+);
