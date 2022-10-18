@@ -1,3 +1,4 @@
+import {MaybeHexString} from "aptos";
 import {useState, useEffect} from "react";
 import {
   connectToWallet,
@@ -15,7 +16,9 @@ export function useWallet() {
   const [isInstalled, setAptosWallet] = useState<boolean>(false);
   const [isAccountSet, setIsAccountSet] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [accountAddress, setAccountAddress] = useState<string | null>(null);
+  const [accountAddress, setAccountAddress] = useState<MaybeHexString | null>(
+    null,
+  );
   const [walletNetwork, setWalletNetwork] = useState<WalletNetworks>("Devnet");
 
   useEffect(() => {

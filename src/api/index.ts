@@ -1,4 +1,4 @@
-import {AptosClient, Types} from "aptos";
+import {AptosClient, MaybeHexString, Types} from "aptos";
 import {isHex} from "../pages/utils";
 import {withResponseError} from "./client";
 
@@ -51,7 +51,7 @@ export function getAccount(
 }
 
 export function getAccountResources(
-  requestParameters: {address: string; ledgerVersion?: number},
+  requestParameters: {address: MaybeHexString; ledgerVersion?: number},
   nodeUrl: string,
 ): Promise<Types.MoveResource[]> {
   const client = new AptosClient(nodeUrl, config);

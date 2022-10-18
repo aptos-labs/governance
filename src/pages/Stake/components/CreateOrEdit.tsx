@@ -5,10 +5,11 @@ import {Create} from "../Create";
 import {Edit} from "../Edit";
 import {Alert} from "@mui/material";
 import {useGlobalState} from "../../../GlobalState";
+import {MaybeHexString} from "aptos";
 
 type CreateOrEditProps = {
   isWalletConnected: boolean;
-  accountAddress: string | null;
+  accountAddress: MaybeHexString | null;
 };
 export function CreateOrEdit({
   isWalletConnected,

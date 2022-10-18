@@ -2,7 +2,7 @@ import React from "react";
 import moment from "moment";
 import Box from "@mui/material/Box";
 import {Typography, useTheme} from "@mui/material";
-import {AptosClient, AptosAccount, HexString} from "aptos";
+import {AptosClient, AptosAccount, HexString, MaybeHexString} from "aptos";
 import {Proposal, ProposalStatus, ProposalVotingState} from "./Types";
 import {
   primaryColor,
@@ -138,8 +138,8 @@ function truncateMiddle(
   }
 }
 
-export function truncateAddress(accountAddress: string) {
-  return truncateMiddle(accountAddress, 4, 4, "…");
+export function truncateAddress(accountAddress: MaybeHexString) {
+  return truncateMiddle(accountAddress as string, 4, 4, "…");
 }
 
 export function isValidAccountAddress(accountAddr: string): boolean {
