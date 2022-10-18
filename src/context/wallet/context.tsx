@@ -1,3 +1,4 @@
+import {MaybeHexString} from "aptos";
 import {createContext, useContext} from "react";
 
 export interface walletContext {
@@ -5,7 +6,7 @@ export interface walletContext {
   isConnected: boolean;
   isAccountSet: boolean;
   walletNetwork: WalletNetworks;
-  accountAddress: string | null;
+  accountAddress: MaybeHexString | null;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
 }

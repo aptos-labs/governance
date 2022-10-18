@@ -1,4 +1,4 @@
-import {Types} from "aptos";
+import {MaybeHexString, Types} from "aptos";
 import {useQuery, UseQueryResult} from "react-query";
 import {getAccountResources} from "..";
 import {ResponseError} from "../client";
@@ -12,7 +12,7 @@ type useGetAccountResourceResponse = {
 };
 
 export function useGetAccountResource(
-  address: string,
+  address: MaybeHexString,
   resource: string,
 ): useGetAccountResourceResponse {
   const [state, _setState] = useGlobalState();
