@@ -8,12 +8,12 @@ import {
   useTheme,
   Link,
 } from "@mui/material";
-import * as RRD from "react-router-dom";
 import {grey} from "../themes/colors/aptosColorPalette";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import {truncateAddress} from "../pages/utils";
 import {assertNever} from "../utils";
+import {explorerUrl} from "../constants";
 
 export enum HashType {
   ACCOUNT = "account",
@@ -24,9 +24,9 @@ export enum HashType {
 function getHashLinkStr(hash: string, type: HashType): string {
   switch (type) {
     case HashType.ACCOUNT:
-      return `/account/${hash}`;
+      return `${explorerUrl}/account/${hash}`;
     case HashType.TRANSACTION:
-      return `/txn/${hash}`;
+      return `${explorerUrl}/txn/${hash}`;
     case HashType.OTHERS:
       return "";
     default:
@@ -39,11 +39,7 @@ function HashLink(hash: string, type: HashType): JSX.Element {
     case HashType.ACCOUNT:
     case HashType.TRANSACTION:
       return (
-        <Link
-          component={RRD.Link}
-          to={getHashLinkStr(hash, type)}
-          color="inherit"
-        >
+        <Link href={getHashLinkStr(hash, type)} color="inherit">
           {hash}
         </Link>
       );
