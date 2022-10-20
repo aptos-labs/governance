@@ -4,12 +4,13 @@ import {useWalletContext} from "../../../context/wallet/context";
 import ConnectWalletInfo from "./ConnectWalletInfo";
 import {Button} from "@mui/material";
 import {useNavigate} from "react-router-dom";
+import {Proposal, ProposalStatus} from "../../Types";
 
 type CastVoteSectionProps = {
-  proposalId: string;
+  proposal: Proposal;
 };
 
-export default function CastVoteSection({proposalId}: CastVoteSectionProps) {
+export default function CastVoteSection({proposal}: CastVoteSectionProps) {
   const {isConnected} = useWalletContext();
   const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ export default function CastVoteSection({proposalId}: CastVoteSectionProps) {
           size="large"
           variant="primary"
           onClick={onVoteButtonClick}
+          disabled={proposal.status !== ProposalStatus.VOTING_IN_PROGRESS}
         >
           Vote
         </Button>

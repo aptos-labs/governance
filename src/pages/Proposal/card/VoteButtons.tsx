@@ -1,12 +1,10 @@
-import {Box, Button, Chip, Stack} from "@mui/material";
+import {Box, Chip, Stack} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import {
   primaryColor,
   negativeColor,
-  primaryColorOnHover,
-  negativeColorOnHover,
   voteFor,
   voteAgainst,
 } from "../../constants";

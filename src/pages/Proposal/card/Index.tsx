@@ -22,7 +22,7 @@ export function ProposalCard({proposal}: ProposalCardProps) {
           />
         }
       >
-        <CastVoteSection proposalId={proposal.proposal_id} />
+        <CastVoteSection proposal={proposal} />
         <ResultsSection proposal={proposal} />
       </Stack>
     </Card>
