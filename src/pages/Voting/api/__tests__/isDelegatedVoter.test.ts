@@ -1,4 +1,4 @@
-import {GlobalState} from "../../../../GlobalState";
+import {GlobalState} from "../../../../context/globalState/context";
 import isDelegatedVoter from "../isDelegatedVoter";
 
 const stakePoolAddress =
@@ -7,7 +7,6 @@ const stakePoolAddress =
 const mockState: GlobalState = {
   network_name: "local",
   network_value: "mock-url",
-  feature_name: "prod",
 };
 
 const addresses = [

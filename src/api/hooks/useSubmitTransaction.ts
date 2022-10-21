@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 
 import {useWalletContext} from "../../context/wallet/context";
 import {signAndSubmitTransaction} from "../wallet";
-import {useGlobalState} from "../../GlobalState";
+import {useGlobalState} from "../../context/globalState";
 import {networks} from "../../constants";
 
 export type TransactionResponse =

@@ -2,7 +2,7 @@ import {Types} from "aptos";
 import {useQuery} from "react-query";
 import {getTransaction} from "../../api";
 import {ResponseError} from "../../api/client";
-import {useGlobalState} from "../../GlobalState";
+import {useGlobalState} from "../../context/globalState";
 
 export function useGetTransaction(txnHashOrVersion: string) {
   const [state, _setState] = useGlobalState();

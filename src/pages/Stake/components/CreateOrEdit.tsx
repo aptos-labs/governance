@@ -4,8 +4,8 @@ import LoadingModal from "../../../components/LoadingModal";
 import {Create} from "../Create";
 import {Edit} from "../Edit";
 import {Alert} from "@mui/material";
-import {useGlobalState} from "../../../GlobalState";
 import {MaybeHexString} from "aptos";
+import {useGlobalState} from "../../../context/globalState";
 
 type CreateOrEditProps = {
   isWalletConnected: boolean;

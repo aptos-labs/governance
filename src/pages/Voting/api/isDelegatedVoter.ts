@@ -1,6 +1,6 @@
 import {BCS, HexString, MaybeHexString, TxnBuilderTypes} from "aptos";
 import {getAccountResource} from "../../../api";
-import {GlobalState} from "../../../GlobalState";
+import {GlobalState} from "../../../context/globalState/context";
 
 type StakePool = {
   delegated_voter: string;

@@ -2,7 +2,7 @@ import {MaybeHexString, Types} from "aptos";
 import {useQuery, UseQueryResult} from "react-query";
 import {getAccountResources} from "..";
 import {ResponseError} from "../client";
-import {useGlobalState} from "../../GlobalState";
+import {useGlobalState} from "../../context/globalState";
 
 type useGetAccountResourceResponse = {
   accountResource: Types.MoveResource | undefined;

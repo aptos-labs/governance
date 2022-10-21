@@ -2,7 +2,7 @@ import {Button, Grid, Typography, TextField} from "@mui/material";
 import {useState} from "react";
 import {AptosClient, AptosAccount, FaucetClient, HexString, Types} from "aptos";
 import {getHexString} from "../utils";
-import {useGlobalState} from "../../GlobalState";
+import {useGlobalState} from "../../context/globalState";
 import {doTransaction} from "../utils";
 
 /* REQUIRED: Please replace the following with your own local network urls */

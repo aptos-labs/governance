@@ -1,8 +1,9 @@
-import {GlobalState, useGlobalState} from "../../GlobalState";
+import {useGlobalState} from "../../context/globalState";
 import {getTableItem} from "..";
 import {Types} from "aptos";
 import {useEffect, useState} from "react";
 import {useGetAccountResource} from "./useGetAccountResource";
+import {GlobalState} from "../../context/globalState/context";
 
 interface CoinInfo {
   decimals: number;
