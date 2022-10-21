@@ -81,7 +81,6 @@ export function useGetProposal(proposal_id: string): Proposal | undefined {
   const proposalTableData = useGetProposalsTableData();
 
   const handle = proposalTableData?.handle ?? undefined;
-  console.log("handle", handle);
   useEffect(() => {
     if (handle !== undefined) {
       fetchProposal(proposal_id, handle, state).then((data) => {

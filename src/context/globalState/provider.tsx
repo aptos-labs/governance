@@ -13,7 +13,6 @@ function reducer(state: GlobalState, newValue: GlobalState): GlobalState {
 
 export const GlobalStateProvider = ({children}: {children: ReactNode}) => {
   const [state, dispatch] = useReducer(reducer, defaultGlobalState);
-  console.log("state", state);
   return (
     <GlobalStateContext.Provider value={state}>
       <DispatchStateContext.Provider value={dispatch}>
