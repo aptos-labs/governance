@@ -2,11 +2,11 @@ import {useEffect, useState} from "react";
 import {sha3_256} from "js-sha3";
 
 import {getTableItem} from "..";
-import {GlobalState, useGlobalState} from "../../GlobalState";
 import {Proposal, ProposalMetadata} from "../../pages/Types";
 import {hex_to_string} from "../../utils";
 import {getProposalStatus, isVotingClosed} from "../../pages/utils";
 import {useGetProposalsTableData} from "../hooks/useGetProposalsTableData";
+import {GlobalState, useGlobalState} from "../../context/globalState/context";
 
 const fetchTableItem = async (
   proposal_id: string,
@@ -81,14 +81,13 @@ export function useGetProposal(proposal_id: string): Proposal | undefined {
   const proposalTableData = useGetProposalsTableData();
 
   const handle = proposalTableData?.handle ?? undefined;
-
   useEffect(() => {
     if (handle !== undefined) {
       fetchProposal(proposal_id, handle, state).then((data) => {
         data && setProposal(data);
       });
     }
-  }, [handle]);
+  }, [handle, state]);
 
   return proposal;
 }

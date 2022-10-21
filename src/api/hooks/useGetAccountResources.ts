@@ -2,7 +2,7 @@ import {Types} from "aptos";
 import {useQuery, UseQueryResult} from "react-query";
 import {getAccountResources} from "../../api";
 import {ResponseError} from "../../api/client";
-import {useGlobalState} from "../../GlobalState";
+import {useGlobalState} from "../../context/globalState";
 
 export function useGetAccountResources(
   address: string,

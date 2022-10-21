@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react";
 import {getAccountResource, getTableItem} from "../../../api";
-import {GlobalState} from "../../../GlobalState";
+import {GlobalState} from "../../../context/globalState/context";
 
 interface VotingRecords {
   votes: {
