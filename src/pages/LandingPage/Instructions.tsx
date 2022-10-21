@@ -8,7 +8,6 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React from "react";
 import Card from "../../components/Card";
 import {useWalletContext} from "../../context/wallet/context";
 import {installWalletUrl} from "../../constants";

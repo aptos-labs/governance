@@ -1,4 +1,3 @@
-import React from "react";
 import {Divider, Grid} from "@mui/material";
 import {Types} from "aptos";
 import {EditOperator} from "./components/EditOperator";

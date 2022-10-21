@@ -1,5 +1,3 @@
-import * as RRD from "react-router-dom";
-import React from "react";
 import {Snackbar, Alert, Typography, Link} from "@mui/material";
 import {CloseAction} from "./TransactionResponseSnackbar";
 import {Types} from "aptos";

@@ -1,4 +1,3 @@
-import React from "react";
 import Section from "./Section";
 import HowToVoteIcon from "@mui/icons-material/HowToVote";
 import {Stack, Typography} from "@mui/material";

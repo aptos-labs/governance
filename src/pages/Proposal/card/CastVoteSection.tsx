@@ -1,4 +1,3 @@
-import React from "react";
 import Section from "./Section";
 import {useWalletContext} from "../../../context/wallet/context";
 import ConnectWalletInfo from "./ConnectWalletInfo";

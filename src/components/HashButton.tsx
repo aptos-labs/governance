@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Button,
@@ -14,6 +13,7 @@ import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import {truncateAddress} from "../pages/utils";
 import {assertNever} from "../utils";
 import {explorerUrl} from "../constants";
+import {useState} from "react";
 
 export enum HashType {
   ACCOUNT = "account",
@@ -56,9 +56,7 @@ interface HashButtonProps {
 }
 
 export default function HashButton({hash, type}: HashButtonProps) {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-    null,
-  );
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const hashExpand = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();

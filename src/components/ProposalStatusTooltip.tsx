@@ -1,5 +1,4 @@
 import {Tooltip, Typography, Stack} from "@mui/material";
-import React from "react";
 import {ProposalStatus} from "../pages/Types";
 import StatusIcon from "../components/StatusIcon";
 import {getStatusColor} from "../pages/utils";

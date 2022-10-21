@@ -1,4 +1,3 @@
-import React from "react";
 import {Stack} from "@mui/material";
 import {Proposal} from "../../Types";
 import Section from "./Section";

@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import {useRef} from "react";
 import {Grid, Hidden} from "@mui/material";
 import {HomePageHeader} from "../../components/Header";
 import {Header as ProposalsHeader} from "./Header";

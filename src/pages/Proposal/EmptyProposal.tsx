@@ -1,4 +1,3 @@
-import React from "react";
 import {Grid} from "@mui/material";
 
 // TODO: generalize empty page for proposals, transactions, and more

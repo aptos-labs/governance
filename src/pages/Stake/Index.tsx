@@ -1,5 +1,3 @@
-import React from "react";
-
 import {useWalletContext} from "../../context/wallet/context";
 import {CreateOrEdit} from "./components/CreateOrEdit";
 import {IndividualPageHeader} from "../../components/Header";

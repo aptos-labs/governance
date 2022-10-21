@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import {Box, Link, Stack, Typography} from "@mui/material";
 import {useSearchParams} from "react-router-dom";
 import {useGlobalState} from "../../GlobalState";

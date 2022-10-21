@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import {FormControl, Select, SelectChangeEvent} from "@mui/material";
 import {defaultFeatureName, NetworkName, networks} from "../../constants";
 import {useGlobalState} from "../../GlobalState";

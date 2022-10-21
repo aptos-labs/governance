@@ -1,4 +1,3 @@
-import React from "react";
 import {walletContext} from "./context";
 import {useWallet} from "./useWallet";
 
