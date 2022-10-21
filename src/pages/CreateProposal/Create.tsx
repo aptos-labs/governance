@@ -1,5 +1,5 @@
 import {Button, Grid, Typography, TextField} from "@mui/material";
-import React, {useState} from "react";
+import {useState} from "react";
 import {AptosClient, AptosAccount, FaucetClient, HexString, Types} from "aptos";
 import {getHexString} from "../utils";
 import {useGlobalState} from "../../GlobalState";

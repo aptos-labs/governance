@@ -1,4 +1,3 @@
-import React from "react";
 import {Box, Container, Link, Typography, useTheme} from "@mui/material";
 
 import Grid from "@mui/material/Unstable_Grid2";
@@ -9,7 +8,7 @@ import {ReactComponent as TwitterLogo} from "../../assets/svg/twitter.svg";
 import {ReactComponent as MediumLogo} from "../../assets/svg/medium.svg";
 import {ReactComponent as LinkedInLogo} from "../../assets/svg/linkedin.svg";
 import {grey} from "../../themes/colors/aptosColorPalette";
-import SvgIcon, {SvgIconProps} from "@mui/material/SvgIcon";
+import SvgIcon from "@mui/material/SvgIcon";
 
 import {ReactComponent as LogoIcon} from "../../assets/svg/aptos-foundation_logo_mark.svg";
 

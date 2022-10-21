@@ -1,4 +1,3 @@
-import React from "react";
 import {ProposalStatus} from "../pages/Types";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";

@@ -1,14 +1,5 @@
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Grid,
-  Stack,
-  TextField,
-} from "@mui/material";
-import {grey} from "@mui/material/colors";
-import React, {useState} from "react";
+import {Chip, Divider, Grid, Stack} from "@mui/material";
+import {useState} from "react";
 import VoteButtons from "../../Proposal/card/VoteButtons";
 import {AddressToVoteMap, Proposal} from "../../Types";
 import {isVotingClosed} from "../../utils";

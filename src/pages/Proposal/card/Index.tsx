@@ -1,4 +1,3 @@
-import React from "react";
 import {Divider, Stack} from "@mui/material";
 
 import Card from "../../../components/Card";

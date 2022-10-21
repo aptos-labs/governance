@@ -1,5 +1,4 @@
 import {Grid, Typography, Hidden} from "@mui/material";
-import React from "react";
 import DividerHero from "./DividerHero";
 import HeadingSub from "./HeadingSub";
 import {WalletButton} from "./WalletButton";

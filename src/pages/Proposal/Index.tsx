@@ -1,5 +1,4 @@
 import {Grid} from "@mui/material";
-import React from "react";
 import {ProposalHeader} from "./Header";
 import {ProposalCard} from "./card/Index";
 import {ProposalContent} from "./Content";

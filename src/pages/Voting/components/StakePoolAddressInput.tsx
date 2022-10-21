@@ -1,5 +1,5 @@
 import {Button, Grid, Stack, TextField, Typography} from "@mui/material";
-import React, {useState} from "react";
+import {useState} from "react";
 import LoadingModal from "../../../components/LoadingModal";
 import {useWalletContext} from "../../../context/wallet/context";
 import {useGlobalState} from "../../../GlobalState";

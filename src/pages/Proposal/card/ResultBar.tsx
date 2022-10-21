@@ -1,4 +1,3 @@
-import React from "react";
 import {Stack, Box, Typography, Tooltip} from "@mui/material";
 import {
   primaryColor,

@@ -1,4 +1,3 @@
-import React from "react";
 import Toolbar from "@mui/material/Toolbar";
 import MuiAppBar from "@mui/material/AppBar";
 import Container from "@mui/material/Container";

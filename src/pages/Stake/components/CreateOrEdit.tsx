@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {useGetAccountResource} from "../../../api/hooks/useGetAccountResource";
 import LoadingModal from "../../../components/LoadingModal";
 import {Create} from "../Create";

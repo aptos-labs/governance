@@ -1,4 +1,3 @@
-import React from "react";
 import moment from "moment";
 import Box from "@mui/material/Box";
 import {Typography, useTheme} from "@mui/material";

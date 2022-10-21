@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import {Grid, Button, FormControl, Tooltip} from "@mui/material";
 import {useWalletContext} from "../../context/wallet/context";
 import useSubmitStake from "../../api/hooks/useSubmitStake";

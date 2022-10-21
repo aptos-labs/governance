@@ -1,5 +1,5 @@
 import {ThemeProvider} from "@mui/system";
-import React, {createContext, useContext} from "react";
+import {createContext, useContext} from "react";
 import useProvideColorMode, {ColorModeContext} from "./ProvideColorMode.State";
 
 interface ProvideColorModeProps {

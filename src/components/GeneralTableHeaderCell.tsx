@@ -1,4 +1,3 @@
-import React from "react";
 import {Typography, TableCell, useTheme, Stack} from "@mui/material";
 import {SxProps} from "@mui/system";
 import {Theme} from "@mui/material/styles";

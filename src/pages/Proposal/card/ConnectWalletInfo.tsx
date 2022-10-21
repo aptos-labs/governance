@@ -1,4 +1,3 @@
-import React from "react";
 import {Stack, Typography, Link, Button} from "@mui/material";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import {useWalletContext} from "../../../context/wallet/context";

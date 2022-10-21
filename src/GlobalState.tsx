@@ -1,4 +1,10 @@
-import React from "react";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  useReducer,
+  useContext,
+} from "react";
 import {
   networks,
   defaultNetworkName,
@@ -62,17 +68,13 @@ function reducer(state: GlobalState, newValue: GlobalState): GlobalState {
   return {...state, ...newValue};
 }
 
-export const GlobalStateContext = React.createContext(defaultGlobalState);
-export const DispatchStateContext = React.createContext<
-  React.Dispatch<GlobalState>
->((value: GlobalState) => value);
+export const GlobalStateContext = createContext(defaultGlobalState);
+export const DispatchStateContext = createContext<Dispatch<GlobalState>>(
+  (value: GlobalState) => value,
+);
 
-export const GlobalStateProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [state, dispatch] = React.useReducer(reducer, defaultGlobalState);
+export const GlobalStateProvider = ({children}: {children: ReactNode}) => {
+  const [state, dispatch] = useReducer(reducer, defaultGlobalState);
   return (
     <GlobalStateContext.Provider value={state}>
       <DispatchStateContext.Provider value={dispatch}>
@@ -82,10 +84,7 @@ export const GlobalStateProvider = ({
   );
 };
 
-export const useGlobalState = (): [
-  GlobalState,
-  React.Dispatch<GlobalState>,
-] => [
-  React.useContext(GlobalStateContext),
-  React.useContext(DispatchStateContext),
+export const useGlobalState = (): [GlobalState, Dispatch<GlobalState>] => [
+  useContext(GlobalStateContext),
+  useContext(DispatchStateContext),
 ];

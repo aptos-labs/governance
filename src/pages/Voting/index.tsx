@@ -1,5 +1,5 @@
 import {Grid} from "@mui/material";
-import React, {useState} from "react";
+import {useState} from "react";
 import {useParams} from "react-router-dom";
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GoBack from "../../components/GoBack";

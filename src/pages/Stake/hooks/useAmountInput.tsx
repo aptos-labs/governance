@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import AmountTextField from "../../../components/AmountTextField";
 import {useGetAccountResources} from "../../../api/hooks/useGetAccountResources";
 

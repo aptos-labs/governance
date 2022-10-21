@@ -1,4 +1,3 @@
-import React from "react";
 import {Typography, Stack, Link, Box} from "@mui/material";
 
 type ContentRowProps = {
