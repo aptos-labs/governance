@@ -1,16 +1,17 @@
-import {Box, Chip, Divider, Grid, Stack, Typography} from "@mui/material";
+import {Chip, Grid, Stack, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {gql, useQuery as useGraphqlQuery} from "@apollo/client";
 
 import {useGlobalState} from "../../../context/globalState";
-import {useWalletContext} from "../../../context/wallet/context";
 import VoteButtons from "../../Proposal/card/VoteButtons";
 import {AddressToVoteMap, Proposal} from "../../Types";
 import {isVotingClosed} from "../../utils";
 import hasAddressVoted from "../api/hasAddressVoted";
+import {MaybeHexString} from "aptos";
 
 type AddressesListProps = {
   proposal: Proposal;
+  accountAddress: MaybeHexString | null;
 };
 
 type AddressVotingStateProps = {
@@ -81,8 +82,10 @@ type CurrentStakingPoolVoter = {
   ];
 };
 
-export default function AddressesList({proposal}: AddressesListProps) {
-  const {accountAddress} = useWalletContext();
+export default function AddressesList({
+  proposal,
+  accountAddress,
+}: AddressesListProps) {
   const [state, _] = useGlobalState();
   const [mapLoading, setMapLoading] = useState<boolean>(false);
   const [addressVoteMap, setAddressVoteMap] = useState<AddressToVoteMap[]>();
@@ -134,7 +137,7 @@ export default function AddressesList({proposal}: AddressesListProps) {
       setMapLoading(true);
       fetchAccounts(data);
     }
-  }, [data]);
+  }, [data, accountAddress]);
 
   if (loading || mapLoading) {
     return (
@@ -160,7 +163,8 @@ export default function AddressesList({proposal}: AddressesListProps) {
     return (
       <Stack sx={{width: "100%"}} mt={4}>
         <Typography variant="h4" mb={4}>
-          You don't have a voting power for any staking pool address
+          We couldn't find any staking pool addresses, make sure you are
+          connected with your voter account.
         </Typography>
       </Stack>
     );
