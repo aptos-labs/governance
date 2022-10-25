@@ -7,8 +7,8 @@ import {IndividualPageHeader} from "../../components/Header";
 import {EmptyProposal} from "../Proposal/EmptyProposal";
 import {ProposalHeader} from "../Proposal/Header";
 import {AddressToVoteMap} from "../Types";
-import AddressesList from "../Voting/components/AddressesList";
-import StakePoolAddressInput from "../Voting/components/StakePoolAddressInput";
+import AddressesList from "./components/AddressesList";
+import StakePoolAddressInput from "./components/StakePoolAddressInput";
 
 export type ProposalPageURLParams = {
   id: string;
@@ -37,9 +37,7 @@ export default function VotingStatus() {
         subtitle="Input the staking pool addresses you would like to see the voting status for, separated
         by space."
       />
-      {addressVoteMap && (
-        <AddressesList addressVoteMap={addressVoteMap} proposal={proposal} />
-      )}
+      {addressVoteMap && <AddressesList addressVoteMap={addressVoteMap} />}
     </Grid>
   );
 }
