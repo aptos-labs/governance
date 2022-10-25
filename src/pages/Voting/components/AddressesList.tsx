@@ -94,8 +94,7 @@ export default function AddressesList({
     STAKE_POOL_ADDRESS_BY_VOTER_QUERY,
     {
       variables: {
-        voter_address:
-          "0x8ac6fe79b3656feda6485fcf872e00033dd35cd9d8e10b485e3dee34949b2f47",
+        voter_address: accountAddress,
       },
     },
   );
