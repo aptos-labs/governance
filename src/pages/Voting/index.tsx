@@ -1,14 +1,14 @@
 import {Grid} from "@mui/material";
-import {useState} from "react";
-import {useParams} from "react-router-dom";
+import {useEffect} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GoBack from "../../components/GoBack";
 import {IndividualPageHeader} from "../../components/Header";
+import {useWalletContext} from "../../context/wallet/context";
 import {EmptyProposal} from "../Proposal/EmptyProposal";
 import {ProposalHeader} from "../Proposal/Header";
-import {AddressToVoteMap} from "../Types";
 import AddressesList from "./components/AddressesList";
-import StakePoolAddressInput from "./components/StakePoolAddressInput";
 
 export type ProposalPageURLParams = {
   id: string;
@@ -17,8 +17,14 @@ export type ProposalPageURLParams = {
 export default function Voting() {
   const {id: proposalId} = useParams() as ProposalPageURLParams;
   const proposal = useGetProposal(proposalId);
+  const {accountAddress, isConnected} = useWalletContext();
+  const navigate = useNavigate();
 
-  const [addressVoteMap, setAddressVoteMap] = useState<AddressToVoteMap[]>();
+  useEffect(() => {
+    if (!accountAddress || !isConnected) {
+      navigate(`/proposal/${proposalId}`);
+    }
+  }, [accountAddress, isConnected]);
 
   if (!proposal) {
     return <EmptyProposal />;
@@ -31,13 +37,7 @@ export default function Voting() {
       <Grid item xs={12}>
         <ProposalHeader proposal={proposal} />
       </Grid>
-      <StakePoolAddressInput
-        setAddressVoteMap={setAddressVoteMap}
-        proposalId={proposalId}
-      />
-      {addressVoteMap && (
-        <AddressesList addressVoteMap={addressVoteMap} proposal={proposal} />
-      )}
+      <AddressesList proposal={proposal} accountAddress={accountAddress} />
     </Grid>
   );
 }
