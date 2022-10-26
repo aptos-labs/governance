@@ -4,8 +4,8 @@ import LoadingModal from "../../../components/LoadingModal";
 import {useWalletContext} from "../../../context/wallet/context";
 import {AddressToVoteMap} from "../../Types";
 import {isValidAccountAddress} from "../../utils";
-import hasAddressVoted from "../api/hasAddressVoted";
-import isDelegatedVoter from "../api/isDelegatedVoter";
+import hasAddressVoted from "../../Voting/api/hasAddressVoted";
+import isDelegatedVoter from "../../Voting/api/isDelegatedVoter";
 import {alpha} from "@mui/material";
 import {primaryColor} from "../../constants";
 import {useGlobalState} from "../../../context/globalState";
@@ -15,11 +15,15 @@ type StakePoolAddressInputProps = {
     React.SetStateAction<AddressToVoteMap[] | undefined>
   >;
   proposalId: string;
+  applyStakeVoterValidation?: boolean;
+  subtitle: string;
 };
 
 export default function StakePoolAddressInput({
   setAddressVoteMap,
   proposalId,
+  applyStakeVoterValidation,
+  subtitle,
 }: StakePoolAddressInputProps) {
   const [addressHasError, setAddressHasError] = useState<string | null>(null);
   const [notPartOfStakingPool, setNotPartOfStakingPool] = useState<
@@ -101,7 +105,9 @@ export default function StakePoolAddressInput({
       const stakePoolAddressTrimmed = stakePoolAddress.trim();
       if (stakePoolAddressTrimmed.length === 0) continue;
       if (!validateStakePoolAddress(stakePoolAddressTrimmed)) break;
-      if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) break;
+      if (applyStakeVoterValidation) {
+        if (!(await validateAccountIsVoter(stakePoolAddressTrimmed))) break;
+      }
       addresses.push(stakePoolAddressTrimmed);
     }
 
@@ -123,8 +129,7 @@ export default function StakePoolAddressInput({
         Stake Pool Addresses
       </Typography>
       <Typography variant="body1" mb={2}>
-        Input the staking pool addresses you would like to vote for, separated
-        by space.
+        {subtitle}
       </Typography>
       <TextField
         fullWidth
