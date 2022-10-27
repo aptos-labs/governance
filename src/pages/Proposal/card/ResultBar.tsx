@@ -7,12 +7,9 @@ import {
 } from "../../constants";
 import {useTheme} from "@mui/material/styles";
 import {grey} from "../../../themes/colors/aptosColorPalette";
+import {octaToAptString, octaToAptnFormatter} from "../../../utils";
 
 const RADIUS = "0.7em";
-
-function getFormattedVotesStr(votes: string): string {
-  return parseInt(votes).toLocaleString("en-US");
-}
 
 type ResultBarProps = {
   shouldPass: boolean;
@@ -33,14 +30,20 @@ export default function ResultBar({
   const remainingPercentageStr = `${(100 - percentage).toFixed(0)}%`;
 
   return (
-    <Tooltip title={`${getFormattedVotesStr(votes)} votes`} placement="left">
+    <Tooltip
+      title={`${octaToAptString(votes)} APT`}
+      placement="left"
+      arrow={true}
+    >
       <Stack>
         <Stack direction="row" justifyContent="space-between" paddingX={0.2}>
           <Typography variant="subtitle2" color={barColor}>
             {shouldPass ? voteFor : voteAgainst}
           </Typography>
 
-          <Typography variant="subtitle2">{percentageStr}</Typography>
+          <Typography variant="subtitle2">
+            {`${octaToAptnFormatter(votes)} APT`} {percentageStr}
+          </Typography>
         </Stack>
         <Stack direction="row">
           <Box
