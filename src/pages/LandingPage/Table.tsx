@@ -193,7 +193,6 @@ type ProposalsTableProps = {
   hideTitle?: boolean;
 };
 
-// TODO: generalize Table component for transactions and proposals
 export function ProposalsTable({
   nextProposalId,
   columns = DEFAULT_COLUMNS,
@@ -203,6 +202,9 @@ export function ProposalsTable({
   const proposalRows = [];
   // we need to iterate from (0...nextProposalId)
   // to make api call for each proposal
+
+  // TODO - future improvement, once more proposals, show 10 proposals on homepage
+  // and the rest on the Ptoposals page.
   const counter = parseInt(nextProposalId);
   for (var proposal_id = 0; proposal_id < counter; proposal_id++) {
     proposalRows.push(
