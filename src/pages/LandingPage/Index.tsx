@@ -1,9 +1,8 @@
 import {useRef} from "react";
-import {Grid, Hidden} from "@mui/material";
+import {Box, Grid, Stack} from "@mui/material";
 import {HomePageHeader} from "../../components/Header";
 import {Header as ProposalsHeader} from "./Header";
 import {ProposalsTable} from "./Table";
-import {Instructions} from "./Instructions";
 import {useGetProposalsTableData} from "../../api/hooks/useGetProposalsTableData";
 
 export default function LandingPage() {
@@ -18,14 +17,15 @@ export default function LandingPage() {
     <Grid item xs={12}>
       <HomePageHeader />
       <ProposalsHeader onVoteProposalButtonClick={scrollTableIntoView} />
-      <Hidden smDown>
-        <Instructions onVoteProposalButtonClick={scrollTableIntoView} />
-      </Hidden>
-      {proposalTableData && (
+      {proposalTableData && proposalTableData.nextProposalId !== "0" ? (
         <ProposalsTable
           nextProposalId={proposalTableData.nextProposalId}
           ProposalsTableRef={ProposalsTableRef}
         />
+      ) : (
+        <Stack spacing={1}>
+          <Box sx={{width: "auto", overflowX: "auto"}}>No Proposals</Box>
+        </Stack>
       )}
     </Grid>
   );
