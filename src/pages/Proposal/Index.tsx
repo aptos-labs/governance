@@ -1,5 +1,4 @@
-import {Box, Grid, Stack, Typography} from "@mui/material";
-import {gql, useQuery as useGraphqlQuery} from "@apollo/client";
+import {Box, Grid, Stack} from "@mui/material";
 import {useParams} from "react-router-dom";
 import Pagination from "@mui/material/Pagination";
 
@@ -11,58 +10,39 @@ import {EmptyProposal} from "./EmptyProposal";
 import {IndividualPageHeader} from "../../components/Header";
 import GoBack from "../../components/GoBack";
 import {VotesTable} from "./VotesTable";
-import {Proposal} from "../Types";
-import {useEffect, useState} from "react";
+import {useState} from "react";
+import {useGetProposalVotesCount} from "./api/useGetProposalVotesCount";
+import {useGetProposalVotes} from "./api/useGetProposalVotes";
+import LoadingModal from "../../components/LoadingModal";
 
 export type ProposalPageURLParams = {
   id: string;
 };
 
-const PROPOSAL_VOTES_QUERY = gql`
-  query proposal_votes($proposal_id: bigint) {
-    proposal_votes(
-      where: {proposal_id: {_eq: $proposal_id}}
-      order_by: {num_votes: desc}
-      limit: $limit
-      offset: $offset
-    ) {
-      should_pass
-      staking_pool_address
-      num_votes
-    }
-  }
-`;
-
-function getTotalVote(proposal: Proposal) {
-  const yesVotes: number = parseInt(proposal.yes_votes);
-  const noVotes: number = parseInt(proposal.no_votes);
-  return yesVotes + noVotes;
-}
+const QUERY_LIMIT = 20;
 
 export const ProposalPage = () => {
   // useParams type signature is string | undefined - to go around it we cast the return value
   const {id: proposalId} = useParams() as ProposalPageURLParams;
   const proposal = useGetProposal(proposalId);
-  const [totalVotes, setTotalVotes] = useState<number>(0);
+  const [offset, setOffset] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const {loading, error, data} = useGraphqlQuery(PROPOSAL_VOTES_QUERY, {
-    variables: {
-      proposal_id: proposalId,
-    },
-  });
+  const {votes, loading} = useGetProposalVotes(proposalId, offset);
+  const totalVotesCount = useGetProposalVotesCount(proposalId);
 
-  useEffect(() => {
-    if (proposal !== undefined) {
-      setTotalVotes(getTotalVote(proposal));
-    }
-  }, [proposal]);
+  const numPages = totalVotesCount && Math.ceil(totalVotesCount / QUERY_LIMIT);
 
   if (!proposal) {
     return <EmptyProposal />;
   }
 
-  const handlePaginationChange = () => {
-    console.log("here");
+  const handlePaginationChange = (
+    event: React.ChangeEvent<unknown>,
+    newPageNum: number,
+  ) => {
+    setOffset((newPageNum - 1) * QUERY_LIMIT);
+    setCurrentPage(newPageNum);
   };
 
   return (
@@ -85,15 +65,22 @@ export const ProposalPage = () => {
         <ProposalCard proposal={proposal} />
       </Grid>
       <Grid item xs={12} mt={8}>
-        {data && (
+        {loading && <LoadingModal open={loading} />}
+        {votes && votes.length > 0 && (
           <Stack spacing={2}>
-            <VotesTable votes={data.proposal_votes} totalVotes={totalVotes} />
+            <VotesTable votes={votes} />
             <Box sx={{display: "flex", justifyContent: "center"}}>
-              <Pagination
-                variant="outlined"
-                shape="rounded"
-                onChange={handlePaginationChange}
-              />
+              {votes && votes.length < totalVotesCount && (
+                <Pagination
+                  variant="outlined"
+                  shape="rounded"
+                  onChange={handlePaginationChange}
+                  page={currentPage}
+                  count={numPages}
+                  showFirstButton
+                  showLastButton
+                />
+              )}
             </Box>
           </Stack>
         )}

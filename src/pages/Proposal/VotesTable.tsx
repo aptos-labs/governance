@@ -17,7 +17,6 @@ import HashButton, {HashType} from "../../components/HashButton";
 
 type ProposalCellProps = {
   vote: Vote;
-  totalVotes: number;
 };
 
 function AddressCell({vote}: ProposalCellProps) {
@@ -25,7 +24,7 @@ function AddressCell({vote}: ProposalCellProps) {
     <TableCell
       sx={{
         textAlign: "left",
-        minWidth: {xs: 250},
+        minWidth: {xs: 300},
         overflow: "hidden",
         textOverflow: "ellipsis",
       }}
@@ -70,51 +69,27 @@ function VotingPowerCell({vote}: ProposalCellProps) {
   );
 }
 
-function VotingPercantageCell({vote, totalVotes}: ProposalCellProps) {
-  return (
-    <TableCell
-      sx={{
-        textAlign: "right",
-        minWidth: {xs: 300},
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
-    >
-      {totalVotes === 0
-        ? 0
-        : ((vote.num_votes * 100) / totalVotes).toFixed(2) + "%"}
-    </TableCell>
-  );
-}
-
 const ProposalCells = Object.freeze({
   address: AddressCell,
   vote: VoteCell,
   votingPower: VotingPowerCell,
-  percentageVotingPower: VotingPercantageCell,
 });
 
 type ProposalColumn = keyof typeof ProposalCells;
 
-const DEFAULT_COLUMNS: ProposalColumn[] = [
-  "address",
-  "vote",
-  "votingPower",
-  "percentageVotingPower",
-];
+const DEFAULT_COLUMNS: ProposalColumn[] = ["address", "vote", "votingPower"];
 
 type ProposalRowProps = {
   columns: ProposalColumn[];
   vote: Vote;
-  totalVotes: number;
 };
 
-function ProposalRow({vote, columns, totalVotes}: ProposalRowProps) {
+function ProposalRow({vote, columns}: ProposalRowProps) {
   return (
     <GeneralTableRow>
       {columns.map((column) => {
         const Cell = ProposalCells[column];
-        return <Cell key={column} vote={vote} totalVotes={totalVotes} />;
+        return <Cell key={column} vote={vote} />;
       })}
     </GeneralTableRow>
   );
@@ -134,13 +109,6 @@ function ProposalHeaderCell({column}: ProposalHeaderCellProps) {
       return (
         <GeneralTableHeaderCell header="voting power" textAlignRight={true} />
       );
-    case "percentageVotingPower":
-      return (
-        <GeneralTableHeaderCell
-          header="percantage voting power"
-          textAlignRight={true}
-        />
-      );
     default:
       return assertNever(column);
   }
@@ -154,14 +122,12 @@ type Vote = {
 
 type ProposalsTableProps = {
   votes: Vote[];
-  totalVotes: number;
   columns?: ProposalColumn[];
   hideTitle?: boolean;
 };
 
 export function VotesTable({
   votes,
-  totalVotes,
   columns = DEFAULT_COLUMNS,
   hideTitle,
 }: ProposalsTableProps) {
@@ -176,14 +142,7 @@ export function VotesTable({
       </TableHead>
       <TableBody>
         {votes.map((vote: any, i: number) => {
-          return (
-            <ProposalRow
-              key={i}
-              vote={vote}
-              columns={columns}
-              totalVotes={totalVotes}
-            />
-          );
+          return <ProposalRow key={i} vote={vote} columns={columns} />;
         })}
       </TableBody>
     </Table>
