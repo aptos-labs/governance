@@ -24,7 +24,7 @@ function AddressCell({vote}: ProposalCellProps) {
     <TableCell
       sx={{
         textAlign: "left",
-        minWidth: {xs: 300},
+        minWidth: {xs: 200},
         overflow: "hidden",
         textOverflow: "ellipsis",
       }}
@@ -53,7 +53,6 @@ function VotingPowerCell({vote}: ProposalCellProps) {
     <TableCell
       sx={{
         textAlign: "right",
-        minWidth: {xs: 250},
         overflow: "hidden",
         textOverflow: "ellipsis",
       }}
