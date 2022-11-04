@@ -64,7 +64,7 @@ export const ProposalPage = () => {
       <Grid item md={4} xs={12}>
         <ProposalCard proposal={proposal} />
       </Grid>
-      <Grid item xs={12} mt={8}>
+      <Grid item xs={8} mt={8}>
         {loading && <LoadingModal open={loading} />}
         {votes && votes.length > 0 && (
           <Stack spacing={2}>
