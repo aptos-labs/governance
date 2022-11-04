@@ -3,7 +3,7 @@ import {grey} from "../themes/colors/aptosColorPalette";
 
 interface TableRowProps {
   children?: React.ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export default function GeneralTableRow({children, onClick}: TableRowProps) {
