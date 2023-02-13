@@ -31,9 +31,16 @@ const fetchTableItem = async (
 };
 
 const getRawGithubUrl = (url: string): string => {
-  return url.includes("github.com")
-    ? url.replace("github.com", "raw.githubusercontent.com")
-    : url;
+  if (!url.includes("github.com")) {
+    return url;
+  }
+
+  // Hot fix for github raw url
+  // from:  https://github.com                /aptos-foundation/mainnet-proposals /raw /main/metadata/v1.2/0/0-move-stdlib.json
+  //   to:  https://raw.githubusercontent.com /aptos-foundation/mainnet-proposals      /main/metadata/v1.2/0/0-move-stdlib.json
+  return url
+    .replace("/raw", "")
+    .replace("github.com", "raw.githubusercontent.com");
 };
 
 const fetchProposalMetadata = async (
