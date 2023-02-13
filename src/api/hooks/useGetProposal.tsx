@@ -30,12 +30,20 @@ const fetchTableItem = async (
   return proposalData;
 };
 
+const getRawGithubUrl = (url: string): string => {
+  return url.includes("github.com")
+    ? url.replace("github.com", "raw.githubusercontent.com")
+    : url;
+};
+
 const fetchProposalMetadata = async (
   proposalData: Proposal,
 ): Promise<ProposalMetadata | null> => {
   // fetch proposal metadata from metadata_location property
   const metadata_location = hex_to_string(proposalData.metadata.data[1].value);
-  const response = await fetch(metadata_location);
+  const raw_metadata_location = getRawGithubUrl(metadata_location);
+
+  const response = await fetch(raw_metadata_location);
   // validate response status
   if (response.status !== 200) return null;
 
