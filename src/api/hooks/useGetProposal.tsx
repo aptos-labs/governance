@@ -30,12 +30,27 @@ const fetchTableItem = async (
   return proposalData;
 };
 
+const getRawGithubUrl = (url: string): string => {
+  if (!url.includes("github.com")) {
+    return url;
+  }
+
+  // Hot fix for github raw url
+  // from:  https://github.com                /aptos-foundation/mainnet-proposals /raw /main/metadata/v1.2/0/0-move-stdlib.json
+  //   to:  https://raw.githubusercontent.com /aptos-foundation/mainnet-proposals      /main/metadata/v1.2/0/0-move-stdlib.json
+  return url
+    .replace("/raw", "")
+    .replace("github.com", "raw.githubusercontent.com");
+};
+
 const fetchProposalMetadata = async (
   proposalData: Proposal,
 ): Promise<ProposalMetadata | null> => {
   // fetch proposal metadata from metadata_location property
   const metadata_location = hex_to_string(proposalData.metadata.data[1].value);
-  const response = await fetch(metadata_location);
+  const raw_metadata_location = getRawGithubUrl(metadata_location);
+
+  const response = await fetch(raw_metadata_location);
   // validate response status
   if (response.status !== 200) return null;
 
