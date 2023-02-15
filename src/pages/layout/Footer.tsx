@@ -6,22 +6,28 @@ import {ReactComponent as GithubLogo} from "../../assets/svg/github.svg";
 import {ReactComponent as DiscordLogo} from "../../assets/svg/discord.svg";
 import {ReactComponent as TwitterLogo} from "../../assets/svg/twitter.svg";
 import {ReactComponent as MediumLogo} from "../../assets/svg/medium.svg";
-import {ReactComponent as LinkedInLogo} from "../../assets/svg/linkedin.svg";
 import {grey} from "../../themes/colors/aptosColorPalette";
 import SvgIcon from "@mui/material/SvgIcon";
 
 import {ReactComponent as LogoIcon} from "../../assets/svg/aptos-foundation_logo_mark.svg";
 
 const socialLinks = [
-  {title: "Git", url: "https://github.com/aptos-labs", icon: GithubLogo},
-  {title: "Discord", url: "https://discord.gg/zTDYBEud7U", icon: DiscordLogo},
-  {title: "Twitter", url: "https://twitter.com/aptoslabs/", icon: TwitterLogo},
-  {title: "Medium", url: "https://aptoslabs.medium.com/", icon: MediumLogo},
   {
-    title: "LinkedIn",
-    url: "https://www.linkedin.com/company/aptoslabs/",
-    icon: LinkedInLogo,
+    title: "Github",
+    url: "https://github.com/aptos-foundation/",
+    icon: GithubLogo,
   },
+  {
+    title: "Discord",
+    url: "https://discord.com/invite/aptoslabs",
+    icon: DiscordLogo,
+  },
+  {
+    title: "Twitter",
+    url: "https://twitter.com/aptos_network",
+    icon: TwitterLogo,
+  },
+  {title: "Medium", url: "https://aptoslabs.medium.com/", icon: MediumLogo},
 ];
 
 export default function Footer() {
@@ -47,7 +53,7 @@ export default function Footer() {
           <Grid>
             <Link
               color="inherit"
-              href="https://aptoslabs.com/"
+              href="https://aptosfoundation.org/"
               target="_blank"
               title="Aptos Foundation"
               sx={{display: "block", width: "3rem"}}
