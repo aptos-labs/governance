@@ -47,7 +47,11 @@ const fetchProposalMetadata = async (
   proposalData: Proposal,
 ): Promise<ProposalMetadata | null> => {
   // fetch proposal metadata from metadata_location property
-  const metadata_location = hex_to_string(proposalData.metadata.data[1].value);
+  const proposal_metadata_location = proposalData.metadata.data.find(
+    (metadata) => metadata.key === "metadata_location",
+  )!.value;
+  const metadata_location = hex_to_string(proposal_metadata_location);
+
   const raw_metadata_location = getRawGithubUrl(metadata_location);
 
   const response = await fetch(raw_metadata_location);
@@ -57,7 +61,9 @@ const fetchProposalMetadata = async (
   const metadataText = await response.text();
 
   //validate metadata
-  const metadata_hash = proposalData.metadata.data[0].value;
+  const metadata_hash = proposalData.metadata.data.find(
+    (metadata) => metadata.key === "metadata_hash",
+  )!.value;
 
   const hash = sha3_256(metadataText);
   if (hex_to_string(metadata_hash) !== hash) return null;
