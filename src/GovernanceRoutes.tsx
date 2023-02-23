@@ -5,7 +5,6 @@ import Layout from "./pages/layout";
 import {ProposalPage} from "./pages/Proposal/Index";
 import {CreateProposalPage} from "./pages/CreateProposal/Index";
 import Voting from "./pages/Voting";
-import StakingPage from "./pages/Stake/Index";
 import ProposalsPage from "./pages/Proposals/Index";
 import VotingStatus from "./pages/VotingStatus/";
 
@@ -19,7 +18,6 @@ export default function GovernanceRoutes() {
         <Route path="/proposal/:id/vote/status" element={<VotingStatus />} />
         <Route path="/proposal/create" element={<CreateProposalPage />} />
         <Route path="/proposals" element={<ProposalsPage />} />
-        <Route path="/staking" element={<StakingPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>
