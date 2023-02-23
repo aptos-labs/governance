@@ -11,8 +11,6 @@ import {ReactComponent as IconLight} from "../../assets/svg/icon_light.svg";
 import {ReactComponent as IconDark} from "../../assets/svg/icon_dark.svg";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Nav from "../../components/Nav";
-import NavMobile from "../../components/NavMobile";
 import {grey} from "../../themes/colors/aptosColorPalette";
 import {useInView} from "react-intersection-observer";
 
@@ -93,8 +91,6 @@ export default function Header() {
             >
               <LogoIcon />
             </Link>
-
-            <Nav />
             <NetworkSelect />
             <Button
               onClick={toggleColorMode}
@@ -113,7 +109,6 @@ export default function Header() {
             >
               {theme.palette.mode === "light" ? <IconLight /> : <IconDark />}
             </Button>
-            <NavMobile />
           </Toolbar>
         </Container>
       </MuiAppBar>
