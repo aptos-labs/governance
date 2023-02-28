@@ -5,7 +5,7 @@ import {QueryClient, QueryClientProvider} from "react-query";
 import GovernanceRoutes from "./GovernanceRoutes";
 import ReactGA from "react-ga4";
 
-ReactGA.initialize(process.env.GA_TRACKING_ID || "G-8XH7V50XK7");
+ReactGA.initialize(process.env.GA_TRACKING_ID || "G-NW8SFC1RKX");
 
 // TODO: add Sentry
 
