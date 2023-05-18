@@ -22,6 +22,7 @@ import StatusIcon from "../../components/StatusIcon";
 import ProposalStatusTooltip from "../../components/ProposalStatusTooltip";
 import InfoIcon from "@mui/icons-material/Info";
 import {renderTimestamp} from "../utils";
+import {useState} from "react";
 
 const MAX_TITLE_WIDTH = 400;
 
@@ -153,9 +154,17 @@ function ProposalRow({proposal_id, columns}: ProposalRowProps) {
 
 type ProposalHeaderCellProps = {
   column: ProposalColumn;
+  direction?: "desc" | "asc";
+  setDirection?: (dir: "desc" | "asc") => void;
+  setSortColumn: (col: ProposalColumn) => void;
 };
 
-function ProposalHeaderCell({column}: ProposalHeaderCellProps) {
+function ProposalHeaderCell({
+  column,
+  direction,
+  setDirection,
+  setSortColumn,
+}: ProposalHeaderCellProps) {
   switch (column) {
     case "title":
       return <GeneralTableHeaderCell header="Title" />;
@@ -173,7 +182,20 @@ function ProposalHeaderCell({column}: ProposalHeaderCellProps) {
     case "proposer":
       return <GeneralTableHeaderCell header="Proposer" />;
     case "votingStartDate":
-      return <GeneralTableHeaderCell header="Voting Start Date" />;
+      // return <GeneralTableHeaderCell header="Voting Start Date" />;
+      return (
+        <GeneralTableHeaderCell
+          header={"Voting Start Date"}
+          sortable
+          direction={direction}
+          selectAndSetDirection={(dir) => {
+            setSortColumn(column);
+            if (setDirection) {
+              setDirection(dir);
+            }
+          }}
+        />
+      );
     case "votingEndDate":
       return <GeneralTableHeaderCell header="Voting End Date" />;
     case "executionDate":
@@ -199,33 +221,48 @@ export function ProposalsTable({
   ProposalsTableRef,
   hideTitle,
 }: ProposalsTableProps) {
-  const proposalRows = [];
   // we need to iterate from (0...nextProposalId)
   // to make api call for each proposal
-
   // TODO - future improvement, once more proposals, show 10 proposals on homepage
   // and the rest on the Ptoposals page.
   const counter = parseInt(nextProposalId);
-  for (var proposal_id = 0; proposal_id < counter; proposal_id++) {
-    proposalRows.push(
-      <ProposalRow
-        key={proposal_id}
-        proposal_id={proposal_id + ""} // cast into a string as future uses expects proposal_id as a string type
-        columns={columns}
-      />,
-    );
-  }
+  const proposalRows = Array.from({length: counter}, (_, proposal_id) =>
+    useGetProposal(proposal_id.toString()),
+  ).filter((proposal) => proposal !== undefined) as Proposal[];
+
+  const [sortColumn, setSortColumn] =
+    useState<ProposalColumn>("votingStartDate");
+  const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc");
+  const sortedProposalRows = getSortedProposals(
+    proposalRows,
+    sortColumn,
+    sortDirection,
+  );
 
   const tableComponent = (
     <Table size="small">
       <TableHead>
         <TableRow>
           {columns.map((column) => (
-            <ProposalHeaderCell key={column} column={column} />
+            <ProposalHeaderCell
+              key={column}
+              column={column}
+              direction={sortColumn === column ? sortDirection : undefined}
+              setDirection={setSortDirection}
+              setSortColumn={setSortColumn}
+            />
           ))}
         </TableRow>
       </TableHead>
-      <TableBody>{proposalRows}</TableBody>
+      <TableBody>
+        {sortedProposalRows.map((proposal) => (
+          <ProposalRow
+            key={proposal.proposal_id}
+            proposal_id={proposal.proposal_id.toString()}
+            columns={columns}
+          />
+        ))}
+      </TableBody>
     </Table>
   );
 
@@ -237,4 +274,29 @@ export function ProposalsTable({
       </Stack>
     </Grid>
   );
+}
+
+function getSortedProposals(
+  proposals: Proposal[],
+  column: ProposalColumn,
+  direction: "desc" | "asc",
+) {
+  const proposalsCopy: Proposal[] = JSON.parse(JSON.stringify(proposals));
+  const orderedProposals = getProposalsOrderedBy(proposalsCopy, column);
+
+  return direction === "desc" ? orderedProposals : orderedProposals.reverse();
+}
+
+function getProposalsOrderedBy(proposals: Proposal[], column: ProposalColumn) {
+  switch (column) {
+    case "votingStartDate":
+      return proposals.sort((proposal1, proposal2) => {
+        return (
+          Number(proposal2.creation_time_secs) -
+          Number(proposal1.creation_time_secs)
+        );
+      });
+    default:
+      return proposals;
+  }
 }
