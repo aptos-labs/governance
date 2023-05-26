@@ -19,7 +19,7 @@ const socialLinks = [
   },
   {
     title: "Discord",
-    url: "https://discord.com/invite/aptoslabs",
+    url: "https://discord.com/invite/aptosnetwork",
     icon: DiscordLogo,
   },
   {
