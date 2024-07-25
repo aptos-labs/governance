@@ -163,7 +163,8 @@ export default function AddressesList({
       <Stack sx={{width: "100%"}} mt={4}>
         <Typography variant="h4" mb={4}>
           We couldn't find any staking pool addresses, make sure you are
-          connected with your voter account.
+          connected with your voter account. If you're delegated staking
+          user, use https://govscan.live/aptos/proposals to vote instead.
         </Typography>
       </Stack>
     );
