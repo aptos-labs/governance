@@ -71,7 +71,7 @@ const fetchProposalMetadata = async (
   const hash = sha3_256(metadataText);
   if (hex_to_string(metadata_hash) !== hash) {
     return {
-      errorMessage: "Metadata is invalid",
+      errorMessage: "Metadata hash mismatch",
     };
   }
 
