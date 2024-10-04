@@ -2,11 +2,12 @@ import {useEffect, useState} from "react";
 import {sha3_256} from "js-sha3";
 
 import {getTableItem} from "..";
-import {Proposal, ProposalMetadata} from "../../pages/Types";
+import {Proposal, ProposalMetadata, ProposalError} from "../../pages/Types";
 import {hex_to_string} from "../../utils";
 import {getProposalStatus, isVotingClosed} from "../../pages/utils";
 import {useGetProposalsTableData} from "../hooks/useGetProposalsTableData";
 import {GlobalState, useGlobalState} from "../../context/globalState/context";
+import {defaultProposalErrorMessage} from "../../constants";
 
 const fetchTableItem = async (
   proposal_id: string,
@@ -45,7 +46,7 @@ const getRawGithubUrl = (url: string): string => {
 
 const fetchProposalMetadata = async (
   proposalData: Proposal,
-): Promise<ProposalMetadata | null> => {
+): Promise<ProposalMetadata | ProposalError> => {
   // fetch proposal metadata from metadata_location property
   const proposal_metadata_location = proposalData.metadata.data.find(
     (metadata) => metadata.key === "metadata_location",
@@ -56,20 +57,25 @@ const fetchProposalMetadata = async (
 
   const response = await fetch(raw_metadata_location);
   // validate response status
-  if (response.status !== 200) return null;
+  if (response.status !== 200) {
+    return {
+      errorMessage: "Proposal metadata not found",
+    };
+  }
 
   const metadataText = await response.text();
-
-  //validate metadata
+  // validate metadata
   const metadata_hash = proposalData.metadata.data.find(
     (metadata) => metadata.key === "metadata_hash",
   )!.value;
-
   const hash = sha3_256(metadataText);
-  if (hex_to_string(metadata_hash) !== hash) return null;
+  if (hex_to_string(metadata_hash) !== hash) {
+    return {
+      errorMessage: "Metadata hash mismatch",
+    };
+  }
 
   const proposal_metadata = JSON.parse(metadataText);
-
   return proposal_metadata;
 };
 
@@ -77,15 +83,24 @@ const fetchProposal = async (
   proposal_id: string,
   handle: string,
   state: GlobalState,
-): Promise<Proposal | null> => {
+): Promise<Proposal | ProposalError> => {
   // fetch proposal table item
   const proposalData = await fetchTableItem(proposal_id, handle, state);
-  if (!proposalData) return null;
+  if (!proposalData) {
+    return {
+      errorMessage: defaultProposalErrorMessage,
+    };
+  }
 
   // fetch proposal metadata
   const proposal_metadata = await fetchProposalMetadata(proposalData);
   // if bad metadata response or metadata hash is different
-  if (!proposal_metadata) return null;
+  if ("errorMessage" in proposal_metadata) {
+    return {
+      errorMessage:
+        proposal_metadata.errorMessage ?? defaultProposalErrorMessage,
+    };
+  }
 
   proposalData.status = getProposalStatus(proposalData);
   proposalData.is_voting_closed = isVotingClosed(proposalData);
@@ -96,19 +111,25 @@ const fetchProposal = async (
   return proposalData;
 };
 
-export function useGetProposal(proposal_id: string): Proposal | undefined {
+export function useGetProposal(proposal_id: string): {
+  proposal: Proposal | ProposalError | undefined;
+  loading: boolean;
+} {
   const [state, _setState] = useGlobalState();
-  const [proposal, setProposal] = useState<Proposal>();
+  const [proposal, setProposal] = useState<Proposal | ProposalError>();
+  const [loading, setLoading] = useState(true);
   const proposalTableData = useGetProposalsTableData();
 
   const handle = proposalTableData?.handle ?? undefined;
   useEffect(() => {
     if (handle !== undefined) {
+      setLoading(true);
       fetchProposal(proposal_id, handle, state).then((data) => {
         data && setProposal(data);
+        setLoading(false);
       });
     }
   }, [handle, state]);
 
-  return proposal;
+  return {proposal, loading};
 }

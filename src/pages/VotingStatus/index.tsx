@@ -9,6 +9,7 @@ import {ProposalHeader} from "../Proposal/Header";
 import {AddressToVoteMap} from "../Types";
 import AddressesList from "./components/AddressesList";
 import StakePoolAddressInput from "./components/StakePoolAddressInput";
+import {defaultProposalErrorMessage} from "../../constants";
 
 export type ProposalPageURLParams = {
   id: string;
@@ -16,12 +17,16 @@ export type ProposalPageURLParams = {
 
 export default function VotingStatus() {
   const {id: proposalId} = useParams() as ProposalPageURLParams;
-  const proposal = useGetProposal(proposalId);
+  const {proposal} = useGetProposal(proposalId);
 
   const [addressVoteMap, setAddressVoteMap] = useState<AddressToVoteMap[]>();
 
-  if (!proposal) {
-    return <EmptyProposal />;
+  if (!proposal || "errorMessage" in proposal) {
+    return (
+      <EmptyProposal
+        errorMessage={proposal?.errorMessage ?? defaultProposalErrorMessage}
+      />
+    );
   }
 
   return (

@@ -9,6 +9,7 @@ import {useWalletContext} from "../../context/wallet/context";
 import {EmptyProposal} from "../Proposal/EmptyProposal";
 import {ProposalHeader} from "../Proposal/Header";
 import AddressesList from "./components/AddressesList";
+import {defaultProposalErrorMessage} from "../../constants";
 
 export type ProposalPageURLParams = {
   id: string;
@@ -16,7 +17,7 @@ export type ProposalPageURLParams = {
 
 export default function Voting() {
   const {id: proposalId} = useParams() as ProposalPageURLParams;
-  const proposal = useGetProposal(proposalId);
+  const {proposal} = useGetProposal(proposalId);
   const {accountAddress, isConnected} = useWalletContext();
   const navigate = useNavigate();
 
@@ -26,8 +27,12 @@ export default function Voting() {
     }
   }, [accountAddress, isConnected]);
 
-  if (!proposal) {
-    return <EmptyProposal />;
+  if (!proposal || "errorMessage" in proposal) {
+    return (
+      <EmptyProposal
+        errorMessage={proposal?.errorMessage ?? defaultProposalErrorMessage}
+      />
+    );
   }
 
   return (
