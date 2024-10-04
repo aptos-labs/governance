@@ -14,6 +14,7 @@ import {useState} from "react";
 import {useGetProposalVotesCount} from "./api/useGetProposalVotesCount";
 import {useGetProposalVotes} from "./api/useGetProposalVotes";
 import LoadingModal from "../../components/LoadingModal";
+import {defaultProposalErrorMessage} from "../../constants";
 
 export type ProposalPageURLParams = {
   id: string;
@@ -24,17 +25,27 @@ const QUERY_LIMIT = 20;
 export const ProposalPage = () => {
   // useParams type signature is string | undefined - to go around it we cast the return value
   const {id: proposalId} = useParams() as ProposalPageURLParams;
-  const proposal = useGetProposal(proposalId);
+  const {proposal, loading: isProposalLoading} = useGetProposal(proposalId);
   const [offset, setOffset] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const {votes, loading} = useGetProposalVotes(proposalId, offset);
+  const {votes, loading: isVotesLoading} = useGetProposalVotes(
+    proposalId,
+    offset,
+  );
   const totalVotesCount = useGetProposalVotesCount(proposalId);
-
   const numPages = totalVotesCount && Math.ceil(totalVotesCount / QUERY_LIMIT);
 
-  if (!proposal) {
-    return <EmptyProposal />;
+  if (isProposalLoading) {
+    return <LoadingModal open={true} />;
+  }
+
+  if (!proposal || "errorMessage" in proposal) {
+    return (
+      <EmptyProposal
+        errorMessage={proposal?.errorMessage ?? defaultProposalErrorMessage}
+      />
+    );
   }
 
   const handlePaginationChange = (
@@ -65,7 +76,7 @@ export const ProposalPage = () => {
         <ProposalCard proposal={proposal} />
       </Grid>
       <Grid item xs={8} mt={8}>
-        {loading && <LoadingModal open={loading} />}
+        {isVotesLoading && <LoadingModal open={isVotesLoading} />}
         {votes && votes.length > 0 && (
           <Stack spacing={2}>
             <VotesTable votes={votes} />

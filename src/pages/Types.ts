@@ -34,6 +34,10 @@ export type Proposal = {
   status: ProposalStatus; // represents general proposal status
 };
 
+export type ProposalError = {
+  errorMessage: string;
+};
+
 export type ProposalMetadata = {
   title: string;
   description: string;

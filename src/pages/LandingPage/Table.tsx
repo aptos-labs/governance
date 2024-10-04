@@ -130,14 +130,14 @@ type ProposalRowProps = {
 };
 
 function ProposalRow({proposal_id, columns}: ProposalRowProps) {
-  const proposalData = useGetProposal(proposal_id);
+  const {proposal: proposalData} = useGetProposal(proposal_id);
   const navigate = RRD.useNavigate();
 
   const onTableRowClick = () => {
     navigate(`/proposal/${proposal_id}`);
   };
 
-  if (!proposalData) {
+  if (!proposalData || "errorMessage" in proposalData) {
     // returns null as we don't need to generate a TableRow if there is no proposal data
     return null;
   }
@@ -226,8 +226,9 @@ export function ProposalsTable({
   // TODO - future improvement, once more proposals, show 10 proposals on homepage
   // and the rest on the Ptoposals page.
   const counter = parseInt(nextProposalId);
-  const proposalRows = Array.from({length: counter}, (_, proposal_id) =>
-    useGetProposal(proposal_id.toString()),
+  const proposalRows = Array.from(
+    {length: counter},
+    (_, proposal_id) => useGetProposal(proposal_id.toString()).proposal,
   ).filter((proposal) => proposal !== undefined) as Proposal[];
 
   const [sortColumn, setSortColumn] =
