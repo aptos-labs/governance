@@ -16,6 +16,7 @@ function safeGetSelectedNetworkName(): NetworkName {
 
 export type GlobalState = {
   network_name: NetworkName;
+  /** Despite the name this is a node API URL. */
   network_value: string;
 };
 
