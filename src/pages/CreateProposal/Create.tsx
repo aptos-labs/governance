@@ -4,6 +4,7 @@ import {AptosClient, AptosAccount, FaucetClient, HexString, Types} from "aptos";
 import {getHexString} from "../utils";
 import {useGlobalState} from "../../context/globalState";
 import {doTransaction} from "../utils";
+import {getConfig} from "../../api/common";
 
 /* REQUIRED: Please replace the following with your own local network urls */
 const FAUCET_URL = "http://127.0.0.1:80";
@@ -53,9 +54,10 @@ export function Create() {
   };
 
   const onCreateProposalClick = async () => {
-    const client = new AptosClient(state.network_value, {
-      WITH_CREDENTIALS: false,
-    });
+    const client = new AptosClient(
+      state.network_value,
+      getConfig(state.network_value),
+    );
     const faucetClient = new FaucetClient(
       state.network_value,
       FAUCET_URL,

@@ -5,6 +5,7 @@ import {useWalletContext} from "../../context/wallet/context";
 import {signAndSubmitTransaction} from "../wallet";
 import {useGlobalState} from "../../context/globalState";
 import {networks} from "../../constants";
+import {getConfig} from "../common";
 
 export type TransactionResponse =
   | TransactionResponseOnSubmission
@@ -29,9 +30,10 @@ const useSubmitTransaction = () => {
     useState<boolean>(false);
   const [state, _] = useGlobalState();
   const {walletNetwork} = useWalletContext();
-  const client = new AptosClient(state.network_value, {
-    WITH_CREDENTIALS: false,
-  });
+  const client = new AptosClient(
+    state.network_value,
+    getConfig(state.network_value),
+  );
 
   useEffect(() => {
     if (transactionResponse !== null) {
