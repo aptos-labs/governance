@@ -12,7 +12,7 @@ import {
   Grid,
 } from "@mui/material";
 import {assertNever} from "../../utils";
-import {Proposal} from "../Types";
+import {Proposal, ProposalError} from "../Types";
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GeneralTableRow from "../../components/GeneralTableRow";
 import GeneralTableHeaderCell from "../../components/GeneralTableHeaderCell";
@@ -129,6 +129,29 @@ type ProposalRowProps = {
   proposal_id: string;
 };
 
+// Error row component to display when proposal data cannot be loaded
+function ProposalErrorRow({
+  proposal_id,
+  columns,
+  errorMessage,
+}: {
+  proposal_id: string;
+  columns: ProposalColumn[];
+  errorMessage: string;
+}) {
+  return (
+    <GeneralTableRow>
+      <TableCell sx={{textAlign: "left", color: "error.main"}}>
+        Proposal #{proposal_id} - Failed to load: {errorMessage}
+      </TableCell>
+      {/* Fill remaining columns with empty cells */}
+      {columns.slice(1).map((column) => (
+        <TableCell key={column} />
+      ))}
+    </GeneralTableRow>
+  );
+}
+
 function ProposalRow({proposal_id, columns}: ProposalRowProps) {
   const {proposal: proposalData} = useGetProposal(proposal_id);
   const navigate = RRD.useNavigate();
@@ -137,11 +160,23 @@ function ProposalRow({proposal_id, columns}: ProposalRowProps) {
     navigate(`/proposal/${proposal_id}`);
   };
 
-  if (!proposalData || "errorMessage" in proposalData) {
+  if (!proposalData) {
     // returns null as we don't need to generate a TableRow if there is no proposal data
     return null;
   }
 
+  // Handle error case
+  if ("errorMessage" in proposalData) {
+    return (
+      <ProposalErrorRow
+        proposal_id={proposal_id}
+        columns={columns}
+        errorMessage={proposalData.errorMessage}
+      />
+    );
+  }
+
+  // Handle success case
   return (
     <GeneralTableRow onClick={onTableRowClick}>
       {columns.map((column) => {
@@ -224,18 +259,39 @@ export function ProposalsTable({
   // we need to iterate from (0...nextProposalId)
   // to make api call for each proposal
   // TODO - future improvement, once more proposals, show 10 proposals on homepage
-  // and the rest on the Ptoposals page.
+  // and the rest on the Proposals page.
   const counter = parseInt(nextProposalId);
-  const proposalRows = Array.from(
+
+  // Get all proposal data, filter out errors from UI but log them to console
+  const proposalRowsWithIds: Array<{data: Proposal; id: string}> = Array.from(
     {length: counter},
-    (_, proposal_id) => useGetProposal(proposal_id.toString()).proposal,
-  ).filter((proposal) => proposal !== undefined) as Proposal[];
+    (_, proposal_id) => {
+      const proposalData = useGetProposal(proposal_id.toString()).proposal;
+      if (!proposalData) {
+        return null;
+      }
+
+      // If it's an error, log it to console and filter it out from UI
+      if ("errorMessage" in proposalData) {
+        console.warn(
+          `Proposal #${proposal_id} failed to load:`,
+          proposalData.errorMessage,
+        );
+        return null;
+      }
+
+      // Only return successful proposals for display
+      return {data: proposalData, id: proposal_id.toString()};
+    },
+  ).filter((item): item is {data: Proposal; id: string} => item !== null);
 
   const [sortColumn, setSortColumn] =
     useState<ProposalColumn>("votingStartDate");
   const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc");
-  const sortedProposalRows = getSortedProposals(
-    proposalRows,
+
+  // Sort the successful proposals
+  const sortedProposalRows = getSortedProposalsWithIds(
+    proposalRowsWithIds,
     sortColumn,
     sortDirection,
   );
@@ -256,13 +312,16 @@ export function ProposalsTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {sortedProposalRows.map((proposal) => (
-          <ProposalRow
-            key={proposal.proposal_id}
-            proposal_id={proposal.proposal_id.toString()}
-            columns={columns}
-          />
-        ))}
+        {sortedProposalRows.map((item: {data: Proposal; id: string}) => {
+          // Only successful proposals are displayed now
+          return (
+            <ProposalRow
+              key={item.data.proposal_id}
+              proposal_id={item.data.proposal_id.toString()}
+              columns={columns}
+            />
+          );
+        })}
       </TableBody>
     </Table>
   );
@@ -277,27 +336,35 @@ export function ProposalsTable({
   );
 }
 
-function getSortedProposals(
-  proposals: Proposal[],
+function getSortedProposalsWithIds(
+  proposalItems: Array<{data: Proposal; id: string}>,
   column: ProposalColumn,
   direction: "desc" | "asc",
-) {
-  const proposalsCopy: Proposal[] = JSON.parse(JSON.stringify(proposals));
-  const orderedProposals = getProposalsOrderedBy(proposalsCopy, column);
+): Array<{data: Proposal; id: string}> {
+  const proposalItemsCopy: Array<{data: Proposal; id: string}> = JSON.parse(
+    JSON.stringify(proposalItems),
+  );
+  const orderedProposals = getProposalsOrderedBy(proposalItemsCopy, column);
 
   return direction === "desc" ? orderedProposals : orderedProposals.reverse();
 }
 
-function getProposalsOrderedBy(proposals: Proposal[], column: ProposalColumn) {
+function getProposalsOrderedBy(
+  proposalItems: Array<{data: Proposal; id: string}>,
+  column: ProposalColumn,
+): Array<{data: Proposal; id: string}> {
   switch (column) {
     case "votingStartDate":
-      return proposals.sort((proposal1, proposal2) => {
+      return proposalItems.sort((item1, item2) => {
+        // Only successful proposals are sorted now
+        const proposal1 = item1.data;
+        const proposal2 = item2.data;
         return (
           Number(proposal2.creation_time_secs) -
           Number(proposal1.creation_time_secs)
         );
       });
     default:
-      return proposals;
+      return proposalItems;
   }
 }
