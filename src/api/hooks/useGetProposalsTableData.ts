@@ -1,4 +1,5 @@
 import {useGetAccountResources} from "./useGetAccountResources";
+import {ResponseError, ResponseErrorType} from "../client";
 
 interface votingForumData {
   next_proposal_id: string;
@@ -7,13 +8,30 @@ interface votingForumData {
   };
 }
 
-type useGetProposalsTableData = {
+type useGetProposalsTableDataSuccess = {
   nextProposalId: string;
   handle: string;
+  error?: never;
 };
 
-export function useGetProposalsTableData(): useGetProposalsTableData | null {
+type useGetProposalsTableDataError = {
+  nextProposalId?: never;
+  handle?: never;
+  error: ResponseError;
+};
+
+type useGetProposalsTableData =
+  | useGetProposalsTableDataSuccess
+  | useGetProposalsTableDataError
+  | null;
+
+export function useGetProposalsTableData(): useGetProposalsTableData {
   const accountResourcesResult = useGetAccountResources("0x1");
+
+  // Handle errors.
+  if (accountResourcesResult.error) {
+    return {error: accountResourcesResult.error};
+  }
 
   if (!accountResourcesResult.data) return null;
 

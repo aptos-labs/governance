@@ -16,7 +16,16 @@ declare global {
   }
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes.
+      cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes.
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus.
+      retry: 1, // Only retry failed requests once.
+    },
+  },
+});
 
 // delay rendering the application until the window.onload event has fired when integrating with the window.aptos API
 window.addEventListener("load", () => {

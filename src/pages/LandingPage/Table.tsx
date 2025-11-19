@@ -10,6 +10,9 @@ import {
   TableHead,
   TableRow,
   Grid,
+  Button,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {assertNever} from "../../utils";
 import {Proposal, ProposalError} from "../Types";
@@ -22,9 +25,10 @@ import StatusIcon from "../../components/StatusIcon";
 import ProposalStatusTooltip from "../../components/ProposalStatusTooltip";
 import InfoIcon from "@mui/icons-material/Info";
 import {renderTimestamp} from "../utils";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 const MAX_TITLE_WIDTH = 400;
+const PROPOSALS_PER_PAGE = 20;
 
 type ProposalCellProps = {
   proposal: Proposal;
@@ -152,20 +156,44 @@ function ProposalErrorRow({
   );
 }
 
-function ProposalRow({proposal_id, columns}: ProposalRowProps) {
-  const {proposal: proposalData} = useGetProposal(proposal_id);
+type ProposalRowWithTrackingProps = {
+  proposal_id: string;
+  columns: ProposalColumn[];
+  onLoadingChange?: (loading: boolean) => void;
+  onError?: (error: any) => void;
+};
+
+function ProposalRowWithTracking({
+  proposal_id,
+  columns,
+  onLoadingChange,
+  onError,
+}: ProposalRowWithTrackingProps) {
+  const {proposal: proposalData, loading, error} = useGetProposal(proposal_id);
   const navigate = RRD.useNavigate();
+
+  // Notify parent of loading state changes.
+  useEffect(() => {
+    onLoadingChange?.(loading);
+  }, [loading, onLoadingChange]);
+
+  // Notify parent of errors.
+  useEffect(() => {
+    if (error) {
+      onError?.(error);
+    }
+  }, [error, onError]);
 
   const onTableRowClick = () => {
     navigate(`/proposal/${proposal_id}`);
   };
 
-  if (!proposalData) {
-    // returns null as we don't need to generate a TableRow if there is no proposal data
+  if (loading || !proposalData) {
+    // Returns null while loading or if there is no proposal data.
     return null;
   }
 
-  // Handle error case
+  // Handle error case.
   if ("errorMessage" in proposalData) {
     return (
       <ProposalErrorRow
@@ -176,7 +204,7 @@ function ProposalRow({proposal_id, columns}: ProposalRowProps) {
     );
   }
 
-  // Handle success case
+  // Handle success case.
   return (
     <GeneralTableRow onClick={onTableRowClick}>
       {columns.map((column) => {
@@ -184,6 +212,12 @@ function ProposalRow({proposal_id, columns}: ProposalRowProps) {
         return <Cell key={column} proposal={proposalData} />;
       })}
     </GeneralTableRow>
+  );
+}
+
+function ProposalRow({proposal_id, columns}: ProposalRowProps) {
+  return (
+    <ProposalRowWithTracking proposal_id={proposal_id} columns={columns} />
   );
 }
 
@@ -250,51 +284,134 @@ type ProposalsTableProps = {
   hideTitle?: boolean;
 };
 
+// Helper component to track proposal loading and errors.
+function ProposalDataTracker({proposal_id}: {proposal_id: number}) {
+  useGetProposal(proposal_id.toString());
+  return null;
+}
+
 export function ProposalsTable({
   nextProposalId,
   columns = DEFAULT_COLUMNS,
   ProposalsTableRef,
   hideTitle,
 }: ProposalsTableProps) {
-  // we need to iterate from (0...nextProposalId)
-  // to make api call for each proposal
-  // TODO - future improvement, once more proposals, show 10 proposals on homepage
-  // and the rest on the Proposals page.
-  const counter = parseInt(nextProposalId);
+  const totalProposals = parseInt(nextProposalId);
 
-  // Get all proposal data, filter out errors from UI but log them to console
-  const proposalRowsWithIds: Array<{data: Proposal; id: string}> = Array.from(
-    {length: counter},
-    (_, proposal_id) => {
-      const proposalData = useGetProposal(proposal_id.toString()).proposal;
-      if (!proposalData) {
-        return null;
-      }
-
-      // If it's an error, log it to console and filter it out from UI
-      if ("errorMessage" in proposalData) {
-        console.warn(
-          `Proposal #${proposal_id} failed to load:`,
-          proposalData.errorMessage,
-        );
-        return null;
-      }
-
-      // Only return successful proposals for display
-      return {data: proposalData, id: proposal_id.toString()};
-    },
-  ).filter((item): item is {data: Proposal; id: string} => item !== null);
+  // Track how many proposals to display with pagination.
+  const [displayCount, setDisplayCount] = useState(PROPOSALS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [loadingProposals, setLoadingProposals] = useState<Set<string>>(
+    new Set(),
+  );
+  const [hasAnyLoaded, setHasAnyLoaded] = useState(false);
 
   const [sortColumn, setSortColumn] =
     useState<ProposalColumn>("votingStartDate");
   const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc");
 
-  // Sort the successful proposals
-  const sortedProposalRows = getSortedProposalsWithIds(
-    proposalRowsWithIds,
-    sortColumn,
-    sortDirection,
+  // Reset displayCount when sort direction changes so we load the correct proposals.
+  useEffect(() => {
+    setDisplayCount(PROPOSALS_PER_PAGE);
+    setRateLimitError(null);
+    setLoadingProposals(new Set());
+    setHasAnyLoaded(false);
+  }, [sortDirection]);
+
+  // Clear loading state after displayCount changes and component re-renders.
+  useEffect(() => {
+    if (isLoadingMore) {
+      const timer = setTimeout(() => {
+        setIsLoadingMore(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [displayCount, isLoadingMore]);
+
+  // Track proposal loading states.
+  const handleLoadingChange = React.useCallback(
+    (proposalId: string, loading: boolean) => {
+      setLoadingProposals((prev) => {
+        const next = new Set(prev);
+        if (loading) {
+          next.add(proposalId);
+        } else {
+          next.delete(proposalId);
+        }
+        return next;
+      });
+
+      if (!loading) {
+        setHasAnyLoaded(true);
+      }
+    },
+    [],
   );
+
+  // Handle errors from proposals.
+  const handleError = React.useCallback((error: any) => {
+    if (error && error.type === "Rate limited") {
+      setRateLimitError(
+        "You've been rate limited by the API. Please try again later.",
+      );
+    }
+  }, []);
+
+  // Calculate how many proposals to load.
+  const proposalsToLoad = Math.min(displayCount, totalProposals);
+
+  // Calculate which proposals to load based on sort direction.
+  // For descending (newest first): load from the end.
+  // For ascending (oldest first): load from the beginning.
+  const startProposalId =
+    sortDirection === "desc"
+      ? Math.max(0, totalProposals - proposalsToLoad)
+      : 0;
+
+  // Generate array of proposal IDs to display.
+  const proposalIds = React.useMemo(
+    () =>
+      Array.from(
+        {length: proposalsToLoad},
+        (_, index) => startProposalId + index,
+      ),
+    [proposalsToLoad, startProposalId],
+  );
+
+  // Sort proposal IDs based on sort settings.
+  // For votingStartDate, we can approximate by ID (higher ID = newer proposal).
+  // For other columns, we'd need to load data, but currently only votingStartDate is sortable.
+  const sortedProposalIds = React.useMemo(() => {
+    const sorted = [...proposalIds];
+    if (sortColumn === "votingStartDate") {
+      sorted.sort((a, b) => {
+        return sortDirection === "desc" ? b - a : a - b;
+      });
+    }
+    return sorted;
+  }, [proposalIds, sortColumn, sortDirection]);
+
+  // Create stable callback refs for each proposal.
+  const loadingCallbacks = React.useMemo(() => {
+    const callbacks: Record<string, (loading: boolean) => void> = {};
+    sortedProposalIds.forEach((id) => {
+      callbacks[id] = (loading: boolean) =>
+        handleLoadingChange(id.toString(), loading);
+    });
+    return callbacks;
+  }, [sortedProposalIds, handleLoadingChange]);
+
+  const isInitialLoad = loadingProposals.size > 0 && !hasAnyLoaded;
+  const hasMoreProposals = displayCount < totalProposals;
+
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    setRateLimitError(null);
+    setDisplayCount((prev) =>
+      Math.min(prev + PROPOSALS_PER_PAGE, totalProposals),
+    );
+  };
 
   const tableComponent = (
     <Table size="small">
@@ -312,13 +429,14 @@ export function ProposalsTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {sortedProposalRows.map((item: {data: Proposal; id: string}) => {
-          // Only successful proposals are displayed now
+        {sortedProposalIds.map((proposalId: number) => {
           return (
-            <ProposalRow
-              key={item.data.proposal_id}
-              proposal_id={item.data.proposal_id.toString()}
+            <ProposalRowWithTracking
+              key={proposalId}
+              proposal_id={proposalId.toString()}
               columns={columns}
+              onLoadingChange={loadingCallbacks[proposalId]}
+              onError={handleError}
             />
           );
         })}
@@ -326,11 +444,59 @@ export function ProposalsTable({
     </Table>
   );
 
+  // Show loading state on initial load.
+  if (isInitialLoad) {
+    return (
+      <Grid ref={ProposalsTableRef}>
+        <Stack spacing={1}>
+          {hideTitle !== true && <Title>Proposals</Title>}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 200,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </Stack>
+      </Grid>
+    );
+  }
+
   return (
     <Grid ref={ProposalsTableRef}>
-      <Stack spacing={1}>
+      <Stack spacing={2}>
         {hideTitle !== true && <Title>Proposals</Title>}
+        {rateLimitError && (
+          <Alert severity="error" onClose={() => setRateLimitError(null)}>
+            {rateLimitError}
+          </Alert>
+        )}
         <Box sx={{width: "auto", overflowX: "auto"}}>{tableComponent}</Box>
+        {rateLimitError && (
+          <Alert severity="error" onClose={() => setRateLimitError(null)}>
+            {rateLimitError}
+          </Alert>
+        )}
+        {hasMoreProposals && (
+          <Box sx={{display: "flex", justifyContent: "center", mt: 2}}>
+            <Button
+              variant="contained"
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+              startIcon={
+                isLoadingMore ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : undefined
+              }
+              sx={{minWidth: 200}}
+            >
+              {isLoadingMore ? "Loading..." : "Load More Proposals"}
+            </Button>
+          </Box>
+        )}
       </Stack>
     </Grid>
   );
