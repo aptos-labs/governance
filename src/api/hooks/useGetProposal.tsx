@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useQuery} from "react-query";
 import {sha3_256} from "js-sha3";
 
 import {getTableItem} from "..";
@@ -114,22 +114,36 @@ const fetchProposal = async (
 export function useGetProposal(proposal_id: string): {
   proposal: Proposal | ProposalError | undefined;
   loading: boolean;
+  error: any;
 } {
   const [state, _setState] = useGlobalState();
-  const [proposal, setProposal] = useState<Proposal | ProposalError>();
-  const [loading, setLoading] = useState(true);
   const proposalTableData = useGetProposalsTableData();
 
-  const handle = proposalTableData?.handle ?? undefined;
-  useEffect(() => {
-    if (handle !== undefined) {
-      setLoading(true);
-      fetchProposal(proposal_id, handle, state).then((data) => {
-        data && setProposal(data);
-        setLoading(false);
-      });
-    }
-  }, [handle, state]);
+  const handle =
+    proposalTableData && "handle" in proposalTableData
+      ? proposalTableData.handle
+      : undefined;
 
-  return {proposal, loading};
+  const {
+    data: proposal,
+    isLoading: loading,
+    error,
+  } = useQuery(
+    ["proposal", proposal_id, handle, state.network_value],
+    () => {
+      if (handle === undefined) {
+        return Promise.resolve(undefined);
+      }
+      return fetchProposal(proposal_id, handle, state);
+    },
+    {
+      enabled: handle !== undefined,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes.
+      cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes.
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus.
+      refetchOnMount: false, // Don't refetch on component mount if data exists.
+    },
+  );
+
+  return {proposal, loading, error};
 }
