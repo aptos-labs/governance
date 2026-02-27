@@ -138,9 +138,10 @@ export const WalletButton = (): JSX.Element => {
         <Tooltip title="Use the Wallet extension to create an account">
           <span>
             <WalletButtonWrapper
+              onClick={connect}
               text="create an account"
               icon={<AddCardIcon />}
-              sx={{cursor: "default"}}
+              sx={{cursor: "pointer"}}
             >
               {!isWalletLatestVersion && <OldWalletVersionWarning />}
             </WalletButtonWrapper>
