@@ -22,7 +22,7 @@
     "date-fns": "^2.29.1",
     "graphql": "^16.6.0",
     "js-sha3": "^0.8.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "moment": "^2.29.1",
     "prettier": "^2.6.2",
     "react": "18.2.0",
@@ -40,12 +40,12 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^5.0.4",
-    "eslint": "^8.57.1",
+    "eslint": "8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^27.0.1",
-    "vite": "^7.1.7",
+    "vite": "^7.3.3",
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^3.2.4"
   },
@@ -74,5 +74,19 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.33.2",
+  "pnpm": {
+    "overrides": {
+      "axios": "1.16.0",
+      "minimatch@^9": "^9.0.7",
+      "flatted": "^3.4.2",
+      "picomatch@^2": "^2.3.2",
+      "picomatch@^4": "^4.0.4",
+      "yaml@^1": "^1.10.3",
+      "postcss": "^8.5.10",
+      "brace-expansion@^2": "^2.0.3",
+      "brace-expansion@^1": "^1.1.13",
+      "@sentry/browser": "^7.119.1"
+    }
+  }
 }
