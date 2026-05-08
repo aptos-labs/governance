@@ -15,7 +15,7 @@ import {
   Alert,
 } from "@mui/material";
 import {assertNever} from "../../utils";
-import {Proposal, ProposalError} from "../Types";
+import {Proposal} from "../Types";
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GeneralTableRow from "../../components/GeneralTableRow";
 import GeneralTableHeaderCell from "../../components/GeneralTableHeaderCell";
@@ -160,7 +160,7 @@ type ProposalRowWithTrackingProps = {
   proposal_id: string;
   columns: ProposalColumn[];
   onLoadingChange?: (loading: boolean) => void;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
 };
 
 function ProposalRowWithTracking({
@@ -215,7 +215,7 @@ function ProposalRowWithTracking({
   );
 }
 
-function ProposalRow({proposal_id, columns}: ProposalRowProps) {
+function _ProposalRow({proposal_id, columns}: ProposalRowProps) {
   return (
     <ProposalRowWithTracking proposal_id={proposal_id} columns={columns} />
   );
@@ -284,12 +284,6 @@ type ProposalsTableProps = {
   hideTitle?: boolean;
 };
 
-// Helper component to track proposal loading and errors.
-function ProposalDataTracker({proposal_id}: {proposal_id: number}) {
-  useGetProposal(proposal_id.toString());
-  return null;
-}
-
 export function ProposalsTable({
   nextProposalId,
   columns = DEFAULT_COLUMNS,
@@ -313,10 +307,12 @@ export function ProposalsTable({
 
   // Reset displayCount when sort direction changes so we load the correct proposals.
   useEffect(() => {
-    setDisplayCount(PROPOSALS_PER_PAGE);
-    setRateLimitError(null);
-    setLoadingProposals(new Set());
-    setHasAnyLoaded(false);
+    queueMicrotask(() => {
+      setDisplayCount(PROPOSALS_PER_PAGE);
+      setRateLimitError(null);
+      setLoadingProposals(new Set());
+      setHasAnyLoaded(false);
+    });
   }, [sortDirection]);
 
   // Clear loading state after displayCount changes and component re-renders.
@@ -350,8 +346,9 @@ export function ProposalsTable({
   );
 
   // Handle errors from proposals.
-  const handleError = React.useCallback((error: any) => {
-    if (error && error.type === "Rate limited") {
+  const handleError = React.useCallback((error: unknown) => {
+    const err = error as {type?: string};
+    if (err?.type === "Rate limited") {
       setRateLimitError(
         "You've been rate limited by the API. Please try again later.",
       );
@@ -502,7 +499,7 @@ export function ProposalsTable({
   );
 }
 
-function getSortedProposalsWithIds(
+function _getSortedProposalsWithIds(
   proposalItems: Array<{data: Proposal; id: string}>,
   column: ProposalColumn,
   direction: "desc" | "asc",

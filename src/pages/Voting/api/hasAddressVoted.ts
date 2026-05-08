@@ -26,11 +26,16 @@ const fetchTableItem = async (
   try {
     await getTableItem(
       {tableHandle: handle, data: tableItemRequest},
-      state.network_value,
+      state.network_name,
     );
-  } catch (e: any) {
+  } catch (e: unknown) {
     // fetchTableItem returns a 404 error if the item does not exist, which means address has not voted, therefore return `false`
-    if (e.type == "Not found") {
+    if (
+      e &&
+      typeof e === "object" &&
+      "type" in e &&
+      (e as {type: string}).type == "Not found"
+    ) {
       console.log("hasAddressVoted", e);
       return false;
     } else {
@@ -48,7 +53,7 @@ export default async function hasAddressVoted(
 ) {
   const votingRecordResource = await getAccountResource(
     {address: "0x1", resourceType: "0x1::aptos_governance::VotingRecords"},
-    state.network_value,
+    state.network_name,
   );
   const votingResource = votingRecordResource.data as VotingRecords;
   const {handle} = votingResource.votes;

@@ -1,11 +1,10 @@
-import {AptosClient, Types} from "aptos";
-import {useEffect, useState} from "react";
+import {InputGenerateTransactionPayloadData} from "@aptos-labs/ts-sdk";
+import {useState} from "react";
+import {useWallet as useAdapterWallet} from "@aptos-labs/wallet-adapter-react";
 
 import {useWalletContext} from "../../context/wallet/context";
-import {signAndSubmitTransaction} from "../wallet";
 import {useGlobalState} from "../../context/globalState";
-import {networks} from "../../constants";
-import {getConfig} from "../common";
+import {getAptosClient} from "../common";
 
 export type TransactionResponse =
   | TransactionResponseOnSubmission
@@ -30,20 +29,14 @@ const useSubmitTransaction = () => {
     useState<boolean>(false);
   const [state, _] = useGlobalState();
   const {walletNetwork} = useWalletContext();
-  const client = new AptosClient(
-    state.network_value,
-    getConfig(state.network_value),
-  );
+  const {signAndSubmitTransaction} = useAdapterWallet();
+  const client = getAptosClient(state.network_name);
 
-  useEffect(() => {
-    if (transactionResponse !== null) {
-      setTransactionInProcess(false);
-    }
-  }, [transactionResponse]);
-
-  async function submitTransaction(payload: Types.TransactionPayload) {
-    // if wallet network in dApp networks && dApp network !== wallet network => return error
-    if (walletNetwork in networks && walletNetwork !== state.network_name) {
+  async function submitTransaction(
+    payload: InputGenerateTransactionPayloadData,
+  ) {
+    const selectedNetwork = state.network_name.toLowerCase();
+    if (walletNetwork && walletNetwork !== selectedNetwork) {
       setTransactionResponse({
         transactionSubmitted: false,
         message:
@@ -53,9 +46,24 @@ const useSubmitTransaction = () => {
     }
 
     setTransactionInProcess(true);
-    await signAndSubmitTransaction(payload, client).then(
-      setTransactionResponse,
-    );
+    try {
+      const response = await signAndSubmitTransaction({data: payload});
+      await client.waitForTransaction({transactionHash: response.hash});
+      setTransactionResponse({
+        transactionSubmitted: true,
+        transactionHash: response.hash,
+      });
+      setTransactionInProcess(false);
+    } catch (error: unknown) {
+      setTransactionResponse({
+        transactionSubmitted: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : String(error ?? "Unknown Error"),
+      });
+      setTransactionInProcess(false);
+    }
   }
 
   function clearTransactionResponse() {

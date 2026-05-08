@@ -65,7 +65,7 @@ export default function VoteButtons({
     if (transactionResponse?.transactionSubmitted) {
       onTransactionSuccess();
     }
-  }, [transactionResponse]);
+  }, [transactionResponse, onTransactionSuccess]);
 
   return (
     <Box>

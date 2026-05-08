@@ -4,17 +4,20 @@
   "private": true,
   "dependencies": {
     "@apollo/client": "^3.6.9",
-    "@emotion/react": "latest",
-    "@emotion/styled": "latest",
-    "@mui/icons-material": "^5.4.2",
-    "@mui/material": "latest",
+    "@aptos-labs/ts-sdk": "^6.0.0",
+    "@aptos-labs/wallet-adapter-mui-design": "^5.5.3",
+    "@aptos-labs/wallet-adapter-react": "^8.3.0",
+    "@emotion/react": "11.10.0",
+    "@emotion/styled": "11.10.0",
+    "@mui/icons-material": "5.18.0",
+    "@mui/material": "5.18.0",
+    "@mui/system": "5.18.0",
     "@mui/x-date-pickers": "^5.0.0-beta.3",
     "@sentry/react": "^6.19.7",
     "@sentry/tracing": "^6.19.7",
     "@types/lodash": "^4.14.179",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "aptos": "^1.3.14",
+    "@types/react": "18.0.17",
+    "@types/react-dom": "18.0.6",
     "aptos-node-checker-client": "0.0.2",
     "date-fns": "^2.29.1",
     "graphql": "^16.6.0",
@@ -22,24 +25,42 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "prettier": "^2.6.2",
-    "react": "latest",
-    "react-dom": "latest",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-ga4": "^1.4.1",
     "react-intersection-observer": "^9.4.0",
     "react-number-format": "^4.9.1",
     "react-query": "^3.38.0",
     "react-router-dom": "^6.2.1",
-    "react-scripts": "latest",
     "recharts": "^2.1.9",
     "ts-results": "^3.3.0",
-    "typescript": "latest"
+    "typescript": "4.7.4"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "jsdom": "^27.0.1",
+    "vite": "^7.1.7",
+    "vite-plugin-svgr": "^4.5.0",
+    "vitest": "^3.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "fmt": "prettier --config .prettierrc.json 'src/**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "fmt": "prettier --config .prettierrc.json --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\" \".github/workflows/*.{yml,yaml}\"",
+    "fmt:check": "prettier --config .prettierrc.json --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\" \".github/workflows/*.{yml,yaml}\""
   },
   "browserslist": {
     "production": [
@@ -53,5 +74,5 @@
       "last 1 safari version"
     ]
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "pnpm@10.17.1"
 }

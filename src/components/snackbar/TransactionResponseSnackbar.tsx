@@ -30,6 +30,12 @@ export default function TransactionResponseSnackbar({
   onCloseSnackbar,
   refreshOnSuccess,
 }: TransactionResponseSnackbarProps) {
+  const hashForFetch =
+    transactionResponse?.transactionSubmitted === true
+      ? transactionResponse.transactionHash
+      : "";
+  const {data, status} = useGetTransaction(hashForFetch);
+
   if (transactionResponse == null) {
     return null;
   }
@@ -44,7 +50,6 @@ export default function TransactionResponseSnackbar({
   }
 
   const transactionHash = transactionResponse.transactionHash;
-  const {data, status} = useGetTransaction(transactionHash);
 
   if (status !== "success") {
     return null;

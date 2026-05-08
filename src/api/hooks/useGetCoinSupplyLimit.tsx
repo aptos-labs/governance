@@ -1,6 +1,6 @@
 import {useGlobalState} from "../../context/globalState";
 import {getTableItem} from "..";
-import {Types} from "aptos";
+import {TableItemRequest} from "@aptos-labs/ts-sdk";
 import {useEffect, useState} from "react";
 import {useGetAccountResource} from "./useGetAccountResource";
 import {GlobalState} from "../../context/globalState/context";
@@ -43,17 +43,17 @@ async function fetchTotalSupply(
     key_type: "address",
     value_type: "u128",
     key: aggregatorData.key,
-  } as Types.TableItemRequest;
+  } as TableItemRequest;
 
   const supplyLimit = await getTableItem(
     {
       tableHandle: aggregatorData.handle,
       data: tableItemRequest,
     },
-    state.network_value,
+    state.network_name,
   );
 
-  return parseInt(supplyLimit);
+  return parseInt(String(supplyLimit));
 }
 
 export function useGetCoinSupplyLimit(): number | null {

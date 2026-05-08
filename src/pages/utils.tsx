@@ -1,7 +1,13 @@
 import moment from "moment";
 import Box from "@mui/material/Box";
 import {Typography, useTheme} from "@mui/material";
-import {AptosClient, AptosAccount, HexString, MaybeHexString} from "aptos";
+import {
+  Account,
+  Aptos,
+  Hex,
+  InputGenerateTransactionPayloadData,
+} from "@aptos-labs/ts-sdk";
+import {MaybeHexString} from "../context/wallet/context";
 import {Proposal, ProposalStatus, ProposalVotingState} from "./Types";
 import {
   primaryColor,
@@ -11,7 +17,7 @@ import {
 } from "./constants";
 import {assertNever} from "../utils";
 
-export function renderDebug(data: any) {
+export function RenderDebug({data}: {data: unknown}) {
   const theme = useTheme();
   return (
     <Box
@@ -25,7 +31,7 @@ export function renderDebug(data: any) {
             overflowWrap: "break-word",
           }}
         >
-          {JSON.stringify(data || null, null, 2)}
+          {JSON.stringify(data ?? null, null, 2)}
         </pre>
       </div>
     </Box>
@@ -86,21 +92,23 @@ export function getProposalTimeRemaining(
 }
 
 export function getHexString(str: string): string {
-  return HexString.fromUint8Array(new TextEncoder().encode(str)).hex();
+  return Hex.fromHexInput(new TextEncoder().encode(str)).toString();
 }
 
 export async function doTransaction(
-  account: AptosAccount,
-  client: AptosClient,
-  payload: any,
+  account: Account,
+  client: Aptos,
+  payload: InputGenerateTransactionPayloadData,
 ) {
-  const txnRequest = await client.generateTransaction(
-    account.address(),
-    payload,
-  );
-  const signedTxn = await client.signTransaction(account, txnRequest);
-  const transactionRes = await client.submitTransaction(signedTxn);
-  await client.waitForTransaction(transactionRes.hash);
+  const transaction = await client.transaction.build.simple({
+    sender: account.accountAddress,
+    data: payload,
+  });
+  const transactionRes = await client.signAndSubmitTransaction({
+    signer: account,
+    transaction,
+  });
+  await client.waitForTransaction({transactionHash: transactionRes.hash});
   return transactionRes;
 }
 
@@ -118,10 +126,8 @@ function truncateMiddle(
     throw `${frontLen} and ${backLen} should be an Integer`;
   }
 
-  var strLen = str.length;
+  const strLen = str.length;
   // Setting default values
-  frontLen = frontLen;
-  backLen = backLen;
   truncateStr = truncateStr || "…";
   if (
     (frontLen === 0 && backLen === 0) ||
@@ -155,17 +161,17 @@ export function isHex(text: string) {
 // replicate on-chain logic is_voting_closed()
 // https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-framework/sources/voting.move
 export function isVotingClosed(proposal: Proposal): boolean {
-  let expirationSecs = ensureMillisecondTimestamp(proposal.expiration_secs);
+  const expirationSecs = ensureMillisecondTimestamp(proposal.expiration_secs);
   return canBeResolvedEarly(proposal) || expirationSecs - Date.now() < 0;
 }
 
 function canBeResolvedEarly(proposal: Proposal): boolean {
   if (proposal.early_resolution_vote_threshold) {
-    let earlyResolutionThreshold = parseInt(
-      proposal.early_resolution_vote_threshold.vec[0],
+    const earlyResolutionThreshold = parseInt(
+      String(proposal.early_resolution_vote_threshold.vec[0]),
     );
-    let yesVotes = parseInt(proposal.yes_votes);
-    let noVotes = parseInt(proposal.no_votes);
+    const yesVotes = parseInt(proposal.yes_votes);
+    const noVotes = parseInt(proposal.no_votes);
     if (
       yesVotes >= earlyResolutionThreshold ||
       noVotes >= earlyResolutionThreshold
@@ -180,10 +186,14 @@ function canBeResolvedEarly(proposal: Proposal): boolean {
 // https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-framework/sources/voting.move
 function getProposalState(proposal: Proposal): ProposalVotingState {
   if (isVotingClosed(proposal)) {
-    let yesVotes = parseInt(proposal.yes_votes);
-    let noVotes = parseInt(proposal.no_votes);
-    let minVoteThreshold = proposal.min_vote_threshold;
-    let enoughVotes = votesAboveThreshold(yesVotes, noVotes, minVoteThreshold);
+    const yesVotes = parseInt(proposal.yes_votes);
+    const noVotes = parseInt(proposal.no_votes);
+    const minVoteThreshold = proposal.min_vote_threshold;
+    const enoughVotes = votesAboveThreshold(
+      yesVotes,
+      noVotes,
+      minVoteThreshold,
+    );
 
     if (yesVotes <= noVotes && enoughVotes) {
       return ProposalVotingState.REJECTED; // more "no" votes

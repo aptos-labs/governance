@@ -1,13 +1,16 @@
 import {Button, Grid, Typography, TextField} from "@mui/material";
 import {useState} from "react";
-import {AptosClient, AptosAccount, FaucetClient, HexString, Types} from "aptos";
+import {
+  Account,
+  AccountAddress,
+  Aptos,
+  Ed25519PrivateKey,
+  InputGenerateTransactionPayloadData,
+} from "@aptos-labs/ts-sdk";
 import {getHexString} from "../utils";
 import {useGlobalState} from "../../context/globalState";
 import {doTransaction} from "../utils";
-import {getConfig} from "../../api/common";
-
-/* REQUIRED: Please replace the following with your own local network urls */
-const FAUCET_URL = "http://127.0.0.1:80";
+import {getAptosClient} from "../../api/common";
 
 /* OPTIONAL: Please replace the following with your own test data */
 const TEST_EXECUTION_HASH =
@@ -18,15 +21,14 @@ const TEST_METADATA_HASH =
   "706b43a2a6f116099a079b2bf469a7add66190d26e324b275f174566d7e603ca";
 
 async function createProposal(
-  account: AptosAccount,
-  client: AptosClient,
+  account: Account,
+  client: Aptos,
 ): Promise<string> {
-  const payload: Types.TransactionPayload = {
-    type: "entry_function_payload",
+  const payload: InputGenerateTransactionPayloadData = {
     function: "0x1::aptos_governance::create_proposal",
-    type_arguments: [],
-    arguments: [
-      account.address().hex(),
+    typeArguments: [],
+    functionArguments: [
+      account.accountAddress.toString(),
       TEST_EXECUTION_HASH,
       getHexString(TEST_METADATA_LOCATION),
       getHexString(TEST_METADATA_HASH),
@@ -54,21 +56,17 @@ export function Create() {
   };
 
   const onCreateProposalClick = async () => {
-    const client = new AptosClient(
-      state.network_value,
-      getConfig(state.network_value),
-    );
-    const faucetClient = new FaucetClient(
-      state.network_value,
-      FAUCET_URL,
-      undefined,
-    );
+    const client = getAptosClient(state.network_name);
 
-    const address = HexString.ensure(accountAddr);
-    const secretKey = HexString.ensure(accountSecretKey);
-
-    const account = new AptosAccount(secretKey.toUint8Array(), address);
-    await faucetClient.fundAccount(account.address(), 5000);
+    const account = Account.fromPrivateKey({
+      privateKey: new Ed25519PrivateKey(accountSecretKey),
+      address: AccountAddress.from(accountAddr),
+      legacy: true,
+    });
+    await client.fundAccount({
+      accountAddress: account.accountAddress,
+      amount: 5000,
+    });
 
     const proposalHash = await createProposal(account, client);
     setProposalHash(proposalHash);

@@ -23,12 +23,12 @@ const fetchTableItem = async (
 
   const proposalData = await getTableItem(
     {tableHandle: handle, data: votingTableItemRequest},
-    state.network_value,
+    state.network_name,
   );
 
   if (!proposalData) return null;
 
-  return proposalData;
+  return proposalData as Proposal;
 };
 
 const getRawGithubUrl = (url: string): string => {
@@ -114,7 +114,7 @@ const fetchProposal = async (
 export function useGetProposal(proposal_id: string): {
   proposal: Proposal | ProposalError | undefined;
   loading: boolean;
-  error: any;
+  error: unknown;
 } {
   const [state, _setState] = useGlobalState();
   const proposalTableData = useGetProposalsTableData();
@@ -129,7 +129,7 @@ export function useGetProposal(proposal_id: string): {
     isLoading: loading,
     error,
   } = useQuery(
-    ["proposal", proposal_id, handle, state.network_value],
+    ["proposal", proposal_id, handle, state.network_name],
     () => {
       if (handle === undefined) {
         return Promise.resolve(undefined);

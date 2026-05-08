@@ -140,7 +140,7 @@ export function VotesTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {votes.map((vote: any, i: number) => {
+        {votes.map((vote: Vote, i: number) => {
           return <ProposalRow key={i} vote={vote} columns={columns} />;
         })}
       </TableBody>

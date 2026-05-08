@@ -1,6 +1,6 @@
 import {useEffect} from "react";
 import {FormControl, Select, SelectChangeEvent} from "@mui/material";
-import {NetworkName, networks} from "../../constants";
+import {NETWORK_NAMES} from "../../constants";
 import {useGlobalState} from "../../context/globalState";
 import {useTheme} from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
@@ -15,13 +15,12 @@ export default function NetworkSelect() {
 
   function maybeSetNetwork(networkNameString: string | null) {
     if (!networkNameString || state.network_name === networkNameString) return;
-    if (!(networkNameString in networks)) return;
-    const network_name = networkNameString as NetworkName;
-    const network_value = networks[network_name];
-    if (network_value) {
-      setSearchParams({network: network_name});
-      dispatch({network_name, network_value});
-    }
+    const key = NETWORK_NAMES.find(
+      (k) => k.toLowerCase() === networkNameString.toLowerCase(),
+    );
+    if (!key) return;
+    setSearchParams({network: key});
+    dispatch({network_name: key});
   }
 
   const handleChange = (event: SelectChangeEvent<string>) => {
@@ -97,7 +96,7 @@ export default function NetworkSelect() {
           <MenuItem disabled value="">
             Select Network
           </MenuItem>
-          {Object.keys(networks).map((network_name: string) => (
+          {NETWORK_NAMES.map((network_name) => (
             <MenuItem key={network_name} value={network_name}>
               {network_name}
             </MenuItem>

@@ -10,7 +10,7 @@ export type Proposal = {
   min_vote_threshold: number;
   expiration_secs: string;
   early_resolution_vote_threshold: {
-    vec: Array<any>;
+    vec: Array<unknown>;
   };
   yes_votes: string;
   no_votes: string;

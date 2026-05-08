@@ -1,5 +1,5 @@
 import {Chip, Grid, Stack, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import {gql, useQuery as useGraphqlQuery} from "@apollo/client";
 
 import {useGlobalState} from "../../../context/globalState";
@@ -7,7 +7,7 @@ import VoteButtons from "../../Proposal/card/VoteButtons";
 import {AddressToVoteMap, Proposal} from "../../Types";
 import {isVotingClosed} from "../../utils";
 import hasAddressVoted from "../api/hasAddressVoted";
-import {MaybeHexString} from "aptos";
+import {MaybeHexString} from "../../../context/wallet/context";
 
 type AddressesListProps = {
   proposal: Proposal;
@@ -99,44 +99,46 @@ export default function AddressesList({
     },
   );
 
-  const fetchHasAccountVoted = async (
-    poolAddress: string,
-  ): Promise<AddressToVoteMap> => {
-    const result = await hasAddressVoted(
-      poolAddress,
-      proposal.proposal_id,
-      state,
-    );
-    const addressToVotemap = {
-      poolAddress,
-      voted: result,
-    };
-    return addressToVotemap;
-  };
+  const fetchHasAccountVoted = useCallback(
+    async (poolAddress: string): Promise<AddressToVoteMap> => {
+      const result = await hasAddressVoted(
+        poolAddress,
+        proposal.proposal_id,
+        state,
+      );
+      const addressToVotemap = {
+        poolAddress,
+        voted: result,
+      };
+      return addressToVotemap;
+    },
+    [proposal.proposal_id, state],
+  );
 
-  const fetchAccounts = async (
-    poolAddresses: CurrentStakingPoolVoter,
-  ): Promise<void> => {
-    const map = poolAddresses.current_staking_pool_voter.map(
-      async (poolAddress) => {
-        const result = await fetchHasAccountVoted(
-          poolAddress.staking_pool_address,
-        );
-        return result;
-      },
-    );
+  const fetchAccounts = useCallback(
+    async (poolAddresses: CurrentStakingPoolVoter): Promise<void> => {
+      setMapLoading(true);
+      const map = poolAddresses.current_staking_pool_voter.map(
+        async (poolAddress) => {
+          const result = await fetchHasAccountVoted(
+            poolAddress.staking_pool_address,
+          );
+          return result;
+        },
+      );
 
-    const addressesVotesMap = await Promise.all(map);
-    setMapLoading(false);
-    setAddressVoteMap(addressesVotesMap);
-  };
+      const addressesVotesMap = await Promise.all(map);
+      setMapLoading(false);
+      setAddressVoteMap(addressesVotesMap);
+    },
+    [fetchHasAccountVoted],
+  );
 
   useEffect(() => {
     if (data !== undefined) {
-      setMapLoading(true);
-      fetchAccounts(data);
+      queueMicrotask(() => fetchAccounts(data));
     }
-  }, [data, accountAddress]);
+  }, [data, accountAddress, fetchAccounts]);
 
   if (loading || mapLoading) {
     return (
@@ -162,9 +164,9 @@ export default function AddressesList({
     return (
       <Stack sx={{width: "100%"}} mt={4}>
         <Typography variant="h4" mb={4}>
-          We couldn't find any staking pool addresses, make sure you are
-          connected with your voter account. If you're delegated staking user,
-          use https://govscan.live/aptos/proposals to vote instead.
+          We couldn&apos;t find any staking pool addresses, make sure you are
+          connected with your voter account. If you&apos;re delegated staking
+          user, use https://govscan.live/aptos/proposals to vote instead.
         </Typography>
       </Stack>
     );

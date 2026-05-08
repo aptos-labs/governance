@@ -8,6 +8,7 @@ import Footer from "./Footer";
 import {GlobalStateProvider} from "../../context/globalState";
 import {ProvideColorMode} from "../../context";
 import {WalletProvider} from "../../context/wallet";
+import {WalletAdapterProvider} from "../../context/wallet/adapterProvider";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,24 +21,26 @@ export default function GovernanceLayout({children}: LayoutProps) {
 
       <GlobalStateProvider>
         <GraphqlClientProvider>
-          <WalletProvider>
-            <Box
-              component="main"
-              sx={{
-                minHeight: "100vh",
-                backgroundColor: "transparent",
-                flexGrow: 1,
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Header />
-              <Container maxWidth="xl" sx={{flexGrow: 4, paddingTop: "2rem"}}>
-                {children}
-              </Container>
-              <Footer />
-            </Box>
-          </WalletProvider>
+          <WalletAdapterProvider>
+            <WalletProvider>
+              <Box
+                component="main"
+                sx={{
+                  minHeight: "100vh",
+                  backgroundColor: "transparent",
+                  flexGrow: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Header />
+                <Container maxWidth="xl" sx={{flexGrow: 4, paddingTop: "2rem"}}>
+                  {children}
+                </Container>
+                <Footer />
+              </Box>
+            </WalletProvider>
+          </WalletAdapterProvider>
         </GraphqlClientProvider>
       </GlobalStateProvider>
     </ProvideColorMode>

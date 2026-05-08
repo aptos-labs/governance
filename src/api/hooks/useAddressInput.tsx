@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState} from "react";
 import AddressTextField from "../../components/AddressTextField";
 import {isValidAccountAddress} from "../../pages/utils";
 
@@ -6,12 +6,9 @@ const useAddressInput = () => {
   const [addr, setAddr] = useState<string>("");
   const [addrIsValid, setAddrIsValid] = useState<boolean>(true);
 
-  useEffect(() => {
-    setAddrIsValid(true);
-  }, [addr]);
-
   const onAddrChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAddr(event.target.value);
+    setAddrIsValid(true);
   };
 
   function clearAddr() {

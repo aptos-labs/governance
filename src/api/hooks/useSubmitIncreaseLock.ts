@@ -1,4 +1,4 @@
-import {Types} from "aptos";
+import {InputGenerateTransactionPayloadData} from "@aptos-labs/ts-sdk";
 import useSubmitTransaction from "./useSubmitTransaction";
 
 const useSubmitIncreaseLock = () => {
@@ -10,11 +10,14 @@ const useSubmitIncreaseLock = () => {
   } = useSubmitTransaction();
 
   async function submitIncreaseLockup() {
-    const payload: Types.TransactionPayload = {
-      type: "entry_function_payload",
+    const payload: InputGenerateTransactionPayloadData = {
       function: "0x1::stake::increase_lockup",
-      type_arguments: [],
-      arguments: [],
+      typeArguments: [],
+      functionArguments: [],
+      abi: {
+        typeParameters: [],
+        parameters: [],
+      },
     };
 
     await submitTransaction(payload);

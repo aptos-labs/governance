@@ -6,9 +6,9 @@ import Link from "@mui/material/Link";
 import * as RRD from "react-router-dom";
 import {useColorMode} from "../../context";
 import {useTheme} from "@mui/material";
-import {ReactComponent as LogoIcon} from "../../assets/svg/aptos_logo_icon.svg";
-import {ReactComponent as IconLight} from "../../assets/svg/icon_light.svg";
-import {ReactComponent as IconDark} from "../../assets/svg/icon_dark.svg";
+import LogoIcon from "../../assets/svg/aptos_logo_icon.svg?react";
+import IconLight from "../../assets/svg/icon_light.svg?react";
+import IconDark from "../../assets/svg/icon_dark.svg?react";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import {grey} from "../../themes/colors/aptosColorPalette";
@@ -33,7 +33,11 @@ export default function Header() {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const {ref, inView, entry} = useInView({
+  const {
+    ref,
+    inView,
+    entry: _entry,
+  } = useInView({
     rootMargin: "-40px 0px 0px 0px",
     threshold: 0,
   });

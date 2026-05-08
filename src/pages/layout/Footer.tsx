@@ -2,14 +2,14 @@ import {Box, Container, Link, Typography, useTheme} from "@mui/material";
 
 import Grid from "@mui/material/Unstable_Grid2";
 
-import {ReactComponent as GithubLogo} from "../../assets/svg/github.svg";
-import {ReactComponent as DiscordLogo} from "../../assets/svg/discord.svg";
-import {ReactComponent as TwitterLogo} from "../../assets/svg/twitter.svg";
-import {ReactComponent as MediumLogo} from "../../assets/svg/medium.svg";
+import GithubLogo from "../../assets/svg/github.svg?react";
+import DiscordLogo from "../../assets/svg/discord.svg?react";
+import TwitterLogo from "../../assets/svg/twitter.svg?react";
+import MediumLogo from "../../assets/svg/medium.svg?react";
 import {grey} from "../../themes/colors/aptosColorPalette";
 import SvgIcon from "@mui/material/SvgIcon";
 
-import {ReactComponent as LogoIcon} from "../../assets/svg/aptos-foundation_logo_mark.svg";
+import LogoIcon from "../../assets/svg/aptos-foundation_logo_mark.svg?react";
 
 const socialLinks = [
   {

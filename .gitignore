@@ -10,6 +10,7 @@
 
 # production
 /build
+/dist
 
 # IDEs and editors
 /.idea
@@ -26,3 +27,4 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*

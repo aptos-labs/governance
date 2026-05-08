@@ -1,71 +1,46 @@
-import {MaybeHexString} from "aptos";
-import {useState, useEffect} from "react";
-import {
-  connectToWallet,
-  getAccountAddress,
-  getAptosWallet,
-  getWalletNetwork,
-  isUpdatedVersion,
-  isAccountCreated,
-  isWalletConnected,
-  disconnectWallet,
-} from "../../api/wallet";
-import {WalletNetworks} from "./context";
+import {useMemo} from "react";
+import {useWallet as useAdapterWallet} from "@aptos-labs/wallet-adapter-react";
+import {MaybeHexString, WalletNetworks} from "./context";
+
+function normalizeNetworkName(networkName?: string | null): WalletNetworks {
+  const normalized = networkName?.toLowerCase();
+  if (normalized === "mainnet") return "mainnet";
+  if (normalized === "testnet") return "testnet";
+  if (normalized === "devnet") return "devnet";
+  if (normalized === "local") return "local";
+  return "mainnet";
+}
 
 export function useWallet() {
-  const [isInstalled, setAptosWallet] = useState<boolean>(false);
-  const [isAccountSet, setIsAccountSet] = useState<boolean>(false);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [accountAddress, setAccountAddress] = useState<MaybeHexString | null>(
-    null,
-  );
-  const [walletNetwork, setWalletNetwork] = useState<WalletNetworks>("Devnet");
+  const {
+    connected,
+    account,
+    network,
+    wallet,
+    wallets,
+    connect: connectAdapterWallet,
+    disconnect: disconnectAdapterWallet,
+  } = useAdapterWallet();
 
-  useEffect(() => {
-    setAptosWallet(getAptosWallet());
-  }, []);
+  const isInstalled = useMemo(() => wallets.length > 0, [wallets.length]);
 
-  useEffect(() => {
-    isAccountCreated().then(setIsAccountSet);
-    isWalletConnected().then(setIsConnected);
-    getWalletNetwork().then(setWalletNetwork);
-  }, [isInstalled, accountAddress, isAccountSet]);
-
-  useEffect(() => {
-    // add this check to support older wallet versions
-    if (isUpdatedVersion()) {
-      window.aptos?.on?.("accountChanged", (account: any) => {
-        if (account.address) {
-          setAccountAddress(account.address);
-        } else {
-          setAccountAddress(null);
-          // this means an account was created but wallet is not connected yet
-          setIsAccountSet(true);
-        }
-      });
-      window.aptos?.on?.("networkChanged", (newNetwork: WalletNetworks) => {
-        setWalletNetwork(newNetwork);
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isConnected) {
-      getAccountAddress().then(setAccountAddress);
-    }
-  }, [isConnected]);
+  const isConnected = connected;
+  const accountAddress: MaybeHexString | null =
+    account?.address.toString() ?? null;
+  const walletNetwork: WalletNetworks = normalizeNetworkName(network?.name);
 
   const connect = async () => {
-    connectToWallet().then(setIsConnected);
+    const walletName = wallet?.name ?? wallets[0]?.name;
+    if (!walletName) return;
+    await connectAdapterWallet(walletName);
   };
 
   const disconnect = async () => {
-    disconnectWallet().then(() => setIsConnected(false));
+    await disconnectAdapterWallet();
   };
 
   return {
     isInstalled,
-    isAccountSet,
     isConnected,
     accountAddress,
     walletNetwork,

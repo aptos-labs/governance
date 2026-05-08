@@ -67,11 +67,8 @@ function TimeRemainingComponent({
   proposal: Proposal;
   isOnMobile: boolean;
 }) {
-  if (isVotingClosed(proposal)) {
-    return null;
-  }
   const [remainingTime, setRemainingTime] = useState<ProposalTimeRemaining>(
-    getProposalTimeRemaining(proposal.expiration_secs),
+    () => getProposalTimeRemaining(proposal.expiration_secs),
   );
 
   useEffect(() => {
@@ -82,7 +79,11 @@ function TimeRemainingComponent({
       clearInterval(intervalID);
     }
     return () => clearInterval(intervalID);
-  }, [remainingTime.minutes]);
+  }, [remainingTime.minutes, proposal.expiration_secs]);
+
+  if (isVotingClosed(proposal)) {
+    return null;
+  }
 
   return (
     <Stack

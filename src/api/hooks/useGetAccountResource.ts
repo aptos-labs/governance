@@ -1,35 +1,31 @@
-import {MaybeHexString, Types} from "aptos";
+import {AccountAddressInput, MoveResource} from "@aptos-labs/ts-sdk";
 import {useQuery, UseQueryResult} from "react-query";
-import {getAccountResources} from "..";
+import {getAccountResource} from "..";
 import {ResponseError} from "../client";
 import {useGlobalState} from "../../context/globalState";
 
 type useGetAccountResourceResponse = {
-  accountResource: Types.MoveResource | undefined;
+  accountResource: MoveResource | undefined;
   isLoading: boolean;
   isError: boolean;
   refetch: () => Promise<UseQueryResult>;
 };
 
 export function useGetAccountResource(
-  address: MaybeHexString,
+  address: AccountAddressInput,
   resource: string,
 ): useGetAccountResourceResponse {
   const [state, _setState] = useGlobalState();
-  const accountResourcesResult = useQuery<
-    Array<Types.MoveResource>,
-    ResponseError
-  >(
-    ["accountResource", {address}, state.network_value],
-    () => getAccountResources({address}, state.network_value),
+  const accountResourcesResult = useQuery<MoveResource, ResponseError>(
+    ["accountResource", {address, resource}, state.network_name],
+    () =>
+      getAccountResource({address, resourceType: resource}, state.network_name),
     {refetchOnWindowFocus: false},
   );
 
   const {isLoading, isError, refetch} = accountResourcesResult;
 
-  const accountResource = accountResourcesResult.data?.find(
-    (r) => r.type === resource,
-  );
+  const accountResource = accountResourcesResult.data;
 
   return {accountResource, isLoading, isError, refetch};
 }

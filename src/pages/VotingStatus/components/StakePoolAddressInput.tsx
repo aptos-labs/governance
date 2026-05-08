@@ -98,7 +98,7 @@ export default function StakePoolAddressInput({
 
   const validateAddresses = async (stakePoolAddressesArray: string[]) => {
     resetErrors();
-    let addresses: string[] = [];
+    const addresses: string[] = [];
     stakePoolAddressesArray = Array.from(new Set(stakePoolAddressesArray));
     for (let count = 0; count < stakePoolAddressesArray.length; count++) {
       const stakePoolAddress = stakePoolAddressesArray[count];

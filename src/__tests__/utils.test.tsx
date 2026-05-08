@@ -1,4 +1,4 @@
-import {expect, it} from "@jest/globals";
+import {expect, it} from "vitest";
 import {octaToAptString, octaToAptnFormatter} from "../utils";
 
 it("converts octa to apt correctly", () => {

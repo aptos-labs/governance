@@ -25,7 +25,7 @@ export default function Voting() {
     if (!accountAddress || !isConnected) {
       navigate(`/proposal/${proposalId}`);
     }
-  }, [accountAddress, isConnected]);
+  }, [accountAddress, isConnected, navigate, proposalId]);
 
   if (!proposal || "errorMessage" in proposal) {
     return (

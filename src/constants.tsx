@@ -1,33 +1,13 @@
 /**
  * Network
+ * RPC/GraphQL URLs are resolved by SDK and useGraphqlClient from network name; no URL map needed.
  */
-export const devnetUrl =
-  process.env.APTOS_DEVNET_URL || "https://fullnode.devnet.aptoslabs.com/";
+const NETWORK_NAMES = ["mainnet", "testnet", "devnet", "local"] as const;
+export type NetworkName = (typeof NETWORK_NAMES)[number];
+export const defaultNetworkName: NetworkName = "mainnet";
 
-export const networks = {
-  mainnet: "https://fullnode.mainnet.aptoslabs.com/",
-  testnet: "https://testnet.aptoslabs.com",
-  Devnet: devnetUrl,
-  local: "http://localhost:8080",
-};
-
-export type NetworkName = keyof typeof networks;
-
-// Remove trailing slashes
-for (const key of Object.keys(networks)) {
-  const networkName = key as NetworkName;
-  if (networks[networkName].endsWith("/")) {
-    networks[networkName] = networks[networkName].slice(0, -1);
-  }
-}
-
-export const defaultNetworkName: NetworkName = "mainnet" as const;
-
-if (!(defaultNetworkName in networks)) {
-  throw `defaultNetworkName '${defaultNetworkName}' not in Networks!`;
-}
-
-export const defaultNetwork = networks[defaultNetworkName];
+/** Ordered list of supported network ids for dropdowns and validation. */
+export {NETWORK_NAMES};
 
 /**
  * Feature

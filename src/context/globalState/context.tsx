@@ -1,28 +1,25 @@
 import {createContext, Dispatch, useContext} from "react";
-import {NetworkName, networks, defaultNetworkName} from "../../constants";
+import {NetworkName, NETWORK_NAMES, defaultNetworkName} from "../../constants";
 
 const selected_network = safeGetSelectedNetworkName();
 
 function safeGetSelectedNetworkName(): NetworkName {
-  let selected_network = localStorage.getItem("selected_network");
-  if (selected_network) {
-    selected_network = selected_network.toLowerCase();
-    if (selected_network in networks) {
-      return selected_network as NetworkName;
-    }
+  const stored = localStorage.getItem("selected_network");
+  if (stored) {
+    const lower = stored.toLowerCase();
+    const key = NETWORK_NAMES.find((k) => k.toLowerCase() === lower);
+    if (key) return key;
   }
   return defaultNetworkName;
 }
 
 export type GlobalState = {
+  /** Current network id (lowercase), e.g. mainnet, testnet, devnet, local. */
   network_name: NetworkName;
-  /** Despite the name this is a node API URL. */
-  network_value: string;
 };
 
 export const defaultGlobalState: GlobalState = {
   network_name: selected_network,
-  network_value: networks[selected_network],
 };
 
 export const GlobalStateContext = createContext(defaultGlobalState);

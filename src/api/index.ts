@@ -1,101 +1,115 @@
-import {AptosClient, MaybeHexString, Types} from "aptos";
+import {
+  AccountAddressInput,
+  AccountData,
+  MoveModuleBytecode,
+  MoveResource,
+  MoveStructId,
+  TableItemRequest,
+  TransactionResponse,
+} from "@aptos-labs/ts-sdk";
 import {isHex} from "../pages/utils";
 import {withResponseError} from "./client";
-import {getConfig} from "./common";
+import {getAptosClient} from "./common";
 
 export function getTransaction(
   requestParameters: {txnHashOrVersion: string | number},
-  nodeUrl: string,
-): Promise<Types.Transaction> {
+  networkName: string,
+): Promise<TransactionResponse> {
   const {txnHashOrVersion} = requestParameters;
   if (isHex(txnHashOrVersion as string)) {
-    return getTransactionByHash(txnHashOrVersion as string, nodeUrl);
+    return getTransactionByHash(txnHashOrVersion as string, networkName);
   } else {
-    return getTransactionByVersion(txnHashOrVersion as number, nodeUrl);
+    return getTransactionByVersion(txnHashOrVersion as number, networkName);
   }
 }
 
 function getTransactionByVersion(
   version: number,
-  nodeUrl: string,
-): Promise<Types.Transaction> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
-  return withResponseError(client.getTransactionByVersion(BigInt(version)));
+  networkName: string,
+): Promise<TransactionResponse> {
+  const client = getAptosClient(networkName);
+  return withResponseError(
+    client.getTransactionByVersion({ledgerVersion: BigInt(version)}),
+  );
 }
 
 function getTransactionByHash(
   hash: string,
-  nodeUrl: string,
-): Promise<Types.Transaction> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
-  return withResponseError(client.getTransactionByHash(hash));
+  networkName: string,
+): Promise<TransactionResponse> {
+  const client = getAptosClient(networkName);
+  return withResponseError(
+    client.getTransactionByHash({transactionHash: hash}),
+  );
 }
 
 export function getAccount(
   requestParameters: {address: string},
-  nodeUrl: string,
-): Promise<Types.AccountData> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
+  networkName: string,
+): Promise<AccountData> {
+  const client = getAptosClient(networkName);
   const {address} = requestParameters;
-  return withResponseError(client.getAccount(address));
+  return withResponseError(client.getAccountInfo({accountAddress: address}));
 }
 
 export function getAccountResources(
-  requestParameters: {address: MaybeHexString; ledgerVersion?: number},
-  nodeUrl: string,
-): Promise<Types.MoveResource[]> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
+  requestParameters: {address: AccountAddressInput; ledgerVersion?: number},
+  networkName: string,
+): Promise<MoveResource[]> {
+  const client = getAptosClient(networkName);
   const {address, ledgerVersion} = requestParameters;
-  let ledgerVersionBig;
-  if (ledgerVersion) {
-    ledgerVersionBig = BigInt(ledgerVersion);
-  }
   return withResponseError(
-    client.getAccountResources(address, {ledgerVersion: ledgerVersionBig}),
+    client.getAccountResources({
+      accountAddress: address,
+      options: {
+        ledgerVersion: ledgerVersion ? BigInt(ledgerVersion) : undefined,
+      },
+    }),
   );
 }
 
 export function getAccountResource(
   requestParameters: {
-    address: string;
+    address: AccountAddressInput;
     resourceType: string;
     ledgerVersion?: number;
   },
-  nodeUrl: string,
-): Promise<Types.MoveResource> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
+  networkName: string,
+): Promise<MoveResource> {
+  const client = getAptosClient(networkName);
   const {address, resourceType, ledgerVersion} = requestParameters;
-  let ledgerVersionBig;
-  if (ledgerVersion) {
-    ledgerVersionBig = BigInt(ledgerVersion);
-  }
   return withResponseError(
-    client.getAccountResource(address, resourceType, {
-      ledgerVersion: ledgerVersionBig,
+    client.getAccountResource({
+      accountAddress: address,
+      resourceType: resourceType as MoveStructId,
+      options: {
+        ledgerVersion: ledgerVersion ? BigInt(ledgerVersion) : undefined,
+      },
     }),
-  );
+  ) as Promise<MoveResource>;
 }
 
 export function getAccountModules(
   requestParameters: {address: string; ledgerVersion?: number},
-  nodeUrl: string,
-): Promise<Types.MoveModuleBytecode[]> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
+  networkName: string,
+): Promise<MoveModuleBytecode[]> {
+  const client = getAptosClient(networkName);
   const {address, ledgerVersion} = requestParameters;
-  let ledgerVersionBig;
-  if (ledgerVersion) {
-    ledgerVersionBig = BigInt(ledgerVersion);
-  }
   return withResponseError(
-    client.getAccountModules(address, {ledgerVersion: ledgerVersionBig}),
+    client.getAccountModules({
+      accountAddress: address,
+      options: {
+        ledgerVersion: ledgerVersion ? BigInt(ledgerVersion) : undefined,
+      },
+    }),
   );
 }
 
 export function getTableItem(
-  requestParameters: {tableHandle: string; data: Types.TableItemRequest},
-  nodeUrl: string,
-): Promise<any> {
-  const client = new AptosClient(nodeUrl, getConfig(nodeUrl));
+  requestParameters: {tableHandle: string; data: TableItemRequest},
+  networkName: string,
+): Promise<unknown> {
+  const client = getAptosClient(networkName);
   const {tableHandle, data} = requestParameters;
-  return withResponseError(client.getTableItem(tableHandle, data));
+  return withResponseError(client.getTableItem({handle: tableHandle, data}));
 }

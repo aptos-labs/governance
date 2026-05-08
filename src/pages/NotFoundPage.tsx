@@ -34,7 +34,7 @@ export default function NotFoundPage() {
               Maybe the page you are looking for has been removed, or you typed
               in the wrong URL.
               <br />
-              You don't have to go home, but you can't stay here!
+              You don&apos;t have to go home, but you can&apos;t stay here!
             </Typography>
           </CardContent>
         </Card>

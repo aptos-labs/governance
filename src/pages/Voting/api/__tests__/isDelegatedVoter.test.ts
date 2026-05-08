@@ -1,4 +1,5 @@
 import {GlobalState} from "../../../../context/globalState/context";
+import * as sdk from "../../../../api";
 import isDelegatedVoter from "../isDelegatedVoter";
 
 const stakePoolAddress =
@@ -6,7 +7,6 @@ const stakePoolAddress =
 
 const mockState: GlobalState = {
   network_name: "local",
-  network_value: "mock-url",
 };
 
 const addresses = [
@@ -27,9 +27,8 @@ const addresses = [
 test.each(addresses)(
   "current wallet address %i matches delegated voter address %i",
   async (walletAddress, delegatedVoterAddress) => {
-    const sdk = require("../../../../api");
-
-    jest.spyOn(sdk, "getAccountResource").mockReturnValue({
+    vi.spyOn(sdk, "getAccountResource").mockResolvedValue({
+      type: "0x1::stake::StakePool",
       data: {
         delegated_voter: delegatedVoterAddress,
       },

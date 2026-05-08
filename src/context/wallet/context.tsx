@@ -1,10 +1,10 @@
-import {MaybeHexString} from "aptos";
 import {createContext, useContext} from "react";
+
+export type MaybeHexString = string;
 
 export interface walletContext {
   isInstalled: boolean;
   isConnected: boolean;
-  isAccountSet: boolean;
   walletNetwork: WalletNetworks;
   accountAddress: MaybeHexString | null;
   connect: () => Promise<void>;
@@ -22,4 +22,4 @@ export const useWalletContext = () => {
   return context;
 };
 
-export type WalletNetworks = "Devnet" | "Testnet";
+export type WalletNetworks = "mainnet" | "testnet" | "devnet" | "local";
