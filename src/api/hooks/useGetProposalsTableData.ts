@@ -1,5 +1,5 @@
-import {useGetAccountResources} from "./useGetAccountResources";
 import {ResponseError} from "../client";
+import {useGetAccountResources} from "./useGetAccountResources";
 
 interface votingForumData {
   next_proposal_id: string;

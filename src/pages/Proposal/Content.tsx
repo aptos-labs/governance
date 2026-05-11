@@ -1,4 +1,4 @@
-import {Stack, Divider} from "@mui/material";
+import {Divider, Stack} from "@mui/material";
 import {Proposal} from "../Types";
 import ContentRow from "./ContentRow";
 

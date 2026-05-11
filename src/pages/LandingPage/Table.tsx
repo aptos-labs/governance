@@ -1,31 +1,31 @@
-import * as React from "react";
-import * as RRD from "react-router-dom";
-import Title from "../../components/Title";
+import InfoIcon from "@mui/icons-material/Info";
 import {
-  Stack,
+  Alert,
   Box,
+  Button,
+  CircularProgress,
+  Grid,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Grid,
-  Button,
-  CircularProgress,
-  Alert,
 } from "@mui/material";
+import * as React from "react";
+import {useEffect, useState} from "react";
+import * as RRD from "react-router-dom";
+import {useGetProposal} from "../../api/hooks/useGetProposal";
+import GeneralTableHeaderCell from "../../components/GeneralTableHeaderCell";
+import GeneralTableRow from "../../components/GeneralTableRow";
+import HashButton, {HashType} from "../../components/HashButton";
+import ProposalStatusTooltip from "../../components/ProposalStatusTooltip";
+import StatusIcon from "../../components/StatusIcon";
+import Title from "../../components/Title";
+import {teal} from "../../themes/colors/aptosColorPalette";
 import {assertNever} from "../../utils";
 import {Proposal} from "../Types";
-import {useGetProposal} from "../../api/hooks/useGetProposal";
-import GeneralTableRow from "../../components/GeneralTableRow";
-import GeneralTableHeaderCell from "../../components/GeneralTableHeaderCell";
-import HashButton, {HashType} from "../../components/HashButton";
-import {teal} from "../../themes/colors/aptosColorPalette";
-import StatusIcon from "../../components/StatusIcon";
-import ProposalStatusTooltip from "../../components/ProposalStatusTooltip";
-import InfoIcon from "@mui/icons-material/Info";
 import {renderTimestamp} from "../utils";
-import {useState, useEffect} from "react";
 
 const MAX_TITLE_WIDTH = 400;
 const PROPOSALS_PER_PAGE = 20;

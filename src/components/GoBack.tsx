@@ -1,7 +1,7 @@
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import Button from "@mui/material/Button";
 import * as React from "react";
 import {useNavigate} from "react-router-dom";
-import Button from "@mui/material/Button";
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 function BackButton(handleClick: () => void) {
   return (

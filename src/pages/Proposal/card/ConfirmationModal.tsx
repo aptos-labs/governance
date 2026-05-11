@@ -1,28 +1,27 @@
-import {
-  Typography,
-  Modal,
-  Box,
-  Divider,
-  Button,
-  Stack,
-  IconButton,
-} from "@mui/material";
-import {grey} from "../../../themes/colors/aptosColorPalette";
-import {useTheme} from "@mui/material/styles";
-import {Theme} from "@mui/material/styles";
-import {
-  voteFor,
-  voteAgainst,
-  primaryColor,
-  negativeColor,
-  primaryColorOnHover,
-  negativeColorOnHover,
-  primaryColorWithOpacity,
-  negativeColorWithOpacity,
-} from "../../constants";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Modal,
+  Stack,
+  Typography,
+} from "@mui/material";
+import {Theme, useTheme} from "@mui/material/styles";
+import {grey} from "../../../themes/colors/aptosColorPalette";
+import {
+  negativeColor,
+  negativeColorOnHover,
+  negativeColorWithOpacity,
+  primaryColor,
+  primaryColorOnHover,
+  primaryColorWithOpacity,
+  voteAgainst,
+  voteFor,
+} from "../../constants";
 
 interface CardBoxProps {
   theme: Theme;

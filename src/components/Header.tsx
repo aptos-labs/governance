@@ -1,4 +1,4 @@
-import {Grid, Typography, Hidden} from "@mui/material";
+import {Grid, Hidden, Typography} from "@mui/material";
 import DividerHero from "./DividerHero";
 import HeadingSub from "./HeadingSub";
 import {WalletButton} from "./WalletButton";

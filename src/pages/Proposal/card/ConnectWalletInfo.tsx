@@ -1,7 +1,7 @@
-import {Stack, Typography, Link, Button} from "@mui/material";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import {useWalletContext} from "../../../context/wallet/context";
+import {Button, Link, Stack, Typography} from "@mui/material";
 import {installWalletUrl} from "../../../constants";
+import {useWalletContext} from "../../../context/wallet/context";
 
 export default function ConnectWalletInfo() {
   const {isInstalled, isConnected, connect} = useWalletContext();

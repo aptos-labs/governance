@@ -13,8 +13,8 @@
     "@mui/material": "5.18.0",
     "@mui/system": "5.18.0",
     "@mui/x-date-pickers": "^5.0.0-beta.3",
-    "@sentry/react": "^6.19.7",
-    "@sentry/tracing": "^6.19.7",
+    "@sentry/react": "^7.120.4",
+    "@sentry/tracing": "^7.120.4",
     "@types/lodash": "^4.14.179",
     "@types/react": "18.0.17",
     "@types/react-dom": "18.0.6",
@@ -24,7 +24,6 @@
     "js-sha3": "^0.8.0",
     "lodash": "^4.18.1",
     "moment": "^2.29.1",
-    "prettier": "^2.6.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-ga4": "^1.4.1",
@@ -37,13 +36,8 @@
     "typescript": "4.7.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@biomejs/biome": "^2.4.15",
     "@vitejs/plugin-react": "^5.0.4",
-    "eslint": "8.57.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^27.0.1",
     "vite": "^7.3.3",
     "vite-plugin-svgr": "^4.5.0",
@@ -54,13 +48,13 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
-    "lint:fix": "pnpm lint --fix",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "fmt": "prettier --config .prettierrc.json --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\" \".github/workflows/*.{yml,yaml}\"",
-    "fmt:check": "prettier --config .prettierrc.json --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\" \".github/workflows/*.{yml,yaml}\""
+    "fmt": "biome format --write src/",
+    "fmt:check": "biome format --check src/"
   },
   "browserslist": {
     "production": [
@@ -85,8 +79,7 @@
       "yaml@^1": "^1.10.3",
       "postcss": "^8.5.10",
       "brace-expansion@^2": "^2.0.3",
-      "brace-expansion@^1": "^1.1.13",
-      "@sentry/browser": "^7.119.1"
+      "brace-expansion@^1": "^1.1.13"
     }
   }
 }

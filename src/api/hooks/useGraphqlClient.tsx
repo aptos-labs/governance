@@ -1,15 +1,13 @@
-import React from "react";
 import {
   ApolloClient,
-  InMemoryCache,
   ApolloProvider,
   HttpLink,
+  InMemoryCache,
   NormalizedCacheObject,
 } from "@apollo/client";
-import {useMemo} from "react";
-
-import {useGlobalState} from "../../context/globalState";
+import React, {useMemo} from "react";
 import {NetworkName} from "../../constants";
+import {useGlobalState} from "../../context/globalState";
 
 function getGraphqlURI(networkName: NetworkName): string | undefined {
   const envMainnet = import.meta.env.VITE_INDEXER_GRAPHQL_MAINNET;

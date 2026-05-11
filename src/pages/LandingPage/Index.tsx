@@ -1,10 +1,10 @@
+import {Alert, AlertTitle, Box, Grid, Stack} from "@mui/material";
 import {useRef} from "react";
-import {Box, Grid, Stack, Alert, AlertTitle} from "@mui/material";
+import {ResponseErrorType} from "../../api/client";
+import {useGetProposalsTableData} from "../../api/hooks/useGetProposalsTableData";
 import {HomePageHeader} from "../../components/Header";
 import {Header as ProposalsHeader} from "./Header";
 import {ProposalsTable} from "./Table";
-import {useGetProposalsTableData} from "../../api/hooks/useGetProposalsTableData";
-import {ResponseErrorType} from "../../api/client";
 
 export default function LandingPage() {
   const proposalTableData = useGetProposalsTableData();

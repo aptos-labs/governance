@@ -1,4 +1,4 @@
-import {Snackbar, Alert} from "@mui/material";
+import {Alert, Snackbar} from "@mui/material";
 import {CloseAction} from "./TransactionResponseSnackbar";
 
 type ErrorSnackbarProps = {

@@ -1,6 +1,6 @@
+import {Theme} from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import {SxProps} from "@mui/system";
-import {Theme} from "@mui/material/styles";
 
 interface TitleProps {
   children?: React.ReactNode;

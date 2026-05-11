@@ -4,12 +4,12 @@ import {useParams} from "react-router-dom";
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GoBack from "../../components/GoBack";
 import {IndividualPageHeader} from "../../components/Header";
+import {defaultProposalErrorMessage} from "../../constants";
 import {EmptyProposal} from "../Proposal/EmptyProposal";
 import {ProposalHeader} from "../Proposal/Header";
 import {AddressToVoteMap} from "../Types";
 import AddressesList from "./components/AddressesList";
 import StakePoolAddressInput from "./components/StakePoolAddressInput";
-import {defaultProposalErrorMessage} from "../../constants";
 
 export type ProposalPageURLParams = {
   id: string;

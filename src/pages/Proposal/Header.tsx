@@ -1,20 +1,21 @@
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import PersonIcon from "@mui/icons-material/Person";
+import {Box, Divider, Grid, Stack, Typography} from "@mui/material";
+import {useTheme} from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import {useEffect, useState} from "react";
-import {Grid, Typography, Stack, Divider, Box} from "@mui/material";
+import HashButton, {HashType} from "../../components/HashButton";
+import ProposalStatusTooltip from "../../components/ProposalStatusTooltip";
+import StatusIcon from "../../components/StatusIcon";
+import {primaryColor} from "../constants";
+import {Proposal} from "../Types";
 import {
   getProposalTimeRemaining,
+  getStatusColor,
+  isVotingClosed,
   ProposalTimeRemaining,
   renderTimestamp,
 } from "../utils";
-import {Proposal} from "../Types";
-import {primaryColor} from "../constants";
-import PersonIcon from "@mui/icons-material/Person";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import {useTheme} from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import {getStatusColor, isVotingClosed} from "../utils";
-import HashButton, {HashType} from "../../components/HashButton";
-import StatusIcon from "../../components/StatusIcon";
-import ProposalStatusTooltip from "../../components/ProposalStatusTooltip";
 
 const SECONDARY_TEXT_COLOR = "#A3A3A3";
 

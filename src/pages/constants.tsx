@@ -1,4 +1,4 @@
-import {teal, grey} from "../themes/colors/aptosColorPalette";
+import {grey, teal} from "../themes/colors/aptosColorPalette";
 
 // TODO: add red and yellow with opacity to aptosColorPalette
 

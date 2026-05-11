@@ -1,18 +1,18 @@
-import Toolbar from "@mui/material/Toolbar";
-import MuiAppBar from "@mui/material/AppBar";
-import Container from "@mui/material/Container";
-import NetworkSelect from "./NetworkSelect";
-import Link from "@mui/material/Link";
-import * as RRD from "react-router-dom";
-import {useColorMode} from "../../context";
 import {useTheme} from "@mui/material";
-import LogoIcon from "../../assets/svg/aptos_logo_icon.svg?react";
-import IconLight from "../../assets/svg/icon_light.svg?react";
-import IconDark from "../../assets/svg/icon_dark.svg?react";
-import Button from "@mui/material/Button";
+import MuiAppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import {grey} from "../../themes/colors/aptosColorPalette";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Link from "@mui/material/Link";
+import Toolbar from "@mui/material/Toolbar";
 import {useInView} from "react-intersection-observer";
+import * as RRD from "react-router-dom";
+import LogoIcon from "../../assets/svg/aptos_logo_icon.svg?react";
+import IconDark from "../../assets/svg/icon_dark.svg?react";
+import IconLight from "../../assets/svg/icon_light.svg?react";
+import {useColorMode} from "../../context";
+import {grey} from "../../themes/colors/aptosColorPalette";
+import NetworkSelect from "./NetworkSelect";
 
 export default function Header() {
   const scrollTop = () => {

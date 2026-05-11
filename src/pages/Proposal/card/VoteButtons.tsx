@@ -1,17 +1,17 @@
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import {Box, Chip, Stack} from "@mui/material";
 import {useEffect, useState} from "react";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import useSubmitVote from "../../../api/hooks/useSubmitVote";
+import LoadingModal from "../../../components/LoadingModal";
+import TransactionResponseSnackbar from "../../../components/snackbar/TransactionResponseSnackbar";
 import {
-  primaryColor,
   negativeColor,
-  voteFor,
+  primaryColor,
   voteAgainst,
+  voteFor,
 } from "../../constants";
 import ConfirmationModal from "./ConfirmationModal";
-import TransactionResponseSnackbar from "../../../components/snackbar/TransactionResponseSnackbar";
-import LoadingModal from "../../../components/LoadingModal";
-import useSubmitVote from "../../../api/hooks/useSubmitVote";
 
 type VoteButtonsProps = {
   proposalId: string;

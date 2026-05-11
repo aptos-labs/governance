@@ -1,20 +1,19 @@
 import {Box, Grid, Stack} from "@mui/material";
-import {useParams} from "react-router-dom";
 import Pagination from "@mui/material/Pagination";
-
-import {ProposalHeader} from "./Header";
-import {ProposalCard} from "./card/Index";
-import {ProposalContent} from "./Content";
-import {useGetProposal} from "../../api/hooks/useGetProposal";
-import {EmptyProposal} from "./EmptyProposal";
-import {IndividualPageHeader} from "../../components/Header";
-import GoBack from "../../components/GoBack";
-import {VotesTable} from "./VotesTable";
 import {useState} from "react";
-import {useGetProposalVotesCount} from "./api/useGetProposalVotesCount";
-import {useGetProposalVotes} from "./api/useGetProposalVotes";
+import {useParams} from "react-router-dom";
+import {useGetProposal} from "../../api/hooks/useGetProposal";
+import GoBack from "../../components/GoBack";
+import {IndividualPageHeader} from "../../components/Header";
 import LoadingModal from "../../components/LoadingModal";
 import {defaultProposalErrorMessage} from "../../constants";
+import {useGetProposalVotes} from "./api/useGetProposalVotes";
+import {useGetProposalVotesCount} from "./api/useGetProposalVotesCount";
+import {ProposalContent} from "./Content";
+import {ProposalCard} from "./card/Index";
+import {EmptyProposal} from "./EmptyProposal";
+import {ProposalHeader} from "./Header";
+import {VotesTable} from "./VotesTable";
 
 export type ProposalPageURLParams = {
   id: string;

@@ -1,5 +1,5 @@
-import {useMemo} from "react";
 import {useWallet as useAdapterWallet} from "@aptos-labs/wallet-adapter-react";
+import {useMemo} from "react";
 import {MaybeHexString, WalletNetworks} from "./context";
 
 function normalizeNetworkName(networkName?: string | null): WalletNetworks {

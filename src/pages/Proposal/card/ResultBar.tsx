@@ -1,13 +1,13 @@
-import {Stack, Box, Typography, Tooltip} from "@mui/material";
-import {
-  primaryColor,
-  negativeColor,
-  voteFor,
-  voteAgainst,
-} from "../../constants";
+import {Box, Stack, Tooltip, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {grey} from "../../../themes/colors/aptosColorPalette";
-import {octaToAptString, octaToAptnFormatter} from "../../../utils";
+import {octaToAptnFormatter, octaToAptString} from "../../../utils";
+import {
+  negativeColor,
+  primaryColor,
+  voteAgainst,
+  voteFor,
+} from "../../constants";
 
 const RADIUS = "0.7em";
 

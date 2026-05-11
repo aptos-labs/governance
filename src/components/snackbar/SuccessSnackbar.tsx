@@ -1,7 +1,7 @@
-import {Snackbar, Alert, Box, Button, Typography, Link} from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import {CloseAction} from "./TransactionResponseSnackbar";
+import {Alert, Box, Button, Link, Snackbar, Typography} from "@mui/material";
 import {explorerUrl} from "../../constants";
+import {CloseAction} from "./TransactionResponseSnackbar";
 
 function RefreshAction() {
   // TODO: update the vote results section without refreshing the page

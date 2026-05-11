@@ -1,7 +1,7 @@
-import {useMemo, useState} from "react";
 import {createTheme, responsiveFontSizes} from "@mui/material";
-import getDesignTokens from "../../themes/theme";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import {useMemo, useState} from "react";
+import getDesignTokens from "../../themes/theme";
 
 export interface ColorModeContext {
   toggleColorMode: () => void;

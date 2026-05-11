@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {BrowserRouter} from "react-router-dom";
-import {QueryClient, QueryClientProvider} from "react-query";
-import GovernanceRoutes from "./GovernanceRoutes";
 import ReactGA from "react-ga4";
+import {QueryClient, QueryClientProvider} from "react-query";
+import {BrowserRouter} from "react-router-dom";
+import GovernanceRoutes from "./GovernanceRoutes";
 
 ReactGA.initialize(import.meta.env.VITE_GA_TRACKING_ID || "G-NW8SFC1RKX");
 

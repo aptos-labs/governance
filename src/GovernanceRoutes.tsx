@@ -1,11 +1,11 @@
 import {Route, Routes} from "react-router-dom";
-import LandingPage from "./pages/LandingPage/Index";
-import NotFoundPage from "./pages/NotFoundPage";
-import Layout from "./pages/layout";
-import {ProposalPage} from "./pages/Proposal/Index";
 import {CreateProposalPage} from "./pages/CreateProposal/Index";
-import Voting from "./pages/Voting";
+import LandingPage from "./pages/LandingPage/Index";
+import Layout from "./pages/layout";
+import NotFoundPage from "./pages/NotFoundPage";
+import {ProposalPage} from "./pages/Proposal/Index";
 import ProposalsPage from "./pages/Proposals/Index";
+import Voting from "./pages/Voting";
 import VotingStatus from "./pages/VotingStatus/";
 
 export default function GovernanceRoutes() {
