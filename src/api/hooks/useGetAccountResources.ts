@@ -1,5 +1,5 @@
 import {MoveResource} from "@aptos-labs/ts-sdk";
-import {useQuery, UseQueryResult} from "react-query";
+import {UseQueryResult, useQuery} from "react-query";
 import {getAccountResources} from "../../api";
 import {ResponseError} from "../../api/client";
 import {useGlobalState} from "../../context/globalState";

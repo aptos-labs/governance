@@ -1,7 +1,7 @@
-import {Snackbar, Alert, Typography, Link} from "@mui/material";
-import {CloseAction} from "./TransactionResponseSnackbar";
 import {TransactionResponse} from "@aptos-labs/ts-sdk";
+import {Alert, Link, Snackbar, Typography} from "@mui/material";
 import {explorerUrl} from "../../constants";
+import {CloseAction} from "./TransactionResponseSnackbar";
 
 type FailureSnackbarProps = {
   onCloseSnackbar: () => void;

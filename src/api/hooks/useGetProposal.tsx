@@ -1,13 +1,12 @@
-import {useQuery} from "react-query";
 import {sha3_256} from "js-sha3";
-
-import {getTableItem} from "..";
-import {Proposal, ProposalMetadata, ProposalError} from "../../pages/Types";
-import {hex_to_string} from "../../utils";
-import {getProposalStatus, isVotingClosed} from "../../pages/utils";
-import {useGetProposalsTableData} from "../hooks/useGetProposalsTableData";
-import {GlobalState, useGlobalState} from "../../context/globalState/context";
+import {useQuery} from "react-query";
 import {defaultProposalErrorMessage} from "../../constants";
+import {GlobalState, useGlobalState} from "../../context/globalState/context";
+import {Proposal, ProposalError, ProposalMetadata} from "../../pages/Types";
+import {getProposalStatus, isVotingClosed} from "../../pages/utils";
+import {hex_to_string} from "../../utils";
+import {getTableItem} from "..";
+import {useGetProposalsTableData} from "../hooks/useGetProposalsTableData";
 
 const fetchTableItem = async (
   proposal_id: string,

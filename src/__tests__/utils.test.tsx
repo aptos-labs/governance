@@ -1,5 +1,5 @@
 import {expect, it} from "vitest";
-import {octaToAptString, octaToAptnFormatter} from "../utils";
+import {octaToAptnFormatter, octaToAptString} from "../utils";
 
 it("converts octa to apt correctly", () => {
   expect(octaToAptString("0")).toEqual("0");

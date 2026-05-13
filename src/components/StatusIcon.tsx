@@ -1,9 +1,9 @@
-import {ProposalStatus} from "../pages/Types";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
-import PendingOutlinedIcon from "@mui/icons-material/PendingOutlined";
 import DataUsageOutlinedIcon from "@mui/icons-material/DataUsageOutlined";
+import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import NotInterestedOutlinedIcon from "@mui/icons-material/NotInterestedOutlined";
+import PendingOutlinedIcon from "@mui/icons-material/PendingOutlined";
+import {ProposalStatus} from "../pages/Types";
 import {getStatusColor} from "../pages/utils";
 import {assertNever} from "../utils";
 

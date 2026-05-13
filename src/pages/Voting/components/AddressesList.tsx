@@ -1,13 +1,13 @@
-import {Chip, Grid, Stack, Typography} from "@mui/material";
-import {useEffect, useState, useCallback} from "react";
 import {gql, useQuery as useGraphqlQuery} from "@apollo/client";
+import {Chip, Grid, Stack, Typography} from "@mui/material";
+import {useCallback, useEffect, useState} from "react";
 
 import {useGlobalState} from "../../../context/globalState";
+import {MaybeHexString} from "../../../context/wallet/context";
 import VoteButtons from "../../Proposal/card/VoteButtons";
 import {AddressToVoteMap, Proposal} from "../../Types";
 import {isVotingClosed} from "../../utils";
 import hasAddressVoted from "../api/hasAddressVoted";
-import {MaybeHexString} from "../../../context/wallet/context";
 
 type AddressesListProps = {
   proposal: Proposal;

@@ -1,19 +1,19 @@
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import {
   Box,
   Button,
-  Typography,
-  Popover,
   IconButton,
-  useTheme,
   Link,
+  Popover,
+  Typography,
+  useTheme,
 } from "@mui/material";
-import {grey} from "../themes/colors/aptosColorPalette";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import {truncateAddress} from "../pages/utils";
-import {assertNever} from "../utils";
-import {explorerUrl} from "../constants";
 import {useState} from "react";
+import {explorerUrl} from "../constants";
+import {truncateAddress} from "../pages/utils";
+import {grey} from "../themes/colors/aptosColorPalette";
+import {assertNever} from "../utils";
 
 export enum HashType {
   ACCOUNT = "account",

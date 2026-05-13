@@ -1,7 +1,7 @@
 import {ReactNode, useReducer} from "react";
 import {
-  defaultGlobalState,
   DispatchStateContext,
+  defaultGlobalState,
   GlobalState,
   GlobalStateContext,
 } from "./context";

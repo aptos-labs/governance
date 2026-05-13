@@ -1,4 +1,4 @@
-import {Typography, Stack, Link, Box} from "@mui/material";
+import {Box, Link, Stack, Typography} from "@mui/material";
 
 type ContentRowProps = {
   title: React.ReactNode;

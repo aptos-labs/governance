@@ -1,5 +1,5 @@
 import {createContext, Dispatch, useContext} from "react";
-import {NetworkName, NETWORK_NAMES, defaultNetworkName} from "../../constants";
+import {defaultNetworkName, NETWORK_NAMES, NetworkName} from "../../constants";
 
 const selected_network = safeGetSelectedNetworkName();
 

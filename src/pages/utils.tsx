@@ -1,21 +1,21 @@
-import moment from "moment";
-import Box from "@mui/material/Box";
-import {Typography, useTheme} from "@mui/material";
 import {
   Account,
   Aptos,
   Hex,
   InputGenerateTransactionPayloadData,
 } from "@aptos-labs/ts-sdk";
+import {Typography, useTheme} from "@mui/material";
+import Box from "@mui/material/Box";
+import moment from "moment";
 import {MaybeHexString} from "../context/wallet/context";
-import {Proposal, ProposalStatus, ProposalVotingState} from "./Types";
-import {
-  primaryColor,
-  negativeColor,
-  warningColor,
-  secondaryColor,
-} from "./constants";
 import {assertNever} from "../utils";
+import {
+  negativeColor,
+  primaryColor,
+  secondaryColor,
+  warningColor,
+} from "./constants";
+import {Proposal, ProposalStatus, ProposalVotingState} from "./Types";
 
 export function RenderDebug({data}: {data: unknown}) {
   const theme = useTheme();

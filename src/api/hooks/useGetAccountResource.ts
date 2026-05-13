@@ -1,8 +1,8 @@
 import {AccountAddressInput, MoveResource} from "@aptos-labs/ts-sdk";
-import {useQuery, UseQueryResult} from "react-query";
+import {UseQueryResult, useQuery} from "react-query";
+import {useGlobalState} from "../../context/globalState";
 import {getAccountResource} from "..";
 import {ResponseError} from "../client";
-import {useGlobalState} from "../../context/globalState";
 
 type useGetAccountResourceResponse = {
   accountResource: MoveResource | undefined;

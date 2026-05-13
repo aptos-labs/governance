@@ -1,15 +1,12 @@
 import {Box, Container, Link, Typography, useTheme} from "@mui/material";
-
-import Grid from "@mui/material/Unstable_Grid2";
-
-import GithubLogo from "../../assets/svg/github.svg?react";
-import DiscordLogo from "../../assets/svg/discord.svg?react";
-import TwitterLogo from "../../assets/svg/twitter.svg?react";
-import MediumLogo from "../../assets/svg/medium.svg?react";
-import {grey} from "../../themes/colors/aptosColorPalette";
 import SvgIcon from "@mui/material/SvgIcon";
-
+import Grid from "@mui/material/Unstable_Grid2";
 import LogoIcon from "../../assets/svg/aptos-foundation_logo_mark.svg?react";
+import DiscordLogo from "../../assets/svg/discord.svg?react";
+import GithubLogo from "../../assets/svg/github.svg?react";
+import MediumLogo from "../../assets/svg/medium.svg?react";
+import TwitterLogo from "../../assets/svg/twitter.svg?react";
+import {grey} from "../../themes/colors/aptosColorPalette";
 
 const socialLinks = [
   {

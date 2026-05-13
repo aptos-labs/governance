@@ -1,19 +1,19 @@
-import Title from "../../components/Title";
 import {
-  Stack,
   Box,
+  Grid,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Grid,
   Tooltip,
 } from "@mui/material";
-import {assertNever, octaToAptnFormatter, octaToAptString} from "../../utils";
-import GeneralTableRow from "../../components/GeneralTableRow";
 import GeneralTableHeaderCell from "../../components/GeneralTableHeaderCell";
+import GeneralTableRow from "../../components/GeneralTableRow";
 import HashButton, {HashType} from "../../components/HashButton";
+import Title from "../../components/Title";
+import {assertNever, octaToAptnFormatter, octaToAptString} from "../../utils";
 
 type ProposalCellProps = {
   vote: Vote;

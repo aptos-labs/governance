@@ -1,14 +1,13 @@
-import {Button, Grid, Stack, TextField, Typography} from "@mui/material";
+import {alpha, Button, Grid, Stack, TextField, Typography} from "@mui/material";
 import {useState} from "react";
 import LoadingModal from "../../../components/LoadingModal";
+import {useGlobalState} from "../../../context/globalState";
 import {useWalletContext} from "../../../context/wallet/context";
+import {primaryColor} from "../../constants";
 import {AddressToVoteMap} from "../../Types";
 import {isValidAccountAddress} from "../../utils";
 import hasAddressVoted from "../../Voting/api/hasAddressVoted";
 import isDelegatedVoter from "../../Voting/api/isDelegatedVoter";
-import {alpha} from "@mui/material";
-import {primaryColor} from "../../constants";
-import {useGlobalState} from "../../../context/globalState";
 
 type StakePoolAddressInputProps = {
   setAddressVoteMap: React.Dispatch<

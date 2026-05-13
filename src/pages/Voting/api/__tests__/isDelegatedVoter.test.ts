@@ -1,5 +1,5 @@
-import {GlobalState} from "../../../../context/globalState/context";
 import * as sdk from "../../../../api";
+import {GlobalState} from "../../../../context/globalState/context";
 import isDelegatedVoter from "../isDelegatedVoter";
 
 const stakePoolAddress =
@@ -24,21 +24,20 @@ const addresses = [
   ],
 ];
 
-test.each(addresses)(
-  "current wallet address %i matches delegated voter address %i",
-  async (walletAddress, delegatedVoterAddress) => {
-    vi.spyOn(sdk, "getAccountResource").mockResolvedValue({
-      type: "0x1::stake::StakePool",
-      data: {
-        delegated_voter: delegatedVoterAddress,
-      },
-    });
+test.each(
+  addresses,
+)("current wallet address %i matches delegated voter address %i", async (walletAddress, delegatedVoterAddress) => {
+  vi.spyOn(sdk, "getAccountResource").mockResolvedValue({
+    type: "0x1::stake::StakePool",
+    data: {
+      delegated_voter: delegatedVoterAddress,
+    },
+  });
 
-    const result = await isDelegatedVoter(
-      stakePoolAddress,
-      walletAddress,
-      mockState,
-    );
-    expect(result).toBe(true);
-  },
-);
+  const result = await isDelegatedVoter(
+    stakePoolAddress,
+    walletAddress,
+    mockState,
+  );
+  expect(result).toBe(true);
+});

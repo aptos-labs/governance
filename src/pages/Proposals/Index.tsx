@@ -1,8 +1,8 @@
-import {useGetProposalsTableData} from "../../api/hooks/useGetProposalsTableData";
-import {ProposalsTable} from "../LandingPage/Table";
-import {IndividualPageHeader} from "../../components/Header";
-import {Stack, Alert, AlertTitle} from "@mui/material";
+import {Alert, AlertTitle, Stack} from "@mui/material";
 import {ResponseErrorType} from "../../api/client";
+import {useGetProposalsTableData} from "../../api/hooks/useGetProposalsTableData";
+import {IndividualPageHeader} from "../../components/Header";
+import {ProposalsTable} from "../LandingPage/Table";
 
 export default function ProposalsPage() {
   const proposalTableData = useGetProposalsTableData();

@@ -1,8 +1,8 @@
-import {Stack, Box, Typography, Tooltip, Theme} from "@mui/material";
-import {secondaryColor} from "../../constants";
+import {Box, Stack, Theme, Tooltip, Typography} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {grey} from "../../../themes/colors/aptosColorPalette";
 import {useGetCoinSupplyLimit} from "../../../api/hooks/useGetCoinSupplyLimit";
+import {grey} from "../../../themes/colors/aptosColorPalette";
+import {secondaryColor} from "../../constants";
 import {Proposal} from "../../Types";
 
 const RADIUS = "0.7em";

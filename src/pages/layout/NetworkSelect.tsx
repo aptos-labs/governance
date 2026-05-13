@@ -1,12 +1,12 @@
-import {useEffect} from "react";
 import {FormControl, Select, SelectChangeEvent} from "@mui/material";
-import {NETWORK_NAMES} from "../../constants";
-import {useGlobalState} from "../../context/globalState";
-import {useTheme} from "@mui/material/styles";
+import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import SvgIcon, {SvgIconProps} from "@mui/material/SvgIcon";
-import Box from "@mui/material/Box";
+import {useTheme} from "@mui/material/styles";
+import {useEffect} from "react";
 import {useSearchParams} from "react-router-dom";
+import {NETWORK_NAMES} from "../../constants";
+import {useGlobalState} from "../../context/globalState";
 import {grey} from "../../themes/colors/aptosColorPalette";
 
 export default function NetworkSelect() {

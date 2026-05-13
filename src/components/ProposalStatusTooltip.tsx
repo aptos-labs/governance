@@ -1,6 +1,6 @@
-import {Tooltip, Typography, Stack} from "@mui/material";
-import {ProposalStatus} from "../pages/Types";
+import {Stack, Tooltip, Typography} from "@mui/material";
 import StatusIcon from "../components/StatusIcon";
+import {ProposalStatus} from "../pages/Types";
 import {getStatusColor} from "../pages/utils";
 
 function StatusBox(status: ProposalStatus, text: string): JSX.Element {

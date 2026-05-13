@@ -1,5 +1,5 @@
-import {Box, GlobalStyles, alpha} from "@mui/material";
 import {WalletConnector} from "@aptos-labs/wallet-adapter-mui-design";
+import {alpha, Box, GlobalStyles} from "@mui/material";
 
 export const WalletButton = (): JSX.Element => {
   return (

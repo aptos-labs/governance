@@ -1,14 +1,13 @@
-import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
+import CssBaseline from "@mui/material/CssBaseline";
 import {GraphqlClientProvider} from "../../api/hooks/useGraphqlClient";
-
-import Header from "./Header";
-import Footer from "./Footer";
-import {GlobalStateProvider} from "../../context/globalState";
 import {ProvideColorMode} from "../../context";
+import {GlobalStateProvider} from "../../context/globalState";
 import {WalletProvider} from "../../context/wallet";
 import {WalletAdapterProvider} from "../../context/wallet/adapterProvider";
+import Footer from "./Footer";
+import Header from "./Header";
 
 interface LayoutProps {
   children: React.ReactNode;

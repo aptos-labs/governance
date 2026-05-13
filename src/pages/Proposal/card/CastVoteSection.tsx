@@ -1,9 +1,9 @@
-import Section from "./Section";
-import {useWalletContext} from "../../../context/wallet/context";
-import ConnectWalletInfo from "./ConnectWalletInfo";
 import {Button} from "@mui/material";
 import {useNavigate} from "react-router-dom";
+import {useWalletContext} from "../../../context/wallet/context";
 import {Proposal, ProposalStatus} from "../../Types";
+import ConnectWalletInfo from "./ConnectWalletInfo";
+import Section from "./Section";
 
 type CastVoteSectionProps = {
   proposal: Proposal;

@@ -5,11 +5,11 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useGetProposal} from "../../api/hooks/useGetProposal";
 import GoBack from "../../components/GoBack";
 import {IndividualPageHeader} from "../../components/Header";
+import {defaultProposalErrorMessage} from "../../constants";
 import {useWalletContext} from "../../context/wallet/context";
 import {EmptyProposal} from "../Proposal/EmptyProposal";
 import {ProposalHeader} from "../Proposal/Header";
 import AddressesList from "./components/AddressesList";
-import {defaultProposalErrorMessage} from "../../constants";
 
 export type ProposalPageURLParams = {
   id: string;

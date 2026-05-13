@@ -31,7 +31,7 @@ export default async function isDelegatedVoter(
       AccountAddress.from(normalizeAddress(delegatedVoter)).toStringLong() ===
       AccountAddress.from(normalizeAddress(currentWalletAddress)).toStringLong()
     );
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }

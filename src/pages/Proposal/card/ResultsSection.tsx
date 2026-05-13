@@ -1,8 +1,8 @@
 import {Stack} from "@mui/material";
 import {Proposal} from "../../Types";
-import Section from "./Section";
-import ResultBar from "./ResultBar";
 import ParticipationBar from "./ParticipationBar";
+import ResultBar from "./ResultBar";
+import Section from "./Section";
 
 type VotePercentage = {
   yes: number;
