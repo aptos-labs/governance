@@ -34,6 +34,7 @@ If any fail, report exact failure and do not claim success.
 - Use `.env.local` for local config.
 - Client-side vars must use `VITE_*`.
 - Current supported vars are listed in `.env.example`.
+- Production hosting is Vercel; set the same `VITE_*` vars in the Vercel project.
 
 ## Code Editing Guidance
 
@@ -47,4 +48,5 @@ If any fail, report exact failure and do not claim success.
 - Package manager: `pnpm` (not Yarn/NPM scripts in docs).
 - Build tool: `Vite` (not `react-scripts` / CRA).
 - SVG React components should use `?react` imports.
+- Hosting: Vercel (`vercel.json`), not Netlify. SPA fallback is a rewrite to `/index.html`.
 

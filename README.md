@@ -64,9 +64,22 @@ Legacy -> Vite mapping:
 - `REACT_APP_INDEXER_GRAPHQL_DEVNET` -> `VITE_INDEXER_GRAPHQL_DEVNET`
 - `GA_TRACKING_ID` -> `VITE_GA_TRACKING_ID`
 
+## Vercel
+
+The production host is Vercel. `vercel.json` configures the Vite framework preset, `pnpm` install/build, `dist/` output, and an SPA rewrite so client routes such as `/proposal/:id` serve `index.html`.
+
+To ship:
+
+1. Import this GitHub repository in the Vercel dashboard.
+2. Confirm the framework is Vite and the output directory is `dist`.
+3. Copy variables from `.env.example` into the Vercel project. Client-side values must stay `VITE_*` prefixed.
+4. Disconnect any existing Netlify site for this repo so deploys do not compete.
+
+Preview deployments run on pull requests; production deploys from `main`. Node.js 22 is pinned via `engines.node` (replacing Netlify `NODE_VERSION`).
+
 ## GitHub Pages
 
-This repo includes `.github/workflows/deploy-pages.yml` for GitHub Pages deployment.
+This repo still includes `.github/workflows/deploy-pages.yml` for GitHub Pages deployment.
 
 - Default base path is `/` (root).
 - To deploy under a repo subpath, set repository variable `GH_PAGES_REPO_NAME` to your repository name.
