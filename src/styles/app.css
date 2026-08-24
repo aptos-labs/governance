@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "IBM Plex Serif", Georgia, "Times New Roman", Times, serif;
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+:root {
+  color-scheme: light;
+
+  --color-canvas: #f9f9f0;
+  --color-paper: #ffffff;
+  --color-text-primary: #171612;
+  --color-text-secondary: #2f2d28;
+  --color-text-disabled: #6a6252;
+  --color-border: #c5cad4;
+  --color-border-light: #d9dde5;
+
+  --color-info: #34648f;
+  --color-success: #256b2e;
+  --color-error: #b84722;
+  --color-warning: #9d5a16;
+
+  --color-status-active-fill: #badbee;
+  --color-status-passed-fill: #daf6d4;
+  --color-status-executed-fill: #2f2d28;
+  --color-status-executed-text: #f9f9f0;
+  --color-status-failed-fill: #fe805c;
+  --color-status-active-text: #171612;
+  --color-status-passed-text: #171612;
+  --color-status-failed-text: #171612;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-canvas: #0f0e0b;
+  --color-paper: #171612;
+  --color-text-primary: #f9f9f0;
+  --color-text-secondary: #efecca;
+  --color-text-disabled: #8c8680;
+  --color-border: #21201c;
+  --color-border-light: #2f2d28;
+
+  --color-info: #badbee;
+  --color-success: #daf6d4;
+  --color-error: #fe805c;
+  --color-warning: #fe805c;
+
+  --color-status-active-fill: #badbee;
+  --color-status-passed-fill: #daf6d4;
+  --color-status-executed-fill: #2f2d28;
+  --color-status-executed-text: #f9f9f0;
+  --color-status-failed-fill: #fe805c;
+  --color-status-active-text: #171612;
+  --color-status-passed-text: #171612;
+  --color-status-failed-text: #171612;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-canvas: #0f0e0b;
+    --color-paper: #171612;
+    --color-text-primary: #f9f9f0;
+    --color-text-secondary: #efecca;
+    --color-text-disabled: #8c8680;
+    --color-border: #21201c;
+    --color-border-light: #2f2d28;
+    --color-info: #badbee;
+    --color-success: #daf6d4;
+    --color-error: #fe805c;
+    --color-warning: #fe805c;
+    --color-status-active-text: #171612;
+    --color-status-passed-text: #171612;
+    --color-status-failed-text: #171612;
+  }
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
