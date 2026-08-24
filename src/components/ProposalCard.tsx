@@ -1,10 +1,10 @@
 // src/components/ProposalCard.tsx
-import { Link } from "@tanstack/react-router";
-import { StatusBadge } from "~/components/StatusBadge";
-import { MyVoteBadge } from "~/components/MyVoteBadge";
-import { VoteBar } from "~/components/VoteBar";
-import { formatDurationCompact } from "~/lib/governance/format";
-import type { ProposalListItem } from "~/lib/governance/types";
+import {Link} from "@tanstack/react-router";
+import {MyVoteBadge} from "~/components/MyVoteBadge";
+import {StatusBadge} from "~/components/StatusBadge";
+import {VoteBar} from "~/components/VoteBar";
+import {formatDurationCompact} from "~/lib/governance/format";
+import type {ProposalListItem} from "~/lib/governance/types";
 
 function describeTiming(proposal: ProposalListItem, nowSecs: bigint): string {
   switch (proposal.status) {
@@ -28,7 +28,7 @@ export function ProposalCard({
 }: {
   proposal: ProposalListItem;
   nowSecs: bigint;
-  myVote?: { shouldPass: boolean };
+  myVote?: {shouldPass: boolean};
 }) {
   const title = proposal.metadataResult.verified
     ? proposal.metadataResult.metadata.title
@@ -37,7 +37,7 @@ export function ProposalCard({
   return (
     <Link
       to="/proposal/$proposalId"
-      params={{ proposalId: proposal.proposalId }}
+      params={{proposalId: proposal.proposalId}}
       className="block rounded-xl border border-[var(--color-border-light)] bg-[var(--color-paper)] p-5 hover:border-[var(--color-border)]"
     >
       <div className="flex items-start justify-between gap-4">

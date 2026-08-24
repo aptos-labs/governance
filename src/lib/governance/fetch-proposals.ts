@@ -1,18 +1,18 @@
 // src/lib/governance/fetch-proposals.ts
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import {createServerFn} from "@tanstack/react-start";
+import {z} from "zod";
 import {
   APTOS_GOVERNANCE_ADDRESS,
   getAptosClient,
   VOTING_FORUM_PROPOSAL_VALUE_TYPE,
   VOTING_FORUM_RESOURCE_TYPE,
 } from "~/lib/aptos/client";
-import { fetchAndVerifyProposalMetadata } from "~/lib/governance/metadata";
+import {fetchAndVerifyProposalMetadata} from "~/lib/governance/metadata";
 import {
   buildProposalListItem,
   parseRawProposalCore,
 } from "~/lib/governance/parse-raw-proposal";
-import type { ProposalListItem, RawProposal } from "~/lib/governance/types";
+import type {ProposalListItem, RawProposal} from "~/lib/governance/types";
 
 const PAGE_SIZE = 20;
 
@@ -22,7 +22,7 @@ const listProposalsInputSchema = z.object({
 
 interface VotingForumResource {
   next_proposal_id: string;
-  proposals: { handle: string };
+  proposals: {handle: string};
 }
 
 export interface ListProposalsResult {
@@ -38,9 +38,9 @@ export interface ListProposalsResult {
  * resource on mainnet on 2026-08-20) — "listing" means picking a slice
  * of that id range and fetching each proposal from the proposals table.
  */
-export const listProposals = createServerFn({ method: "GET" })
+export const listProposals = createServerFn({method: "GET"})
   .validator(listProposalsInputSchema)
-  .handler(async ({ data }): Promise<ListProposalsResult> => {
+  .handler(async ({data}): Promise<ListProposalsResult> => {
     const aptos = getAptosClient();
 
     const forum = await aptos.getAccountResource<VotingForumResource>({
@@ -55,7 +55,7 @@ export const listProposals = createServerFn({ method: "GET" })
     const lowestId = Math.max(0, highestId - PAGE_SIZE + 1);
 
     if (highestId < 0) {
-      return { items: [], totalCount, page: data.page, pageSize: PAGE_SIZE };
+      return {items: [], totalCount, page: data.page, pageSize: PAGE_SIZE};
     }
 
     const ids: number[] = [];
@@ -91,5 +91,5 @@ export const listProposals = createServerFn({ method: "GET" })
       }),
     );
 
-    return { items, totalCount, page: data.page, pageSize: PAGE_SIZE };
+    return {items, totalCount, page: data.page, pageSize: PAGE_SIZE};
   });

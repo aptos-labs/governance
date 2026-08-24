@@ -8,7 +8,10 @@ declare global {
      *  signAndSubmitTransaction, populated synchronously during the
      *  wallet-adapter call and read by e2e test assertions after the
      *  mutation resolves. */
-    __mockWalletCalls?: Array<{ data: { function: string; functionArguments: unknown[] } }>;
+    __mockWalletCalls?: Array<{
+      data: {function: string; functionArguments: unknown[]};
+    }>;
   }
 }
+
 export {};

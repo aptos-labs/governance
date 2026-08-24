@@ -1,7 +1,7 @@
 // src/lib/governance/fetch-eligible-pools.ts
-import { getAptosClient } from "~/lib/aptos/client";
-import { executeIndexerQuery } from "~/lib/governance/indexer-client";
-import type { EligiblePool } from "~/lib/governance/types";
+import {getAptosClient} from "~/lib/aptos/client";
+import {executeIndexerQuery} from "~/lib/governance/indexer-client";
+import type {EligiblePool} from "~/lib/governance/types";
 
 const STAKING_POOL_VOTER_QUERY = `
   query StakingPoolVoter($voter: String) {
@@ -20,11 +20,11 @@ const DELEGATED_VOTER_QUERY = `
 `;
 
 interface StakingPoolVoterResult {
-  current_staking_pool_voter: Array<{ staking_pool_address: string }>;
+  current_staking_pool_voter: Array<{staking_pool_address: string}>;
 }
 
 interface DelegatedVoterResult {
-  current_delegated_voter: Array<{ delegation_pool_address: string }>;
+  current_delegated_voter: Array<{delegation_pool_address: string}>;
 }
 
 async function findEligibleStakePools(
@@ -32,10 +32,10 @@ async function findEligibleStakePools(
   proposalId: string,
 ): Promise<EligiblePool[]> {
   const aptos = getAptosClient();
-  const { current_staking_pool_voter } =
+  const {current_staking_pool_voter} =
     await executeIndexerQuery<StakingPoolVoterResult>(
       STAKING_POOL_VOTER_QUERY,
-      { voter: voterAddress },
+      {voter: voterAddress},
     );
 
   return Promise.all(
@@ -74,7 +74,7 @@ async function findEligibleDelegationPools(
   proposalId: string,
 ): Promise<EligiblePool[]> {
   const aptos = getAptosClient();
-  const { current_delegated_voter } =
+  const {current_delegated_voter} =
     await executeIndexerQuery<DelegatedVoterResult>(DELEGATED_VOTER_QUERY, {
       voter: voterAddress,
     });

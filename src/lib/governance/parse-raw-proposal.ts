@@ -1,4 +1,4 @@
-import { deriveProposalStatus } from "~/lib/governance/status";
+import {deriveProposalStatus} from "~/lib/governance/status";
 import type {
   MetadataVerificationResult,
   ProposalListItem,

@@ -1,4 +1,4 @@
-import type { MetadataVerificationResult } from "~/lib/governance/types";
+import type {MetadataVerificationResult} from "~/lib/governance/types";
 
 export function MetadataVerifiedNotice({
   result,
@@ -15,8 +15,8 @@ export function MetadataVerifiedNotice({
           Metadata unverified
         </p>
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          This proposal's off-chain metadata could not be verified against
-          its on-chain hash and is not shown. Reason: {result.reason}
+          This proposal's off-chain metadata could not be verified against its
+          on-chain hash and is not shown. Reason: {result.reason}
         </p>
       </div>
     );

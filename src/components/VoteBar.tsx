@@ -1,4 +1,4 @@
-import { formatOctasToApt } from "~/lib/governance/format";
+import {formatOctasToApt} from "~/lib/governance/format";
 
 export function VoteBar({
   yesVotes,
@@ -18,18 +18,25 @@ export function VoteBar({
     <div>
       <div
         className="flex h-1.5 overflow-hidden rounded-full"
-        style={{ backgroundColor: "var(--color-border-light)" }}
+        style={{backgroundColor: "var(--color-border-light)"}}
       >
         <div
-          style={{ width: `${yesPct}%`, backgroundColor: "var(--color-status-passed-fill)" }}
+          style={{
+            width: `${yesPct}%`,
+            backgroundColor: "var(--color-status-passed-fill)",
+          }}
         />
         <div
-          style={{ width: `${noPct}%`, backgroundColor: "var(--color-status-failed-fill)" }}
+          style={{
+            width: `${noPct}%`,
+            backgroundColor: "var(--color-status-failed-fill)",
+          }}
         />
       </div>
       <div className="mt-1 flex justify-between text-xs text-[var(--color-text-secondary)]">
         <span>
-          {formatOctasToApt(yesVotes)} APT for &middot; {formatOctasToApt(noVotes)} APT against
+          {formatOctasToApt(yesVotes)} APT for &middot;{" "}
+          {formatOctasToApt(noVotes)} APT against
         </span>
         <span>{thresholdMet ? "Threshold met" : "Threshold not yet met"}</span>
       </div>

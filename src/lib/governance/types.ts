@@ -29,13 +29,13 @@ export interface RawProposalMetadataEntry {
  */
 export interface RawProposal {
   proposer: string;
-  execution_content: { vec: Array<{ dummy_field: boolean }> };
-  metadata: { data: RawProposalMetadataEntry[] };
+  execution_content: {vec: Array<{dummy_field: boolean}>};
+  metadata: {data: RawProposalMetadataEntry[]};
   creation_time_secs: string;
   execution_hash: string;
   min_vote_threshold: string;
   expiration_secs: string;
-  early_resolution_vote_threshold: { vec: string[] };
+  early_resolution_vote_threshold: {vec: string[]};
   yes_votes: string;
   no_votes: string;
   is_resolved: boolean;
@@ -52,8 +52,8 @@ export interface ProposalMetadata {
 
 /** Result of fetching + verifying a proposal's off-chain metadata. */
 export type MetadataVerificationResult =
-  | { verified: true; metadata: ProposalMetadata }
-  | { verified: false; reason: string; rawText?: string };
+  | {verified: true; metadata: ProposalMetadata}
+  | {verified: false; reason: string; rawText?: string};
 
 /** Normalized proposal shape the UI actually renders. */
 export interface ProposalListItem {

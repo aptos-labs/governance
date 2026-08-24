@@ -1,6 +1,6 @@
 // src/lib/governance/fetch-proposal.ts
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import {createServerFn} from "@tanstack/react-start";
+import {z} from "zod";
 import {
   APTOS_GOVERNANCE_ADDRESS,
   getAptosClient,
@@ -11,12 +11,12 @@ import {
   fetchProposalVotes,
   type ProposalVoteRow,
 } from "~/lib/governance/fetch-proposal-votes";
-import { fetchAndVerifyProposalMetadata } from "~/lib/governance/metadata";
+import {fetchAndVerifyProposalMetadata} from "~/lib/governance/metadata";
 import {
   buildProposalListItem,
   parseRawProposalCore,
 } from "~/lib/governance/parse-raw-proposal";
-import type { ProposalListItem, RawProposal } from "~/lib/governance/types";
+import type {ProposalListItem, RawProposal} from "~/lib/governance/types";
 
 const getProposalInputSchema = z.object({
   proposalId: z
@@ -26,7 +26,7 @@ const getProposalInputSchema = z.object({
 
 interface VotingForumResource {
   next_proposal_id: string;
-  proposals: { handle: string };
+  proposals: {handle: string};
 }
 
 export interface ProposalDetailResult {
@@ -34,9 +34,9 @@ export interface ProposalDetailResult {
   votes: ProposalVoteRow[];
 }
 
-export const getProposalDetail = createServerFn({ method: "GET" })
+export const getProposalDetail = createServerFn({method: "GET"})
   .validator(getProposalInputSchema)
-  .handler(async ({ data }): Promise<ProposalDetailResult> => {
+  .handler(async ({data}): Promise<ProposalDetailResult> => {
     const aptos = getAptosClient();
 
     const forum = await aptos.getAccountResource<VotingForumResource>({

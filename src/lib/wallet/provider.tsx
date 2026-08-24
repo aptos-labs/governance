@@ -1,8 +1,9 @@
 // src/lib/wallet/provider.tsx
-import { ClientOnly } from "@tanstack/react-router";
-import { Network } from "@aptos-labs/ts-sdk";
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import type { ReactNode } from "react";
+
+import {Network} from "@aptos-labs/ts-sdk";
+import {AptosWalletAdapterProvider} from "@aptos-labs/wallet-adapter-react";
+import {ClientOnly} from "@tanstack/react-router";
+import type {ReactNode} from "react";
 
 /**
  * AIP-62 wallet discovery runs entirely client-side (window event
@@ -12,12 +13,12 @@ import type { ReactNode } from "react";
  * and initial hydration; children (route content) still render via
  * the fallback slot so pages aren't blank while wallet discovery boots.
  */
-export function AppWalletProvider({ children }: { children: ReactNode }) {
+export function AppWalletProvider({children}: {children: ReactNode}) {
   return (
     <ClientOnly fallback={<>{children}</>}>
       <AptosWalletAdapterProvider
         autoConnect
-        dappConfig={{ network: Network.MAINNET }}
+        dappConfig={{network: Network.MAINNET}}
         onError={(error) => {
           // Non-fatal: connection/signing errors surface inline in the
           // components that triggered them (WalletConnectButton,

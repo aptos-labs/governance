@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useWallet, type WalletInfo } from "@aptos-labs/wallet-adapter-react";
-import { truncateAddress } from "~/lib/governance/format";
+import {useWallet, type WalletInfo} from "@aptos-labs/wallet-adapter-react";
+import {useState} from "react";
+import {truncateAddress} from "~/lib/governance/format";
 
 const FEATURED_WALLETS = ["Petra", "Petra Web"];
 
@@ -16,7 +16,7 @@ function sortWithFeaturedFirst(wallets: readonly WalletInfo[]) {
 }
 
 export function WalletConnectButton() {
-  const { connected, account, wallets, connect, disconnect } = useWallet();
+  const {connected, account, wallets, connect, disconnect} = useWallet();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   if (connected && account) {

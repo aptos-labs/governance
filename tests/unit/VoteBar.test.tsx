@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
-import { VoteBar } from "~/components/VoteBar";
+import {cleanup, render, screen} from "@testing-library/react";
+import {afterEach, describe, expect, it} from "vitest";
+import {VoteBar} from "~/components/VoteBar";
 
 describe("VoteBar", () => {
   afterEach(cleanup);
@@ -32,7 +32,11 @@ describe("VoteBar", () => {
 
   it("shows a threshold-not-met indicator when total votes are below the minimum", () => {
     render(
-      <VoteBar yesVotes={10_00000000n} noVotes={5_00000000n} minVoteThreshold={50_00000000n} />,
+      <VoteBar
+        yesVotes={10_00000000n}
+        noVotes={5_00000000n}
+        minVoteThreshold={50_00000000n}
+      />,
     );
     expect(screen.getByText(/threshold not yet met/i)).toBeInTheDocument();
   });

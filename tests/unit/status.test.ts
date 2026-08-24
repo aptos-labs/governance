@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { deriveProposalStatus, isVotingClosed } from "~/lib/governance/status";
+import {describe, expect, it} from "vitest";
+import {deriveProposalStatus, isVotingClosed} from "~/lib/governance/status";
 
 describe("isVotingClosed", () => {
   it("is false before expiration with no early-resolution threshold set", () => {
@@ -63,7 +63,7 @@ describe("deriveProposalStatus", () => {
   };
 
   it("is active while voting is still open", () => {
-    expect(deriveProposalStatus({ ...base, nowSecs: 500n })).toBe("active");
+    expect(deriveProposalStatus({...base, nowSecs: 500n})).toBe("active");
   });
 
   it("is passed once closed with enough yes votes over threshold", () => {

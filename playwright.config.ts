@@ -1,5 +1,5 @@
 // playwright.config.ts
-import { defineConfig, devices } from "@playwright/test";
+import {defineConfig, devices} from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -43,10 +43,10 @@ export default defineConfig({
     // global.setup.ts for the full explanation, including why the
     // config-level `globalSetup` option was tried first and replaced
     // with this "project dependencies" approach instead).
-    { name: "setup", testMatch: /global\.setup\.ts/ },
+    {name: "setup", testMatch: /global\.setup\.ts/},
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {...devices["Desktop Chrome"]},
       dependencies: ["setup"],
     },
   ],

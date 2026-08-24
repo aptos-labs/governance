@@ -1,5 +1,5 @@
 // tests/unit/format.test.ts
-import { describe, expect, it } from "vitest";
+import {describe, expect, it} from "vitest";
 import {
   clampVotingPowerOctas,
   formatDurationCompact,
@@ -15,9 +15,7 @@ describe("formatOctasToApt", () => {
 
   it("converts a large realistic voting-power figure", () => {
     // 369935249.51380141 APT worth of octas, truncated to 2 decimals
-    expect(formatOctasToApt(36_993_524_951_380_141n, 2)).toBe(
-      "369,935,249.51",
-    );
+    expect(formatOctasToApt(36_993_524_951_380_141n, 2)).toBe("369,935,249.51");
   });
 
   it("handles zero", () => {

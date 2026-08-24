@@ -1,4 +1,4 @@
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import {Aptos, AptosConfig, Network} from "@aptos-labs/ts-sdk";
 
 let cachedClient: Aptos | null = null;
 
@@ -19,7 +19,7 @@ export function getAptosClient(): Aptos {
         network: Network.MAINNET,
         fullnode: process.env.APTOS_FULLNODE_URL || undefined,
         clientConfig: process.env.APTOS_BUILD_API_KEY
-          ? { API_KEY: process.env.APTOS_BUILD_API_KEY }
+          ? {API_KEY: process.env.APTOS_BUILD_API_KEY}
           : undefined,
       }),
     );

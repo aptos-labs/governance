@@ -3,11 +3,12 @@
 /** Overridable per design spec §9 — defaults to the hosted mainnet
  *  endpoint; Task 18's e2e test points this at a local mock instead. */
 const INDEXER_URL =
-  process.env.APTOS_INDEXER_URL || "https://api.mainnet.aptoslabs.com/v1/graphql";
+  process.env.APTOS_INDEXER_URL ||
+  "https://api.mainnet.aptoslabs.com/v1/graphql";
 
 interface GraphQLResponse<T> {
   data?: T;
-  errors?: Array<{ message: string }>;
+  errors?: Array<{message: string}>;
 }
 
 /**
@@ -31,7 +32,7 @@ export async function executeIndexerQuery<T>(
   const response = await fetch(INDEXER_URL, {
     method: "POST",
     headers,
-    body: JSON.stringify({ query, variables }),
+    body: JSON.stringify({query, variables}),
   });
 
   if (!response.ok) {

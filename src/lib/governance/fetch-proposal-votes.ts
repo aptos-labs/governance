@@ -1,5 +1,5 @@
 // src/lib/governance/fetch-proposal-votes.ts
-import { executeIndexerQuery } from "~/lib/governance/indexer-client";
+import {executeIndexerQuery} from "~/lib/governance/indexer-client";
 
 export interface ProposalVoteRow {
   stakingPoolAddress: string;
@@ -49,7 +49,7 @@ export async function fetchProposalVotes(
 ): Promise<ProposalVoteRow[]> {
   const result = await executeIndexerQuery<ProposalVotesQueryResult>(
     PROPOSAL_VOTES_QUERY,
-    { proposalId, limit, offset },
+    {proposalId, limit, offset},
   );
 
   return result.proposal_votes.map((row) => ({

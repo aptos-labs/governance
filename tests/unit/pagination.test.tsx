@@ -1,5 +1,5 @@
 // tests/unit/pagination.test.tsx
-import { describe, it, expect } from "vitest";
+import {describe, expect, it} from "vitest";
 
 function getTotalPages(totalCount: number, pageSize: number): number {
   return Math.max(1, Math.ceil(totalCount / pageSize));
@@ -9,7 +9,11 @@ function hasPrevPage(page: number): boolean {
   return page > 0;
 }
 
-function hasNextPage(page: number, totalCount: number, pageSize: number): boolean {
+function hasNextPage(
+  page: number,
+  totalCount: number,
+  pageSize: number,
+): boolean {
   return (page + 1) * pageSize < totalCount;
 }
 

@@ -1,8 +1,8 @@
 // tests/unit/fetch-my-pools.test.ts
-import { describe, expect, it, vi } from "vitest";
-import { findMyPools } from "~/lib/governance/fetch-my-pools";
+import {describe, expect, it, vi} from "vitest";
+import {getAptosClient} from "~/lib/aptos/client";
+import {findMyPools} from "~/lib/governance/fetch-my-pools";
 import * as indexerClient from "~/lib/governance/indexer-client";
-import { getAptosClient } from "~/lib/aptos/client";
 
 vi.mock("~/lib/governance/indexer-client");
 vi.mock("~/lib/aptos/client");
@@ -16,21 +16,21 @@ describe("findMyPools", () => {
         if (query.includes("current_staking_pool_voter")) {
           return {
             current_staking_pool_voter: [
-              { staking_pool_address: "0xstakepool1" },
+              {staking_pool_address: "0xstakepool1"},
             ],
           } as never;
         }
-        return { current_delegated_voter: [] } as never;
+        return {current_delegated_voter: []} as never;
       },
     );
 
-    const mockView = vi.fn(async ({ payload }: { payload: { function: string } }) => {
+    const mockView = vi.fn(async ({payload}: {payload: {function: string}}) => {
       if (payload.function === "0x1::aptos_governance::get_voting_power") {
         return [1234n];
       }
       throw new Error(`unexpected view call: ${payload.function}`);
     });
-    vi.mocked(getAptosClient).mockReturnValue({ view: mockView } as never);
+    vi.mocked(getAptosClient).mockReturnValue({view: mockView} as never);
 
     const pools = await findMyPools(VOTER);
 
@@ -47,17 +47,15 @@ describe("findMyPools", () => {
     vi.mocked(indexerClient.executeIndexerQuery).mockImplementation(
       async (query: string) => {
         if (query.includes("current_staking_pool_voter")) {
-          return { current_staking_pool_voter: [] } as never;
+          return {current_staking_pool_voter: []} as never;
         }
         return {
-          current_delegated_voter: [
-            { delegation_pool_address: "0xdelegpool1" },
-          ],
+          current_delegated_voter: [{delegation_pool_address: "0xdelegpool1"}],
         } as never;
       },
     );
 
-    const mockView = vi.fn(async ({ payload }: { payload: { function: string } }) => {
+    const mockView = vi.fn(async ({payload}: {payload: {function: string}}) => {
       if (
         payload.function ===
         "0x1::delegation_pool::calculate_and_update_voter_total_voting_power"
@@ -66,7 +64,7 @@ describe("findMyPools", () => {
       }
       throw new Error(`unexpected view call: ${payload.function}`);
     });
-    vi.mocked(getAptosClient).mockReturnValue({ view: mockView } as never);
+    vi.mocked(getAptosClient).mockReturnValue({view: mockView} as never);
 
     const pools = await findMyPools(VOTER);
 

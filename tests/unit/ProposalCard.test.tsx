@@ -1,24 +1,26 @@
 // tests/unit/ProposalCard.test.tsx
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
 import {
-  RouterProvider,
   createMemoryHistory,
   createRootRoute,
   createRoute,
   createRouter,
+  RouterProvider,
 } from "@tanstack/react-router";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import { ProposalCard } from "~/components/ProposalCard";
-import type { ProposalListItem } from "~/lib/governance/types";
+import {cleanup, render, screen} from "@testing-library/react";
+import {afterEach, beforeAll, describe, expect, it} from "vitest";
+import {ProposalCard} from "~/components/ProposalCard";
+import type {ProposalListItem} from "~/lib/governance/types";
 
 // jsdom does not implement window.scrollTo — TanStack Router's scroll
 // restoration calls it on every render, which otherwise logs
 // "Not implemented: Window's scrollTo() method" noise to stderr on
 // every test in this file. Stub it so test output stays pristine.
 beforeAll(() => {
-  window.scrollTo = () => {};
+  window.scrollTo = () => {
+    /* jsdom stub — see comment above */
+  };
 });
 
 const baseProposal: ProposalListItem = {
@@ -67,7 +69,7 @@ function renderWithRouter(ui: React.ReactElement) {
   });
   const router = createRouter({
     routeTree: rootRoute.addChildren([indexRoute, proposalRoute]),
-    history: createMemoryHistory({ initialEntries: ["/"] }),
+    history: createMemoryHistory({initialEntries: ["/"]}),
   });
   return render(<RouterProvider router={router} />);
 }
@@ -92,7 +94,7 @@ describe("ProposalCard", () => {
   it("shows a generic fallback title when metadata is unverified", async () => {
     const unverified: ProposalListItem = {
       ...baseProposal,
-      metadataResult: { verified: false, reason: "hash mismatch" },
+      metadataResult: {verified: false, reason: "hash mismatch"},
     };
     renderWithRouter(<ProposalCard proposal={unverified} nowSecs={500n} />);
     expect(await screen.findByText(/proposal #142/i)).toBeInTheDocument();

@@ -1,7 +1,7 @@
 // tests/e2e/vote-flow.spec.ts
-import { test, expect } from "@playwright/test";
-import { MOCK_WALLET_INIT_SCRIPT, MOCK_ADDRESS } from "./fixtures/mock-wallet";
-import { ACTIVE_PROPOSAL_ID } from "./fixtures/mock-fullnode-server";
+import {expect, test} from "@playwright/test";
+import {ACTIVE_PROPOSAL_ID} from "./fixtures/mock-fullnode-server";
+import {MOCK_ADDRESS, MOCK_WALLET_INIT_SCRIPT} from "./fixtures/mock-wallet";
 
 // The mock fullnode/indexer server is started once, as its own
 // process, before `playwright test` is even invoked — see
@@ -33,18 +33,18 @@ import { ACTIVE_PROPOSAL_ID } from "./fixtures/mock-fullnode-server";
  * timing that could still flake under different machine speeds.
  */
 async function connectMockWallet(page: import("@playwright/test").Page) {
-  const connectButton = page.getByRole("button", { name: /connect wallet/i });
-  const mockWalletMenuItem = page.getByRole("menuitem", { name: "Mock Wallet" });
+  const connectButton = page.getByRole("button", {name: /connect wallet/i});
+  const mockWalletMenuItem = page.getByRole("menuitem", {name: "Mock Wallet"});
 
   await expect(async () => {
     await connectButton.click();
-    await expect(mockWalletMenuItem).toBeVisible({ timeout: 1000 });
-  }).toPass({ timeout: 15000 });
+    await expect(mockWalletMenuItem).toBeVisible({timeout: 1000});
+  }).toPass({timeout: 15000});
 
   await mockWalletMenuItem.click();
 }
 
-test("connect wallet, view proposal, and cast a vote", async ({ page }) => {
+test("connect wallet, view proposal, and cast a vote", async ({page}) => {
   // Inject the mock AIP-62 wallet before any app script runs, so the
   // adapter's discovery code sees it exactly like a real extension.
   await page.addInitScript(MOCK_WALLET_INIT_SCRIPT);
@@ -53,33 +53,29 @@ test("connect wallet, view proposal, and cast a vote", async ({ page }) => {
 
   // The verified title should be visible — confirms metadata hash
   // verification passed against the mock server's served body.
-  await expect(
-    page.getByText("Mock Proposal For E2E Testing"),
-  ).toBeVisible();
+  await expect(page.getByText("Mock Proposal For E2E Testing")).toBeVisible();
 
   await connectMockWallet(page);
 
   // The truncated mock address should appear once connected.
   await expect(
-    page.getByText(MOCK_ADDRESS.slice(0, 8), { exact: false }),
+    page.getByText(MOCK_ADDRESS.slice(0, 8), {exact: false}),
   ).toBeVisible();
 
   // Cast a Yes vote.
-  await page.getByRole("button", { name: /^yes$/i }).click();
-  await page.getByRole("button", { name: /review vote/i }).click();
+  await page.getByRole("button", {name: /^yes$/i}).click();
+  await page.getByRole("button", {name: /review vote/i}).click();
 
   // Review step must show the real function name before any signing.
   await expect(
     page.getByText("0x1::aptos_governance::partial_vote"),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: /confirm and sign/i }).click();
+  await page.getByRole("button", {name: /confirm and sign/i}).click();
 
   // After a successful vote, the mock wallet's signAndSubmitTransaction
   // should have been called with the exact expected payload.
-  await page.waitForFunction(
-    () => (window.__mockWalletCalls?.length ?? 0) > 0,
-  );
+  await page.waitForFunction(() => (window.__mockWalletCalls?.length ?? 0) > 0);
   const calls = (await page.evaluate(
     () => window.__mockWalletCalls,
   )) as NonNullable<typeof window.__mockWalletCalls>;

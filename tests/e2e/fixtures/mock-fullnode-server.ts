@@ -1,7 +1,7 @@
 // tests/e2e/fixtures/mock-fullnode-server.ts
 import http from "node:http";
-import { Deserializer, EntryFunction } from "@aptos-labs/ts-sdk";
-import { MOCK_POOL_ADDRESS } from "./mock-wallet.ts";
+import {Deserializer, EntryFunction} from "@aptos-labs/ts-sdk";
+import {MOCK_POOL_ADDRESS} from "./mock-wallet.ts";
 
 export const ACTIVE_PROPOSAL_ID = "999";
 const VOTING_FORUM_HANDLE =
@@ -13,7 +13,7 @@ function buildMockProposal() {
   const nowSecs = Math.floor(Date.now() / 1000);
   return {
     proposer: MOCK_POOL_ADDRESS,
-    execution_content: { vec: [{ dummy_field: false }] },
+    execution_content: {vec: [{dummy_field: false}]},
     metadata: {
       data: [
         {
@@ -33,7 +33,7 @@ function buildMockProposal() {
     execution_hash: "0x00",
     min_vote_threshold: "1",
     expiration_secs: String(nowSecs + 3600),
-    early_resolution_vote_threshold: { vec: [] },
+    early_resolution_vote_threshold: {vec: []},
     yes_votes: "0",
     no_votes: "0",
     is_resolved: false,
@@ -48,8 +48,8 @@ function buildMockProposal() {
 // (reproduced ERR_PACKAGE_PATH_NOT_EXPORTED with the extensionless
 // form). Fixed proactively here rather than waiting to hit the error.
 async function computeMetadataHashHex(): Promise<string> {
-  const { sha3_256 } = await import("@noble/hashes/sha3.js");
-  const { bytesToHex } = await import("@noble/hashes/utils.js");
+  const {sha3_256} = await import("@noble/hashes/sha3.js");
+  const {bytesToHex} = await import("@noble/hashes/utils.js");
   const digestHex = bytesToHex(
     sha3_256(new TextEncoder().encode(MOCK_METADATA_BODY)),
   );
@@ -110,31 +110,29 @@ export async function startMockFullnodeServer(port = 8081) {
       // its real position (confirmed by reproducing exactly this:
       // declaring a proposal-id argument slot as "address" caused
       // "Hex string is too short..." trying to parse "999" as hex).
-      const functionAbis: Record<
-        string,
-        { params: string[]; return: string[] }
-      > = {
-        get_remaining_voting_power: {
-          params: ["address", "u64"],
-          return: ["u64"],
-        },
-        has_entirely_voted: {
-          params: ["address", "u64"],
-          return: ["bool"],
-        },
-        get_voting_power: {
-          params: ["address"],
-          return: ["u64"],
-        },
-        calculate_and_update_remaining_voting_power: {
-          params: ["address", "address", "u64"],
-          return: ["u64"],
-        },
-        calculate_and_update_voter_total_voting_power: {
-          params: ["address", "address"],
-          return: ["u64"],
-        },
-      };
+      const functionAbis: Record<string, {params: string[]; return: string[]}> =
+        {
+          get_remaining_voting_power: {
+            params: ["address", "u64"],
+            return: ["u64"],
+          },
+          has_entirely_voted: {
+            params: ["address", "u64"],
+            return: ["bool"],
+          },
+          get_voting_power: {
+            params: ["address"],
+            return: ["u64"],
+          },
+          calculate_and_update_remaining_voting_power: {
+            params: ["address", "address", "u64"],
+            return: ["u64"],
+          },
+          calculate_and_update_voter_total_voting_power: {
+            params: ["address", "address"],
+            return: ["u64"],
+          },
+        };
       res.end(
         JSON.stringify({
           bytecode: "0x",
@@ -143,7 +141,7 @@ export async function startMockFullnodeServer(port = 8081) {
             name: moduleName,
             friends: [],
             exposed_functions: Object.entries(functionAbis).map(
-              ([name, { params, return: returns }]) => ({
+              ([name, {params, return: returns}]) => ({
                 name,
                 visibility: "public",
                 is_entry: false,
@@ -168,7 +166,7 @@ export async function startMockFullnodeServer(port = 8081) {
         JSON.stringify({
           data: {
             next_proposal_id: String(Number(ACTIVE_PROPOSAL_ID) + 1),
-            proposals: { handle: VOTING_FORUM_HANDLE },
+            proposals: {handle: VOTING_FORUM_HANDLE},
           },
         }),
       );
@@ -266,7 +264,9 @@ export async function startMockFullnodeServer(port = 8081) {
           sender: "0x1",
           sequence_number: "0",
           max_gas_amount: "2000",
-          expiration_timestamp_secs: String(Math.floor(Date.now() / 1000) + 3600),
+          expiration_timestamp_secs: String(
+            Math.floor(Date.now() / 1000) + 3600,
+          ),
           payload: {
             type: "entry_function_payload",
             function: "0x1::aptos_governance::partial_vote",
@@ -300,7 +300,9 @@ export async function startMockFullnodeServer(port = 8081) {
           sender: "0x1",
           sequence_number: "0",
           max_gas_amount: "2000",
-          expiration_timestamp_secs: String(Math.floor(Date.now() / 1000) + 3600),
+          expiration_timestamp_secs: String(
+            Math.floor(Date.now() / 1000) + 3600,
+          ),
           payload: {
             type: "entry_function_payload",
             function: "0x1::aptos_governance::partial_vote",
@@ -318,37 +320,50 @@ export async function startMockFullnodeServer(port = 8081) {
 
     if (req.method === "POST" && url.pathname === "/graphql") {
       const body = JSON.parse(await readBody(req));
-      if (typeof body.query === "string" && body.query.includes("current_staking_pool_voter")) {
+      if (
+        typeof body.query === "string" &&
+        body.query.includes("current_staking_pool_voter")
+      ) {
         res.end(
           JSON.stringify({
             data: {
               current_staking_pool_voter: [
-                { staking_pool_address: MOCK_POOL_ADDRESS },
+                {staking_pool_address: MOCK_POOL_ADDRESS},
               ],
             },
           }),
         );
         return;
       }
-      if (typeof body.query === "string" && body.query.includes("current_delegated_voter")) {
-        res.end(JSON.stringify({ data: { current_delegated_voter: [] } }));
+      if (
+        typeof body.query === "string" &&
+        body.query.includes("current_delegated_voter")
+      ) {
+        res.end(JSON.stringify({data: {current_delegated_voter: []}}));
         return;
       }
-      if (typeof body.query === "string" && body.query.includes("proposal_votes")) {
-        res.end(JSON.stringify({ data: { proposal_votes: [] } }));
+      if (
+        typeof body.query === "string" &&
+        body.query.includes("proposal_votes")
+      ) {
+        res.end(JSON.stringify({data: {proposal_votes: []}}));
         return;
       }
       res.statusCode = 400;
-      res.end(JSON.stringify({ errors: [{ message: "unhandled mock query" }] }));
+      res.end(JSON.stringify({errors: [{message: "unhandled mock query"}]}));
       return;
     }
 
     res.statusCode = 404;
-    res.end(JSON.stringify({ error: `mock server: no handler for ${req.method} ${url.pathname}` }));
+    res.end(
+      JSON.stringify({
+        error: `mock server: no handler for ${req.method} ${url.pathname}`,
+      }),
+    );
   });
 
   await new Promise<void>((resolve) => server.listen(port, resolve));
-  return { server, activeProposalId: ACTIVE_PROPOSAL_ID };
+  return {server, activeProposalId: ACTIVE_PROPOSAL_ID};
 }
 
 function readBody(req: http.IncomingMessage): Promise<string> {

@@ -1,7 +1,7 @@
 // src/lib/governance/fetch-my-pools.ts
-import { getAptosClient } from "~/lib/aptos/client";
-import { executeIndexerQuery } from "~/lib/governance/indexer-client";
-import type { PoolKind } from "~/lib/governance/types";
+import {getAptosClient} from "~/lib/aptos/client";
+import {executeIndexerQuery} from "~/lib/governance/indexer-client";
+import type {PoolKind} from "~/lib/governance/types";
 
 const STAKING_POOL_VOTER_QUERY = `
   query StakingPoolVoter($voter: String) {
@@ -50,9 +50,9 @@ export interface PoolVoteHistoryRow {
 
 async function findMyStakePools(voterAddress: string): Promise<MyPool[]> {
   const aptos = getAptosClient();
-  const { current_staking_pool_voter } = await executeIndexerQuery<{
-    current_staking_pool_voter: Array<{ staking_pool_address: string }>;
-  }>(STAKING_POOL_VOTER_QUERY, { voter: voterAddress });
+  const {current_staking_pool_voter} = await executeIndexerQuery<{
+    current_staking_pool_voter: Array<{staking_pool_address: string}>;
+  }>(STAKING_POOL_VOTER_QUERY, {voter: voterAddress});
 
   return Promise.all(
     current_staking_pool_voter.map(async (row) => {
@@ -74,9 +74,9 @@ async function findMyStakePools(voterAddress: string): Promise<MyPool[]> {
 
 async function findMyDelegationPools(voterAddress: string): Promise<MyPool[]> {
   const aptos = getAptosClient();
-  const { current_delegated_voter } = await executeIndexerQuery<{
-    current_delegated_voter: Array<{ delegation_pool_address: string }>;
-  }>(DELEGATED_VOTER_QUERY, { voter: voterAddress });
+  const {current_delegated_voter} = await executeIndexerQuery<{
+    current_delegated_voter: Array<{delegation_pool_address: string}>;
+  }>(DELEGATED_VOTER_QUERY, {voter: voterAddress});
 
   return Promise.all(
     current_delegated_voter.map(async (row) => {
@@ -114,13 +114,13 @@ export async function findMyPools(voterAddress: string): Promise<MyPool[]> {
 export async function fetchVoteHistoryForPool(
   poolAddress: string,
 ): Promise<PoolVoteHistoryRow[]> {
-  const { proposal_votes } = await executeIndexerQuery<{
+  const {proposal_votes} = await executeIndexerQuery<{
     proposal_votes: Array<{
       proposal_id: string;
       should_pass: boolean;
       num_votes: string;
     }>;
-  }>(VOTE_HISTORY_QUERY, { poolAddress });
+  }>(VOTE_HISTORY_QUERY, {poolAddress});
 
   return proposal_votes.map((row) => ({
     proposalId: row.proposal_id,

@@ -1,44 +1,44 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { StatusBadge } from "~/components/StatusBadge";
-import { VoteBar } from "~/components/VoteBar";
-import { MyVoteBadge } from "~/components/MyVoteBadge";
-import { MetadataVerifiedNotice } from "~/components/MetadataVerifiedNotice";
-import { VotingPanel } from "~/components/VotingPanel";
+import {useWallet} from "@aptos-labs/wallet-adapter-react";
+import {useQuery} from "@tanstack/react-query";
+import {createFileRoute, Link} from "@tanstack/react-router";
+import {MetadataVerifiedNotice} from "~/components/MetadataVerifiedNotice";
+import {MyVoteBadge} from "~/components/MyVoteBadge";
+import {StatusBadge} from "~/components/StatusBadge";
+import {VoteBar} from "~/components/VoteBar";
+import {VotingPanel} from "~/components/VotingPanel";
+import {fetchMyVotes} from "~/lib/governance/fetch-my-votes";
+import {getProposalDetail} from "~/lib/governance/fetch-proposal";
+import {PROPOSAL_VOTES_PAGE_SIZE} from "~/lib/governance/fetch-proposal-votes";
 import {
   formatDurationCompact,
   formatOctasToApt,
   truncateAddress,
 } from "~/lib/governance/format";
-import { getProposalDetail } from "~/lib/governance/fetch-proposal";
-import { fetchMyVotes } from "~/lib/governance/fetch-my-votes";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { PROPOSAL_VOTES_PAGE_SIZE } from "~/lib/governance/fetch-proposal-votes";
 
 export const Route = createFileRoute("/proposal/$proposalId")({
-  loader: ({ params }) =>
-    getProposalDetail({ data: { proposalId: params.proposalId } }),
+  loader: ({params}) =>
+    getProposalDetail({data: {proposalId: params.proposalId}}),
   component: ProposalDetail,
 });
 
 function ProposalDetail() {
   const initialData = Route.useLoaderData();
-  const { proposalId } = Route.useParams();
+  const {proposalId} = Route.useParams();
 
-  const { data } = useQuery({
+  const {data} = useQuery({
     queryKey: ["proposal", proposalId],
-    queryFn: () => getProposalDetail({ data: { proposalId } }),
+    queryFn: () => getProposalDetail({data: {proposalId}}),
     initialData,
     refetchInterval: 30_000,
   });
 
-  const { proposal, votes } = data;
+  const {proposal, votes} = data;
   const nowSecs = BigInt(Math.floor(Date.now() / 1000));
   const title = proposal.metadataResult.verified
     ? proposal.metadataResult.metadata.title
     : `Proposal #${proposal.proposalId}`;
 
-  const { connected, account } = useWallet();
+  const {connected, account} = useWallet();
 
   const myVotesQuery = useQuery({
     queryKey: ["my-votes", account?.address?.toString(), proposalId],
@@ -59,7 +59,7 @@ function ProposalDetail() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <Link
         to="/"
-        search={{ page: 0, status: "all" }}
+        search={{page: 0, status: "all"}}
         className="text-sm text-[var(--color-text-secondary)] underline"
       >
         ← All proposals
@@ -116,7 +116,8 @@ function ProposalDetail() {
           />
         </div>
         <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
-          Minimum vote threshold: {formatOctasToApt(proposal.minVoteThreshold, 0)} APT
+          Minimum vote threshold:{" "}
+          {formatOctasToApt(proposal.minVoteThreshold, 0)} APT
           {proposal.earlyResolutionVoteThreshold &&
             ` · Early resolution at ${formatOctasToApt(proposal.earlyResolutionVoteThreshold, 0)} APT`}
         </p>

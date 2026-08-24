@@ -1,4 +1,4 @@
-import type { ProposalStatus } from "~/lib/governance/types";
+import type {ProposalStatus} from "~/lib/governance/types";
 
 const STATUS_LABEL: Record<ProposalStatus, string> = {
   active: "Active",
@@ -21,7 +21,7 @@ const STATUS_TEXT_VAR: Record<ProposalStatus, string> = {
   failed: "var(--color-status-failed-text)",
 };
 
-export function StatusBadge({ status }: { status: ProposalStatus }) {
+export function StatusBadge({status}: {status: ProposalStatus}) {
   return (
     <span
       className="inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold uppercase tracking-wide"

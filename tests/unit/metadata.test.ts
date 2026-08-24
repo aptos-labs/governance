@@ -1,8 +1,8 @@
 // tests/unit/metadata.test.ts
-import { describe, expect, it, vi, afterEach } from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 import {
-  verifyProposalMetadata,
   fetchAndVerifyProposalMetadata,
+  verifyProposalMetadata,
 } from "~/lib/governance/metadata";
 
 // Real fixture: the exact bytes and on-chain hash confirmed against
@@ -63,7 +63,7 @@ describe("verifyProposalMetadata", () => {
   });
 
   it("fails verification when required fields are missing", () => {
-    const incomplete = JSON.stringify({ title: "Only a title" });
+    const incomplete = JSON.stringify({title: "Only a title"});
     // Same reasoning as above: this hash genuinely matches `incomplete`'s
     // real digest so the test isolates the missing-fields branch instead
     // of tripping the hash-mismatch check first.
@@ -95,7 +95,9 @@ describe("fetchAndVerifyProposalMetadata", () => {
   function mockFetchResolvedWith(body: string, status = 200): void {
     globalThis.fetch = vi
       .fn()
-      .mockResolvedValue(new Response(body, { status })) as unknown as typeof fetch;
+      .mockResolvedValue(
+        new Response(body, {status}),
+      ) as unknown as typeof fetch;
   }
 
   it("returns verified metadata for a matching fetch response", async () => {

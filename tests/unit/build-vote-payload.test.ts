@@ -1,7 +1,7 @@
 // tests/unit/build-vote-payload.test.ts
-import { describe, expect, it } from "vitest";
-import { buildVoteTransactionPayload } from "~/lib/governance/build-vote-payload";
-import type { EligiblePool } from "~/lib/governance/types";
+import {describe, expect, it} from "vitest";
+import {buildVoteTransactionPayload} from "~/lib/governance/build-vote-payload";
+import type {EligiblePool} from "~/lib/governance/types";
 
 const stakePool: EligiblePool = {
   poolAddress: "0xstakepool1",

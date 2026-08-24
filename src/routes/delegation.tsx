@@ -1,22 +1,22 @@
 // src/routes/delegation.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { Link } from "@tanstack/react-router";
-import { getMyDelegation } from "~/lib/governance/get-my-delegation";
-import { formatOctasToApt, truncateAddress } from "~/lib/governance/format";
+
+import {useWallet} from "@aptos-labs/wallet-adapter-react";
+import {useQuery} from "@tanstack/react-query";
+import {createFileRoute, Link} from "@tanstack/react-router";
+import {formatOctasToApt, truncateAddress} from "~/lib/governance/format";
+import {getMyDelegation} from "~/lib/governance/get-my-delegation";
 
 export const Route = createFileRoute("/delegation")({
   component: MyDelegation,
 });
 
 function MyDelegation() {
-  const { connected, account } = useWallet();
+  const {connected, account} = useWallet();
 
   const query = useQuery({
     queryKey: ["my-delegation", account?.address],
     queryFn: () =>
-      getMyDelegation({ data: { voterAddress: account!.address.toString() } }),
+      getMyDelegation({data: {voterAddress: account!.address.toString()}}),
     enabled: connected && !!account,
   });
 
@@ -52,7 +52,9 @@ function MyDelegation() {
                   {truncateAddress(pool.poolAddress)}
                 </span>
                 <span className="text-xs uppercase text-[var(--color-text-secondary)]">
-                  {pool.poolKind === "stake_pool" ? "Stake pool" : "Delegation pool"}
+                  {pool.poolKind === "stake_pool"
+                    ? "Stake pool"
+                    : "Delegation pool"}
                 </span>
               </div>
               <p className="mt-1 text-sm">
@@ -65,7 +67,7 @@ function MyDelegation() {
                     <li key={h.proposalId}>
                       <Link
                         to="/proposal/$proposalId"
-                        params={{ proposalId: h.proposalId }}
+                        params={{proposalId: h.proposalId}}
                         className="underline"
                       >
                         Proposal #{h.proposalId}

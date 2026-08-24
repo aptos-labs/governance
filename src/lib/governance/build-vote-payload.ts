@@ -1,6 +1,6 @@
 // src/lib/governance/build-vote-payload.ts
-import type { InputEntryFunctionData } from "@aptos-labs/ts-sdk";
-import type { EligiblePool } from "~/lib/governance/types";
+import type {InputEntryFunctionData} from "@aptos-labs/ts-sdk";
+import type {EligiblePool} from "~/lib/governance/types";
 
 /**
  * Uses the SDK's own InputEntryFunctionData type directly (re-exported

@@ -3,8 +3,8 @@
 // imports (its package.json "exports" map only defines "./sha3.js" and
 // "./utils.js", not the extensionless "./sha3"/"./utils" that worked on
 // older majors).
-import { sha3_256 } from "@noble/hashes/sha3.js";
-import { bytesToHex } from "@noble/hashes/utils.js";
+import {sha3_256} from "@noble/hashes/sha3.js";
+import {bytesToHex} from "@noble/hashes/utils.js";
 import type {
   MetadataVerificationResult,
   ProposalMetadata,
@@ -57,7 +57,9 @@ export function verifyProposalMetadata(
   rawText: string,
   expectedHashHex: string,
 ): MetadataVerificationResult {
-  const computedDigest = bytesToHex(sha3_256(new TextEncoder().encode(rawText)));
+  const computedDigest = bytesToHex(
+    sha3_256(new TextEncoder().encode(rawText)),
+  );
   const expectedDigest = decodeOnChainHash(expectedHashHex);
 
   if (computedDigest !== expectedDigest) {
@@ -88,7 +90,7 @@ export function verifyProposalMetadata(
     };
   }
 
-  return { verified: true, metadata: parsed };
+  return {verified: true, metadata: parsed};
 }
 
 /**
@@ -137,7 +139,7 @@ export async function fetchAndVerifyProposalMetadata(
 
     try {
       while (true) {
-        const { done, value } = await reader.read();
+        const {done, value} = await reader.read();
         if (done) break;
         totalBytes += value.byteLength;
         if (totalBytes > MAX_METADATA_BYTES) {
@@ -155,7 +157,9 @@ export async function fetchAndVerifyProposalMetadata(
       reader.releaseLock();
     }
 
-    const text = new TextDecoder("utf-8").decode(concatChunks(chunks, totalBytes));
+    const text = new TextDecoder("utf-8").decode(
+      concatChunks(chunks, totalBytes),
+    );
 
     return verifyProposalMetadata(text, expectedHashHex);
   } catch (error) {

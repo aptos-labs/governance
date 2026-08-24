@@ -1,9 +1,9 @@
 // src/components/VotingPanel.tsx
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { getAptosClient } from "~/lib/aptos/client";
-import { getEligiblePools } from "~/lib/governance/get-eligible-pools";
+
+import {useWallet} from "@aptos-labs/wallet-adapter-react";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useState} from "react";
+import {getAptosClient} from "~/lib/aptos/client";
 import {
   buildVoteTransactionPayload,
   type VoteTransactionPayload,
@@ -13,7 +13,8 @@ import {
   parseAptToOctas,
   truncateAddress,
 } from "~/lib/governance/format";
-import type { EligiblePool } from "~/lib/governance/types";
+import {getEligiblePools} from "~/lib/governance/get-eligible-pools";
+import type {EligiblePool} from "~/lib/governance/types";
 
 /**
  * Everything the review step displays AND everything needed to submit,
@@ -54,8 +55,8 @@ interface PoolVoteDraft {
   submitError: string | null;
 }
 
-export function VotingPanel({ proposalId }: { proposalId: string }) {
-  const { connected, account, signAndSubmitTransaction } = useWallet();
+export function VotingPanel({proposalId}: {proposalId: string}) {
+  const {connected, account, signAndSubmitTransaction} = useWallet();
   const queryClient = useQueryClient();
   const [drafts, setDrafts] = useState<Record<string, PoolVoteDraft>>({});
 
@@ -72,7 +73,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
     queryKey: ["eligible-pools", accountAddress, proposalId],
     queryFn: async () => {
       const raw = await getEligiblePools({
-        data: { voterAddress: accountAddress!, proposalId },
+        data: {voterAddress: accountAddress!, proposalId},
       });
       return raw.map((p) => ({
         ...p,
@@ -96,8 +97,8 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
       submittedAccountAddress: string;
       payload: VoteTransactionPayload;
     }) => {
-      const { hash } = await signAndSubmitTransaction(input.payload);
-      await getAptosClient().waitForTransaction({ transactionHash: hash });
+      const {hash} = await signAndSubmitTransaction(input.payload);
+      await getAptosClient().waitForTransaction({transactionHash: hash});
       return hash;
     },
     onSuccess: (_hash, variables) => {
@@ -111,7 +112,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
       queryClient.invalidateQueries({
         queryKey: ["proposal", variables.submittedProposalId],
       });
-      queryClient.invalidateQueries({ queryKey: ["proposals"] });
+      queryClient.invalidateQueries({queryKey: ["proposals"]});
       queryClient.invalidateQueries({
         queryKey: [
           "eligible-pools",
@@ -120,7 +121,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
         ],
       });
       setDrafts((prev) => {
-        const next = { ...prev };
+        const next = {...prev};
         delete next[variables.draftKey];
         return next;
       });
@@ -132,7 +133,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
         if (!existing) return prev;
         return {
           ...prev,
-          [variables.draftKey]: { ...existing, submitError: message },
+          [variables.draftKey]: {...existing, submitError: message},
         };
       });
     },
@@ -208,7 +209,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
         const setDraft = (patch: Partial<PoolVoteDraft>) =>
           setDrafts((prev) => ({
             ...prev,
-            [draftKey]: { ...draft, ...patch },
+            [draftKey]: {...draft, ...patch},
           }));
 
         const parsedAmountOctas = parseAptToOctas(draft.amountText);
@@ -246,7 +247,10 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
             </div>
 
             {draft.submitError && (
-              <p role="alert" className="mt-2 text-sm text-[var(--color-error)]">
+              <p
+                role="alert"
+                className="mt-2 text-sm text-[var(--color-error)]"
+              >
                 {draft.submitError}
               </p>
             )}
@@ -256,14 +260,14 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
                 <div className="mt-3 flex gap-2">
                   <button
                     type="button"
-                    onClick={() => setDraft({ direction: "for" })}
+                    onClick={() => setDraft({direction: "for"})}
                     className={`rounded-full px-4 py-1 text-sm ${draft.direction === "for" ? "bg-[var(--color-status-passed-fill)]" : "border border-[var(--color-border)]"}`}
                   >
                     Yes
                   </button>
                   <button
                     type="button"
-                    onClick={() => setDraft({ direction: "against" })}
+                    onClick={() => setDraft({direction: "against"})}
                     className={`rounded-full px-4 py-1 text-sm ${draft.direction === "against" ? "bg-[var(--color-status-failed-fill)]" : "border border-[var(--color-border)]"}`}
                   >
                     No
@@ -281,7 +285,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
                   type="text"
                   inputMode="decimal"
                   value={draft.amountText}
-                  onChange={(e) => setDraft({ amountText: e.target.value })}
+                  onChange={(e) => setDraft({amountText: e.target.value})}
                   className="mt-1 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-paper)] px-3 py-1.5 text-sm"
                 />
                 {amountExceedsAvailable && (
@@ -341,7 +345,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
               draft.reviewed && (
                 <div
                   className="mt-3 rounded-lg p-3 text-sm"
-                  style={{ backgroundColor: "var(--color-border-light)" }}
+                  style={{backgroundColor: "var(--color-border-light)"}}
                 >
                   <dl className="space-y-1">
                     <div>
@@ -389,7 +393,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
                     <button
                       type="button"
                       onClick={() =>
-                        setDraft({ reviewing: false, reviewed: null })
+                        setDraft({reviewing: false, reviewed: null})
                       }
                       className="rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm"
                     >
@@ -399,7 +403,7 @@ export function VotingPanel({ proposalId }: { proposalId: string }) {
                       type="button"
                       disabled={voteMutation.isPending}
                       onClick={() => {
-                        setDraft({ submitError: null });
+                        setDraft({submitError: null});
                         // submittedProposalId/submittedAccountAddress
                         // come from the frozen `draft.reviewed`
                         // snapshot (proposalId) and the draftKey's own

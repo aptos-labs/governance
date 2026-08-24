@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
-import { StatusBadge } from "~/components/StatusBadge";
+import {cleanup, render, screen} from "@testing-library/react";
+import {afterEach, describe, expect, it} from "vitest";
+import {StatusBadge} from "~/components/StatusBadge";
 
 describe("StatusBadge", () => {
   afterEach(cleanup);

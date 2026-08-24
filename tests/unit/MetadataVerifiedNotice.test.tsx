@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import { MetadataVerifiedNotice } from "~/components/MetadataVerifiedNotice";
+import {render, screen} from "@testing-library/react";
+import {describe, expect, it} from "vitest";
+import {MetadataVerifiedNotice} from "~/components/MetadataVerifiedNotice";
 
 describe("MetadataVerifiedNotice", () => {
   it("shows nothing alarming and renders the verified description when verified", () => {
@@ -20,11 +20,11 @@ describe("MetadataVerifiedNotice", () => {
       />,
     );
     expect(screen.getByText("A verified description.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /source/i })).toHaveAttribute(
+    expect(screen.getByRole("link", {name: /source/i})).toHaveAttribute(
       "href",
       "https://example.com/src",
     );
-    expect(screen.getByRole("link", { name: /discussion/i })).toHaveAttribute(
+    expect(screen.getByRole("link", {name: /discussion/i})).toHaveAttribute(
       "href",
       "https://example.com/discuss",
     );
@@ -34,7 +34,7 @@ describe("MetadataVerifiedNotice", () => {
   it("shows an explicit warning and the failure reason when unverified", () => {
     render(
       <MetadataVerifiedNotice
-        result={{ verified: false, reason: "metadata hash mismatch: ..." }}
+        result={{verified: false, reason: "metadata hash mismatch: ..."}}
       />,
     );
     expect(screen.getByText(/unverified/i)).toBeInTheDocument();
@@ -56,7 +56,9 @@ describe("MetadataVerifiedNotice", () => {
       />,
     );
     // The literal tag text should appear as text content, not be parsed as an element.
-    expect(screen.getByText("<img src=x onerror=alert(1)>")).toBeInTheDocument();
+    expect(
+      screen.getByText("<img src=x onerror=alert(1)>"),
+    ).toBeInTheDocument();
     expect(document.querySelector("img")).not.toBeInTheDocument();
   });
 });

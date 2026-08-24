@@ -1,14 +1,21 @@
 // src/routes/index.tsx
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
-import { ProposalCard } from "~/components/ProposalCard";
-import { listProposals } from "~/lib/governance/fetch-proposals";
-import { fetchMyVotes } from "~/lib/governance/fetch-my-votes";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import type { ProposalStatus } from "~/lib/governance/types";
 
-const STATUS_FILTERS = ["all", "active", "passed", "executed", "failed"] as const;
+import {useWallet} from "@aptos-labs/wallet-adapter-react";
+import {useQuery} from "@tanstack/react-query";
+import {createFileRoute, Link} from "@tanstack/react-router";
+import {z} from "zod";
+import {ProposalCard} from "~/components/ProposalCard";
+import {fetchMyVotes} from "~/lib/governance/fetch-my-votes";
+import {listProposals} from "~/lib/governance/fetch-proposals";
+import type {ProposalStatus} from "~/lib/governance/types";
+
+const STATUS_FILTERS = [
+  "all",
+  "active",
+  "passed",
+  "executed",
+  "failed",
+] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 const searchSchema = z.object({
@@ -18,8 +25,8 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/")({
   validateSearch: searchSchema,
-  loaderDeps: ({ search }) => ({ page: search.page }),
-  loader: ({ deps }) => listProposals({ data: { page: deps.page } }),
+  loaderDeps: ({search}) => ({page: search.page}),
+  loader: ({deps}) => listProposals({data: {page: deps.page}}),
   component: Home,
 });
 
@@ -29,19 +36,21 @@ function matchesFilter(status: ProposalStatus, filter: StatusFilter): boolean {
 
 function Home() {
   const initialData = Route.useLoaderData();
-  const { page, status } = Route.useSearch();
+  const {page, status} = Route.useSearch();
 
-  const { data } = useQuery({
+  const {data} = useQuery({
     queryKey: ["proposals", page],
-    queryFn: () => listProposals({ data: { page } }),
+    queryFn: () => listProposals({data: {page}}),
     initialData,
     refetchInterval: 30_000,
   });
 
   const nowSecs = BigInt(Math.floor(Date.now() / 1000));
-  const filteredItems = data.items.filter((p) => matchesFilter(p.status, status));
+  const filteredItems = data.items.filter((p) =>
+    matchesFilter(p.status, status),
+  );
 
-  const { connected, account } = useWallet();
+  const {connected, account} = useWallet();
 
   const myVotesQuery = useQuery({
     queryKey: ["my-votes", account?.address?.toString(), page],
@@ -70,7 +79,7 @@ function Home() {
           <Link
             key={filterOption}
             to="/"
-            search={(prev) => ({ page: prev.page ?? 0, status: filterOption })}
+            search={(prev) => ({page: prev.page ?? 0, status: filterOption})}
             className={`rounded-full px-3 py-1 text-sm capitalize ${
               status === filterOption
                 ? "bg-[var(--color-text-primary)] text-[var(--color-canvas)]"
@@ -105,7 +114,10 @@ function Home() {
           {page > 0 ? (
             <Link
               to="/"
-              search={(prev) => ({ page: page - 1, status: prev.status ?? "all" })}
+              search={(prev) => ({
+                page: page - 1,
+                status: prev.status ?? "all",
+              })}
               className="rounded-full border border-[var(--color-border)] px-3 py-1"
             >
               ← Previous
@@ -116,12 +128,16 @@ function Home() {
             </span>
           )}
           <span className="text-[var(--color-text-secondary)]">
-            Page {page + 1} of {Math.max(1, Math.ceil(data.totalCount / data.pageSize))}
+            Page {page + 1} of{" "}
+            {Math.max(1, Math.ceil(data.totalCount / data.pageSize))}
           </span>
           {(page + 1) * data.pageSize < data.totalCount ? (
             <Link
               to="/"
-              search={(prev) => ({ page: page + 1, status: prev.status ?? "all" })}
+              search={(prev) => ({
+                page: page + 1,
+                status: prev.status ?? "all",
+              })}
               className="rounded-full border border-[var(--color-border)] px-3 py-1"
             >
               Next →

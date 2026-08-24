@@ -1,6 +1,6 @@
 // src/components/MyVoteBadge.tsx
 
-export function MyVoteBadge({ shouldPass }: { shouldPass: boolean }) {
+export function MyVoteBadge({shouldPass}: {shouldPass: boolean}) {
   return (
     <span
       className="inline-flex items-center rounded-full px-2 py-0.5 font-mono text-xs font-semibold uppercase tracking-wide"

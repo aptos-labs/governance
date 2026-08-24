@@ -23,7 +23,7 @@
 // starts polling port 3000, port 8081 has already been serving
 // responses for as long as `pnpm dev` takes to boot, which is normally
 // well under a second.
-import { startMockFullnodeServer } from "./mock-fullnode-server.ts";
+import {startMockFullnodeServer} from "./mock-fullnode-server.ts";
 
 async function main() {
   await startMockFullnodeServer(8081);

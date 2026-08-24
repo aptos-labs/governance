@@ -1,15 +1,15 @@
-import { describe, expect, it } from "vitest";
+import {describe, expect, it} from "vitest";
 import {
+  buildProposalListItem,
   decodeMetadataLocation,
   parseRawProposalCore,
-  buildProposalListItem,
 } from "~/lib/governance/parse-raw-proposal";
-import type { RawProposal } from "~/lib/governance/types";
+import type {RawProposal} from "~/lib/governance/types";
 
 const REAL_RAW_PROPOSAL: RawProposal = {
   creation_time_secs: "1782168501",
-  early_resolution_vote_threshold: { vec: ["60229252106793881"] },
-  execution_content: { vec: [{ dummy_field: false }] },
+  early_resolution_vote_threshold: {vec: ["60229252106793881"]},
+  execution_content: {vec: [{dummy_field: false}]},
   execution_hash:
     "0x1d7165849ba6d59630992eafb972ac83c997a65670192a93d95503f8c8e35447",
   expiration_secs: "1782427701",
@@ -26,9 +26,9 @@ const REAL_RAW_PROPOSAL: RawProposal = {
         value:
           "0x63626330376439363530646338383336663137636439393039316638633033333166623765633333643638323562323034393066356235616635353433386138",
       },
-      { key: "IS_MULTI_STEP_PROPOSAL_KEY", value: "0x01" },
-      { key: "IS_MULTI_STEP_PROPOSAL_IN_EXECUTION", value: "0x00" },
-      { key: "RESOLVABLE_TIME_METADATA_KEY", value: "0x36a83d6a00000000" },
+      {key: "IS_MULTI_STEP_PROPOSAL_KEY", value: "0x01"},
+      {key: "IS_MULTI_STEP_PROPOSAL_IN_EXECUTION", value: "0x00"},
+      {key: "RESOLVABLE_TIME_METADATA_KEY", value: "0x36a83d6a00000000"},
     ],
   },
   min_vote_threshold: "30000000000000000",
@@ -80,13 +80,15 @@ describe("parseRawProposalCore", () => {
       is_resolved: false,
       resolution_time_secs: "0",
     };
-    expect(parseRawProposalCore("201", unresolved).resolutionTimeSecs).toBeNull();
+    expect(
+      parseRawProposalCore("201", unresolved).resolutionTimeSecs,
+    ).toBeNull();
   });
 
   it("returns earlyResolutionVoteThreshold=null when the option vec is empty", () => {
     const noThreshold: RawProposal = {
       ...REAL_RAW_PROPOSAL,
-      early_resolution_vote_threshold: { vec: [] },
+      early_resolution_vote_threshold: {vec: []},
     };
     expect(
       parseRawProposalCore("202", noThreshold).earlyResolutionVoteThreshold,
@@ -99,7 +101,7 @@ describe("buildProposalListItem", () => {
     const core = parseRawProposalCore("200", REAL_RAW_PROPOSAL);
     const item = buildProposalListItem(
       core,
-      { verified: false, reason: "not fetched in this test" },
+      {verified: false, reason: "not fetched in this test"},
       0n,
     );
     expect(item.status).toBe("executed");

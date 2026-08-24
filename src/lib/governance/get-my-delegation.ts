@@ -1,16 +1,16 @@
 // src/lib/governance/get-my-delegation.ts
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import {createServerFn} from "@tanstack/react-start";
+import {z} from "zod";
 import {
   fetchVoteHistoryForPool,
   findMyPools,
 } from "~/lib/governance/fetch-my-pools";
 
-const inputSchema = z.object({ voterAddress: z.string().min(1) });
+const inputSchema = z.object({voterAddress: z.string().min(1)});
 
-export const getMyDelegation = createServerFn({ method: "GET" })
+export const getMyDelegation = createServerFn({method: "GET"})
   .validator(inputSchema)
-  .handler(async ({ data }) => {
+  .handler(async ({data}) => {
     const pools = await findMyPools(data.voterAddress);
 
     const withHistory = await Promise.all(
@@ -32,5 +32,5 @@ export const getMyDelegation = createServerFn({ method: "GET" })
       }),
     );
 
-    return { pools: withHistory };
+    return {pools: withHistory};
   });

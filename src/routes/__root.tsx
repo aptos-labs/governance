@@ -4,22 +4,22 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import {WalletConnectButton} from "~/components/WalletConnectButton";
+import {AppWalletProvider} from "~/lib/wallet/provider";
 import appCss from "~/styles/app.css?url";
-import { AppWalletProvider } from "~/lib/wallet/provider";
-import { WalletConnectButton } from "~/components/WalletConnectButton";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aptos Gov" },
+      {charSet: "utf-8"},
+      {name: "viewport", content: "width=device-width, initial-scale=1"},
+      {title: "Aptos Gov"},
       {
         name: "description",
         content: "Delegated governance voting for the Aptos network.",
       },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [{rel: "stylesheet", href: appCss}],
   }),
   component: RootComponent,
 });
@@ -40,7 +40,7 @@ function RootComponent() {
   );
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootDocument({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
       <head>

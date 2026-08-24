@@ -1,23 +1,23 @@
 // tests/unit/VotingPanel.test.tsx
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
+import {useWallet} from "@aptos-labs/wallet-adapter-react";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {
+  cleanup,
+  fireEvent,
   render,
   screen,
-  fireEvent,
   waitFor,
-  cleanup,
   within,
 } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { VotingPanel } from "~/components/VotingPanel";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { getEligiblePools } from "~/lib/governance/get-eligible-pools";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import {VotingPanel} from "~/components/VotingPanel";
+import {getEligiblePools} from "~/lib/governance/get-eligible-pools";
 
 vi.mock("@aptos-labs/wallet-adapter-react", async () => {
   const actual = await vi.importActual("@aptos-labs/wallet-adapter-react");
-  return { ...actual, useWallet: vi.fn() };
+  return {...actual, useWallet: vi.fn()};
 });
 vi.mock("~/lib/governance/get-eligible-pools");
 
@@ -26,7 +26,7 @@ const mockedGetEligiblePools = vi.mocked(getEligiblePools);
 
 function renderWithClient(ui: React.ReactElement) {
   const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {queries: {retry: false}},
   });
   return render(
     <QueryClientProvider client={client}>{ui}</QueryClientProvider>,
@@ -56,7 +56,7 @@ describe("VotingPanel", () => {
   it("shows 'no voting power' when connected but no eligible pools exist", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction,
     } as never);
     mockedGetEligiblePools.mockResolvedValue([]);
@@ -72,7 +72,7 @@ describe("VotingPanel", () => {
   it("shows the review step with exact parameters and does NOT sign until confirmed", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction,
     } as never);
     mockedGetEligiblePools.mockResolvedValue([
@@ -88,8 +88,8 @@ describe("VotingPanel", () => {
 
     await waitFor(() => screen.getByText(/0xstake/i));
 
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /review vote/i }));
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
+    fireEvent.click(screen.getByRole("button", {name: /review vote/i}));
 
     // Review step must show the EXACT transaction parameters before any
     // signing: function, pool, proposal id, amount, direction. Each is
@@ -113,7 +113,7 @@ describe("VotingPanel", () => {
     // Critically: no signing has happened yet.
     expect(signAndSubmitTransaction).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: /confirm and sign/i }));
+    fireEvent.click(screen.getByRole("button", {name: /confirm and sign/i}));
 
     await waitFor(() =>
       expect(signAndSubmitTransaction).toHaveBeenCalledWith({
@@ -129,7 +129,7 @@ describe("VotingPanel", () => {
   it("defaults the amount field to full remaining power, and allows editing it down for a partial vote (design spec §6.4)", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction,
     } as never);
     mockedGetEligiblePools.mockResolvedValue([
@@ -148,9 +148,9 @@ describe("VotingPanel", () => {
     // Defaults to the pool's full remaining power, per §6.4's approved default.
     expect(amountInput.value).toBe("500");
 
-    fireEvent.change(amountInput, { target: { value: "150" } });
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /review vote/i }));
+    fireEvent.change(amountInput, {target: {value: "150"}});
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
+    fireEvent.click(screen.getByRole("button", {name: /review vote/i}));
 
     // Review step reflects the edited partial amount, not the full amount.
     // Scoped to the "Amount:" row for the same reason as the test above —
@@ -159,7 +159,7 @@ describe("VotingPanel", () => {
     const amountRow = screen.getByText(/Amount:/i).closest("div");
     expect(amountRow).toHaveTextContent("150 APT");
 
-    fireEvent.click(screen.getByRole("button", { name: /confirm and sign/i }));
+    fireEvent.click(screen.getByRole("button", {name: /confirm and sign/i}));
 
     await waitFor(() =>
       expect(signAndSubmitTransaction).toHaveBeenCalledWith({
@@ -177,7 +177,7 @@ describe("VotingPanel", () => {
   it("rejects a typed amount above the pool's remaining voting power before allowing review", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction,
     } as never);
     mockedGetEligiblePools.mockResolvedValue([
@@ -193,19 +193,19 @@ describe("VotingPanel", () => {
     await waitFor(() => screen.getByText(/0xstake/i));
 
     const amountInput = screen.getByLabelText(/amount/i);
-    fireEvent.change(amountInput, { target: { value: "9999" } });
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
+    fireEvent.change(amountInput, {target: {value: "9999"}});
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
 
+    expect(screen.getByRole("button", {name: /review vote/i})).toBeDisabled();
     expect(
-      screen.getByRole("button", { name: /review vote/i }),
-    ).toBeDisabled();
-    expect(screen.getByText(/exceeds available voting power/i)).toBeInTheDocument();
+      screen.getByText(/exceeds available voting power/i),
+    ).toBeInTheDocument();
   });
 
   it("never carries a reviewed/confirmable vote across a proposalId prop change (round-2 review finding)", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction,
     } as never);
     // Same pool address is eligible on both proposals — this is the
@@ -221,20 +221,20 @@ describe("VotingPanel", () => {
     ] as never);
 
     const client = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
+      defaultOptions: {queries: {retry: false}},
     });
-    const { rerender } = render(
+    const {rerender} = render(
       <QueryClientProvider client={client}>
         <VotingPanel proposalId="42" />
       </QueryClientProvider>,
     );
 
     await waitFor(() => screen.getByText(/0xstake/i));
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /review vote/i }));
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
+    fireEvent.click(screen.getByRole("button", {name: /review vote/i}));
     expect(screen.getByText("#42")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /confirm and sign/i }),
+      screen.getByRole("button", {name: /confirm and sign/i}),
     ).toBeInTheDocument();
 
     // Simulate a client-side route transition to a different proposal
@@ -250,12 +250,10 @@ describe("VotingPanel", () => {
       </QueryClientProvider>,
     );
 
-    expect(
-      screen.getByText(/checking your voting power/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/checking your voting power/i)).toBeInTheDocument();
     expect(screen.queryByText("#42")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /confirm and sign/i }),
+      screen.queryByRole("button", {name: /confirm and sign/i}),
     ).not.toBeInTheDocument();
 
     // Once proposal 43's pools load, the SAME pool address starts from
@@ -264,19 +262,19 @@ describe("VotingPanel", () => {
     // proposal, not just per pool address.
     await waitFor(() => screen.getByText(/0xstake/i));
     expect(
-      screen.getByRole("button", { name: /review vote/i }),
+      screen.getByRole("button", {name: /review vote/i}),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /confirm and sign/i }),
+      screen.queryByRole("button", {name: /confirm and sign/i}),
     ).not.toBeInTheDocument();
     expect(screen.queryByText("#42")).not.toBeInTheDocument();
 
     // Completing a fresh review + confirm now under proposal 43
     // submits "43", never a leftover "42".
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /review vote/i }));
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
+    fireEvent.click(screen.getByRole("button", {name: /review vote/i}));
     expect(screen.getByText("#43")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /confirm and sign/i }));
+    fireEvent.click(screen.getByRole("button", {name: /confirm and sign/i}));
 
     await waitFor(() =>
       expect(signAndSubmitTransaction).toHaveBeenCalledWith({
@@ -303,25 +301,25 @@ describe("VotingPanel", () => {
     ] as never);
 
     const client = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
+      defaultOptions: {queries: {retry: false}},
     });
 
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xwalletA" },
+      account: {address: "0xwalletA"},
       signAndSubmitTransaction,
     } as never);
-    const { rerender } = render(
+    const {rerender} = render(
       <QueryClientProvider client={client}>
         <VotingPanel proposalId="42" />
       </QueryClientProvider>,
     );
 
     await waitFor(() => screen.getByText(/0xstake/i));
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /review vote/i }));
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
+    fireEvent.click(screen.getByRole("button", {name: /review vote/i}));
     expect(
-      screen.getByRole("button", { name: /confirm and sign/i }),
+      screen.getByRole("button", {name: /confirm and sign/i}),
     ).toBeInTheDocument();
 
     // Simulate switching connected wallets WITHOUT unmounting this
@@ -331,7 +329,7 @@ describe("VotingPanel", () => {
     // A's frozen review next to wallet B's connection.
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xwalletB" },
+      account: {address: "0xwalletB"},
       signAndSubmitTransaction,
     } as never);
     rerender(
@@ -340,11 +338,9 @@ describe("VotingPanel", () => {
       </QueryClientProvider>,
     );
 
+    expect(screen.getByText(/checking your voting power/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/checking your voting power/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /confirm and sign/i }),
+      screen.queryByRole("button", {name: /confirm and sign/i}),
     ).not.toBeInTheDocument();
 
     // Once wallet B's pools load, the SAME pool address starts from a
@@ -353,17 +349,17 @@ describe("VotingPanel", () => {
     // just per proposal + pool address.
     await waitFor(() => screen.getByText(/0xstake/i));
     expect(
-      screen.getByRole("button", { name: /review vote/i }),
+      screen.getByRole("button", {name: /review vote/i}),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /confirm and sign/i }),
+      screen.queryByRole("button", {name: /confirm and sign/i}),
     ).not.toBeInTheDocument();
   });
 
   it("clears a pool's error only for that pool, not for other pools, and re-clears it on a fresh review (round-3 review finding)", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction: vi
         .fn()
         .mockRejectedValue(new Error("User rejected the request")),
@@ -389,14 +385,12 @@ describe("VotingPanel", () => {
     // Fail pool 1's vote.
     const pool1Card = screen.getByText(/0xstakepool1/i).closest("div")!
       .parentElement!;
+    fireEvent.click(within(pool1Card).getByRole("button", {name: /^yes$/i}));
     fireEvent.click(
-      within(pool1Card).getByRole("button", { name: /^yes$/i }),
+      within(pool1Card).getByRole("button", {name: /review vote/i}),
     );
     fireEvent.click(
-      within(pool1Card).getByRole("button", { name: /review vote/i }),
-    );
-    fireEvent.click(
-      within(pool1Card).getByRole("button", { name: /confirm and sign/i }),
+      within(pool1Card).getByRole("button", {name: /confirm and sign/i}),
     );
     await waitFor(() =>
       expect(screen.getByText(/user rejected/i)).toBeInTheDocument(),
@@ -406,7 +400,9 @@ describe("VotingPanel", () => {
     // scoped per pool/draft, not rendered once for the whole panel.
     const pool2Card = screen.getByText(/0xstakepool2/i).closest("div")!
       .parentElement!;
-    expect(within(pool2Card).queryByText(/user rejected/i)).not.toBeInTheDocument();
+    expect(
+      within(pool2Card).queryByText(/user rejected/i),
+    ).not.toBeInTheDocument();
 
     // Now actually exercise the "re-clears on a fresh review" half of
     // this test's name. After a failed submit, pool 1 is still in its
@@ -414,20 +410,22 @@ describe("VotingPanel", () => {
     // to the not-reviewing view first, still showing the stale error,
     // then start a fresh review and confirm the error is cleared
     // rather than lingering underneath the new review.
-    fireEvent.click(within(pool1Card).getByRole("button", { name: /back/i }));
+    fireEvent.click(within(pool1Card).getByRole("button", {name: /back/i}));
     expect(within(pool1Card).getByText(/user rejected/i)).toBeInTheDocument();
 
-    fireEvent.click(within(pool1Card).getByRole("button", { name: /^yes$/i }));
+    fireEvent.click(within(pool1Card).getByRole("button", {name: /^yes$/i}));
     fireEvent.click(
-      within(pool1Card).getByRole("button", { name: /review vote/i }),
+      within(pool1Card).getByRole("button", {name: /review vote/i}),
     );
-    expect(within(pool1Card).queryByText(/user rejected/i)).not.toBeInTheDocument();
+    expect(
+      within(pool1Card).queryByText(/user rejected/i),
+    ).not.toBeInTheDocument();
   });
 
   it("shows a specific message when the wallet rejects the transaction", async () => {
     mockedUseWallet.mockReturnValue({
       connected: true,
-      account: { address: "0xvoter" },
+      account: {address: "0xvoter"},
       signAndSubmitTransaction: vi
         .fn()
         .mockRejectedValue(new Error("User rejected the request")),
@@ -444,9 +442,9 @@ describe("VotingPanel", () => {
     renderWithClient(<VotingPanel proposalId="42" />);
     await waitFor(() => screen.getByText(/0xstake/i));
 
-    fireEvent.click(screen.getByRole("button", { name: /^yes$/i }));
-    fireEvent.click(screen.getByRole("button", { name: /review vote/i }));
-    fireEvent.click(screen.getByRole("button", { name: /confirm and sign/i }));
+    fireEvent.click(screen.getByRole("button", {name: /^yes$/i}));
+    fireEvent.click(screen.getByRole("button", {name: /review vote/i}));
+    fireEvent.click(screen.getByRole("button", {name: /confirm and sign/i}));
 
     await waitFor(() =>
       expect(screen.getByText(/user rejected/i)).toBeInTheDocument(),

@@ -1,4 +1,4 @@
-import type { ProposalStatus } from "~/lib/governance/types";
+import type {ProposalStatus} from "~/lib/governance/types";
 
 export interface VotingClosedInput {
   yesVotes: bigint;

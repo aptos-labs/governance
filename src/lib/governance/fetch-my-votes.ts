@@ -1,7 +1,7 @@
 // src/lib/governance/fetch-my-votes.ts
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { executeIndexerQuery } from "~/lib/governance/indexer-client";
+import {createServerFn} from "@tanstack/react-start";
+import {z} from "zod";
+import {executeIndexerQuery} from "~/lib/governance/indexer-client";
 
 const STAKING_POOL_VOTER_QUERY = `
   query StakingPoolVoter($voter: String) {
@@ -70,15 +70,14 @@ const fetchMyVotesInputSchema = z.object({
   proposalIds: z.array(z.string()),
 });
 
-export const fetchMyVotes = createServerFn({ method: "GET" })
+export const fetchMyVotes = createServerFn({method: "GET"})
   .validator(fetchMyVotesInputSchema)
-  .handler(async ({ data }): Promise<MyVotesMap> => {
+  .handler(async ({data}): Promise<MyVotesMap> => {
     try {
       // 1. Discover which pools this address controls
-      const { current_staking_pool_voter } =
-        await executeIndexerQuery<{
-          current_staking_pool_voter: Array<{ staking_pool_address: string }>;
-        }>(STAKING_POOL_VOTER_QUERY, { voter: data.voterAddress });
+      const {current_staking_pool_voter} = await executeIndexerQuery<{
+        current_staking_pool_voter: Array<{staking_pool_address: string}>;
+      }>(STAKING_POOL_VOTER_QUERY, {voter: data.voterAddress});
 
       const poolAddresses = current_staking_pool_voter.map(
         (r) => r.staking_pool_address,
@@ -89,18 +88,17 @@ export const fetchMyVotes = createServerFn({ method: "GET" })
       }
 
       // 2. Query proposal_votes for these pools on these proposals
-      const { proposal_votes } =
-        await executeIndexerQuery<{
-          proposal_votes: Array<{
-            staking_pool_address: string;
-            proposal_id: string;
-            should_pass: boolean;
-            num_votes: string;
-          }>;
-        }>(MY_VOTES_QUERY, {
-          poolAddresses,
-          proposalIds: data.proposalIds.map(Number),
-        });
+      const {proposal_votes} = await executeIndexerQuery<{
+        proposal_votes: Array<{
+          staking_pool_address: string;
+          proposal_id: string;
+          should_pass: boolean;
+          num_votes: string;
+        }>;
+      }>(MY_VOTES_QUERY, {
+        poolAddresses,
+        proposalIds: data.proposalIds.map(Number),
+      });
 
       return aggregateVotesByProposal(poolAddresses, proposal_votes);
     } catch {
