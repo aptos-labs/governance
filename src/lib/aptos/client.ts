@@ -14,22 +14,13 @@ let cachedClient: Aptos | null = null;
  */
 export function getAptosClient(): Aptos {
   if (!cachedClient) {
-    const geomiKey = import.meta.env["VITE_GEOMI_API_KEY"] as string | undefined;
-    const geomiFullnodeUrl = import.meta.env["VITE_GEOMI_FULLNODE_URL"] as string | undefined;
-
-    const fullnodeUrl = geomiKey
-      ? (geomiFullnodeUrl || "https://api.geomi.dev/v1")
-      : (process.env.APTOS_FULLNODE_URL || undefined);
-
     cachedClient = new Aptos(
       new AptosConfig({
         network: Network.MAINNET,
-        fullnode: fullnodeUrl,
-        clientConfig: geomiKey
-          ? { API_KEY: geomiKey }
-          : process.env.APTOS_BUILD_API_KEY
-            ? { API_KEY: process.env.APTOS_BUILD_API_KEY }
-            : undefined,
+        fullnode: process.env.APTOS_FULLNODE_URL || undefined,
+        clientConfig: process.env.APTOS_BUILD_API_KEY
+          ? { API_KEY: process.env.APTOS_BUILD_API_KEY }
+          : undefined,
       }),
     );
   }

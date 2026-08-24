@@ -1,15 +1,9 @@
 // src/lib/governance/indexer-client.ts
 
-/** Overridable per design spec \u00a79 \u2014 defaults to the hosted mainnet
- *  endpoint; Task 18's e2e test points this at a local mock instead.
- *  When VITE_GEOMI_INDEXER_URL is set, the Geomi proxy is used to
- *  avoid public endpoint rate limits. */
-const GEOMI_INDEXER_URL = import.meta.env["VITE_GEOMI_INDEXER_URL"] as string | undefined;
-
+/** Overridable per design spec §9 — defaults to the hosted mainnet
+ *  endpoint; Task 18's e2e test points this at a local mock instead. */
 const INDEXER_URL =
-  GEOMI_INDEXER_URL ||
-  process.env.APTOS_INDEXER_URL ||
-  "https://api.mainnet.aptoslabs.com/v1/graphql";
+  process.env.APTOS_INDEXER_URL || "https://api.mainnet.aptoslabs.com/v1/graphql";
 
 interface GraphQLResponse<T> {
   data?: T;
@@ -30,10 +24,7 @@ export async function executeIndexerQuery<T>(
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  const geomiKey = import.meta.env["VITE_GEOMI_API_KEY"] as string | undefined;
-  if (geomiKey) {
-    headers.Authorization = `Bearer ${geomiKey}`;
-  } else if (process.env.APTOS_BUILD_API_KEY) {
+  if (process.env.APTOS_BUILD_API_KEY) {
     headers.Authorization = `Bearer ${process.env.APTOS_BUILD_API_KEY}`;
   }
 
