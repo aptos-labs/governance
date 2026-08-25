@@ -16,6 +16,10 @@
         {
           "key": "CDN-Cache-Control",
           "value": "public, s-maxage=15, stale-while-revalidate=45"
+        },
+        {
+          "key": "Link",
+          "value": "</.well-known/api-catalog>; rel=\"api-catalog\", </openapi.json>; rel=\"service-desc\"; type=\"application/json\", </docs/api>; rel=\"service-doc\"; type=\"text/markdown\", </.well-known/ai-catalog.json>; rel=\"describedby\"; type=\"application/json\""
         }
       ]
     },
@@ -29,6 +33,28 @@
         {
           "key": "CDN-Cache-Control",
           "value": "public, s-maxage=15, stale-while-revalidate=45"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/:path*",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
         }
       ]
     }

@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import {SiteFooter} from "~/components/SiteFooter";
 import {SiteHeader} from "~/components/SiteHeader";
+import {WebMcpTools} from "~/components/WebMcpTools";
 import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
 import {AppWalletProvider} from "~/lib/wallet/provider";
 import appCss from "~/styles/app.css?url";
@@ -33,6 +34,14 @@ export const Route = createRootRoute({
       {rel: "icon", type: "image/svg+xml", href: "/favicon.svg"},
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
       {rel: "manifest", href: "/manifest.json"},
+      {rel: "api-catalog", href: "/.well-known/api-catalog"},
+      {rel: "service-desc", href: "/openapi.json", type: "application/json"},
+      {rel: "service-doc", href: "/docs/api", type: "text/markdown"},
+      {
+        rel: "describedby",
+        href: "/.well-known/ai-catalog.json",
+        type: "application/json",
+      },
       {rel: "preconnect", href: "https://fonts.googleapis.com"},
       {
         rel: "preconnect",
@@ -52,6 +61,7 @@ function RootComponent() {
   return (
     <RootDocument>
       <AppWalletProvider>
+        <WebMcpTools />
         <div id="app-shell">
           <SiteHeader />
           <div

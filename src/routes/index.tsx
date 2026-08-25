@@ -6,6 +6,7 @@ import {ApiErrorAlert} from "~/components/ApiErrorAlert";
 import {PageHeader} from "~/components/PageHeader";
 import {PaginationBar} from "~/components/PaginationBar";
 import {ProposalsTable} from "~/components/ProposalsTable";
+import {homepageLinkHeaderValue} from "~/lib/agent-discovery/headers";
 import {fetchMyVotes} from "~/lib/governance/fetch-my-votes";
 import {listProposals} from "~/lib/governance/fetch-proposals";
 import type {ProposalStatus} from "~/lib/governance/types";
@@ -28,6 +29,9 @@ export const Route = createFileRoute("/")({
   validateSearch: searchSchema,
   loaderDeps: ({search}) => ({page: search.page}),
   loader: ({deps}) => listProposals({data: {page: deps.page}}),
+  headers: () => ({
+    Link: homepageLinkHeaderValue(),
+  }),
   component: Home,
 });
 

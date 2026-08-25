@@ -19,3 +19,10 @@ export async function loadVotingForum(): Promise<VotingForumResource> {
     });
   }) as Promise<VotingForumResource>;
 }
+
+/** Sequential proposal ids run from 0 to next_proposal_id - 1. */
+export async function loadProposalCount(): Promise<number> {
+  const forum = await loadVotingForum();
+  const count = Number(forum.next_proposal_id);
+  return Number.isFinite(count) && count > 0 ? count : 0;
+}

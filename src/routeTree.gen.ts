@@ -10,12 +10,35 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthDotmdRouteImport } from './routes/auth[.]md'
 import { Route as DelegationRouteImport } from './routes/delegation'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OpenapiDotjsonRouteImport } from './routes/openapi[.]json'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as DotwellKnownSplatRouteImport } from './routes/[.]well-known.$'
+import { Route as AgentIdentityRouteImport } from './routes/agent.identity'
+import { Route as ApiHealthRouteImport } from './routes/api.health'
+import { Route as ApiProposalsRouteImport } from './routes/api.proposals'
+import { Route as DocsApiRouteImport } from './routes/docs.api'
+import { Route as Oauth2AuthorizeRouteImport } from './routes/oauth2.authorize'
+import { Route as Oauth2RevokeRouteImport } from './routes/oauth2.revoke'
+import { Route as Oauth2TokenRouteImport } from './routes/oauth2.token'
+import { Route as Oauth2UserinfoRouteImport } from './routes/oauth2.userinfo'
 import { Route as ProposalProposalIdRouteImport } from './routes/proposal.$proposalId'
+import { Route as AgentEventNotifyRouteImport } from './routes/agent.event.notify'
+import { Route as AgentIdentityClaimRouteImport } from './routes/agent.identity.claim'
+import { Route as ApiProposalsProposalIdRouteImport } from './routes/api.proposals.$proposalId'
+import { Route as ApiProposalsProposalIdVotesRouteImport } from './routes/api.proposals.$proposalId.votes'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthDotmdRoute = AuthDotmdRouteImport.update({
+  id: '/auth.md',
+  path: '/auth.md',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DelegationRoute = DelegationRouteImport.update({
@@ -23,40 +46,259 @@ const DelegationRoute = DelegationRouteImport.update({
   path: '/delegation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpenapiDotjsonRoute = OpenapiDotjsonRouteImport.update({
+  id: '/openapi.json',
+  path: '/openapi.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownSplatRoute = DotwellKnownSplatRouteImport.update({
+  id: '/.well-known/$',
+  path: '/.well-known/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentIdentityRoute = AgentIdentityRouteImport.update({
+  id: '/agent/identity',
+  path: '/agent/identity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProposalsRoute = ApiProposalsRouteImport.update({
+  id: '/api/proposals',
+  path: '/api/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsApiRoute = DocsApiRouteImport.update({
+  id: '/docs/api',
+  path: '/docs/api',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Oauth2AuthorizeRoute = Oauth2AuthorizeRouteImport.update({
+  id: '/oauth2/authorize',
+  path: '/oauth2/authorize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Oauth2RevokeRoute = Oauth2RevokeRouteImport.update({
+  id: '/oauth2/revoke',
+  path: '/oauth2/revoke',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Oauth2TokenRoute = Oauth2TokenRouteImport.update({
+  id: '/oauth2/token',
+  path: '/oauth2/token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Oauth2UserinfoRoute = Oauth2UserinfoRouteImport.update({
+  id: '/oauth2/userinfo',
+  path: '/oauth2/userinfo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProposalProposalIdRoute = ProposalProposalIdRouteImport.update({
   id: '/proposal/$proposalId',
   path: '/proposal/$proposalId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentEventNotifyRoute = AgentEventNotifyRouteImport.update({
+  id: '/agent/event/notify',
+  path: '/agent/event/notify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentIdentityClaimRoute = AgentIdentityClaimRouteImport.update({
+  id: '/claim',
+  path: '/claim',
+  getParentRoute: () => AgentIdentityRoute,
+} as any)
+const ApiProposalsProposalIdRoute = ApiProposalsProposalIdRouteImport.update({
+  id: '/$proposalId',
+  path: '/$proposalId',
+  getParentRoute: () => ApiProposalsRoute,
+} as any)
+const ApiProposalsProposalIdVotesRoute =
+  ApiProposalsProposalIdVotesRouteImport.update({
+    id: '/votes',
+    path: '/votes',
+    getParentRoute: () => ApiProposalsProposalIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth.md': typeof AuthDotmdRoute
   '/delegation': typeof DelegationRoute
+  '/mcp': typeof McpRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
+  '/agent/identity': typeof AgentIdentityRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
+  '/api/proposals': typeof ApiProposalsRouteWithChildren
+  '/docs/api': typeof DocsApiRoute
+  '/oauth2/authorize': typeof Oauth2AuthorizeRoute
+  '/oauth2/revoke': typeof Oauth2RevokeRoute
+  '/oauth2/token': typeof Oauth2TokenRoute
+  '/oauth2/userinfo': typeof Oauth2UserinfoRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/agent/event/notify': typeof AgentEventNotifyRoute
+  '/agent/identity/claim': typeof AgentIdentityClaimRoute
+  '/api/proposals/$proposalId': typeof ApiProposalsProposalIdRouteWithChildren
+  '/api/proposals/$proposalId/votes': typeof ApiProposalsProposalIdVotesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth.md': typeof AuthDotmdRoute
   '/delegation': typeof DelegationRoute
+  '/mcp': typeof McpRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
+  '/agent/identity': typeof AgentIdentityRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
+  '/api/proposals': typeof ApiProposalsRouteWithChildren
+  '/docs/api': typeof DocsApiRoute
+  '/oauth2/authorize': typeof Oauth2AuthorizeRoute
+  '/oauth2/revoke': typeof Oauth2RevokeRoute
+  '/oauth2/token': typeof Oauth2TokenRoute
+  '/oauth2/userinfo': typeof Oauth2UserinfoRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/agent/event/notify': typeof AgentEventNotifyRoute
+  '/agent/identity/claim': typeof AgentIdentityClaimRoute
+  '/api/proposals/$proposalId': typeof ApiProposalsProposalIdRouteWithChildren
+  '/api/proposals/$proposalId/votes': typeof ApiProposalsProposalIdVotesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth.md': typeof AuthDotmdRoute
   '/delegation': typeof DelegationRoute
+  '/mcp': typeof McpRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
+  '/agent/identity': typeof AgentIdentityRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
+  '/api/proposals': typeof ApiProposalsRouteWithChildren
+  '/docs/api': typeof DocsApiRoute
+  '/oauth2/authorize': typeof Oauth2AuthorizeRoute
+  '/oauth2/revoke': typeof Oauth2RevokeRoute
+  '/oauth2/token': typeof Oauth2TokenRoute
+  '/oauth2/userinfo': typeof Oauth2UserinfoRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/agent/event/notify': typeof AgentEventNotifyRoute
+  '/agent/identity/claim': typeof AgentIdentityClaimRoute
+  '/api/proposals/$proposalId': typeof ApiProposalsProposalIdRouteWithChildren
+  '/api/proposals/$proposalId/votes': typeof ApiProposalsProposalIdVotesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/delegation' | '/proposal/$proposalId'
+  fullPaths:
+    | '/'
+    | '/auth.md'
+    | '/delegation'
+    | '/mcp'
+    | '/openapi.json'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/.well-known/$'
+    | '/agent/identity'
+    | '/api/health'
+    | '/api/proposals'
+    | '/docs/api'
+    | '/oauth2/authorize'
+    | '/oauth2/revoke'
+    | '/oauth2/token'
+    | '/oauth2/userinfo'
+    | '/proposal/$proposalId'
+    | '/agent/event/notify'
+    | '/agent/identity/claim'
+    | '/api/proposals/$proposalId'
+    | '/api/proposals/$proposalId/votes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/delegation' | '/proposal/$proposalId'
-  id: '__root__' | '/' | '/delegation' | '/proposal/$proposalId'
+  to:
+    | '/'
+    | '/auth.md'
+    | '/delegation'
+    | '/mcp'
+    | '/openapi.json'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/.well-known/$'
+    | '/agent/identity'
+    | '/api/health'
+    | '/api/proposals'
+    | '/docs/api'
+    | '/oauth2/authorize'
+    | '/oauth2/revoke'
+    | '/oauth2/token'
+    | '/oauth2/userinfo'
+    | '/proposal/$proposalId'
+    | '/agent/event/notify'
+    | '/agent/identity/claim'
+    | '/api/proposals/$proposalId'
+    | '/api/proposals/$proposalId/votes'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth.md'
+    | '/delegation'
+    | '/mcp'
+    | '/openapi.json'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/.well-known/$'
+    | '/agent/identity'
+    | '/api/health'
+    | '/api/proposals'
+    | '/docs/api'
+    | '/oauth2/authorize'
+    | '/oauth2/revoke'
+    | '/oauth2/token'
+    | '/oauth2/userinfo'
+    | '/proposal/$proposalId'
+    | '/agent/event/notify'
+    | '/agent/identity/claim'
+    | '/api/proposals/$proposalId'
+    | '/api/proposals/$proposalId/votes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthDotmdRoute: typeof AuthDotmdRoute
   DelegationRoute: typeof DelegationRoute
+  McpRoute: typeof McpRoute
+  OpenapiDotjsonRoute: typeof OpenapiDotjsonRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  DotwellKnownSplatRoute: typeof DotwellKnownSplatRoute
+  AgentIdentityRoute: typeof AgentIdentityRouteWithChildren
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiProposalsRoute: typeof ApiProposalsRouteWithChildren
+  DocsApiRoute: typeof DocsApiRoute
+  Oauth2AuthorizeRoute: typeof Oauth2AuthorizeRoute
+  Oauth2RevokeRoute: typeof Oauth2RevokeRoute
+  Oauth2TokenRoute: typeof Oauth2TokenRoute
+  Oauth2UserinfoRoute: typeof Oauth2UserinfoRoute
   ProposalProposalIdRoute: typeof ProposalProposalIdRoute
+  AgentEventNotifyRoute: typeof AgentEventNotifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +310,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth.md': {
+      id: '/auth.md'
+      path: '/auth.md'
+      fullPath: '/auth.md'
+      preLoaderRoute: typeof AuthDotmdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/delegation': {
       id: '/delegation'
       path: '/delegation'
       fullPath: '/delegation'
       preLoaderRoute: typeof DelegationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/openapi.json': {
+      id: '/openapi.json'
+      path: '/openapi.json'
+      fullPath: '/openapi.json'
+      preLoaderRoute: typeof OpenapiDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/$': {
+      id: '/.well-known/$'
+      path: '/.well-known/$'
+      fullPath: '/.well-known/$'
+      preLoaderRoute: typeof DotwellKnownSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/identity': {
+      id: '/agent/identity'
+      path: '/agent/identity'
+      fullPath: '/agent/identity'
+      preLoaderRoute: typeof AgentIdentityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/proposals': {
+      id: '/api/proposals'
+      path: '/api/proposals'
+      fullPath: '/api/proposals'
+      preLoaderRoute: typeof ApiProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/api': {
+      id: '/docs/api'
+      path: '/docs/api'
+      fullPath: '/docs/api'
+      preLoaderRoute: typeof DocsApiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth2/authorize': {
+      id: '/oauth2/authorize'
+      path: '/oauth2/authorize'
+      fullPath: '/oauth2/authorize'
+      preLoaderRoute: typeof Oauth2AuthorizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth2/revoke': {
+      id: '/oauth2/revoke'
+      path: '/oauth2/revoke'
+      fullPath: '/oauth2/revoke'
+      preLoaderRoute: typeof Oauth2RevokeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth2/token': {
+      id: '/oauth2/token'
+      path: '/oauth2/token'
+      fullPath: '/oauth2/token'
+      preLoaderRoute: typeof Oauth2TokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth2/userinfo': {
+      id: '/oauth2/userinfo'
+      path: '/oauth2/userinfo'
+      fullPath: '/oauth2/userinfo'
+      preLoaderRoute: typeof Oauth2UserinfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/proposal/$proposalId': {
@@ -82,23 +422,105 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProposalProposalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent/event/notify': {
+      id: '/agent/event/notify'
+      path: '/agent/event/notify'
+      fullPath: '/agent/event/notify'
+      preLoaderRoute: typeof AgentEventNotifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/identity/claim': {
+      id: '/agent/identity/claim'
+      path: '/claim'
+      fullPath: '/agent/identity/claim'
+      preLoaderRoute: typeof AgentIdentityClaimRouteImport
+      parentRoute: typeof AgentIdentityRoute
+    }
+    '/api/proposals/$proposalId': {
+      id: '/api/proposals/$proposalId'
+      path: '/$proposalId'
+      fullPath: '/api/proposals/$proposalId'
+      preLoaderRoute: typeof ApiProposalsProposalIdRouteImport
+      parentRoute: typeof ApiProposalsRoute
+    }
+    '/api/proposals/$proposalId/votes': {
+      id: '/api/proposals/$proposalId/votes'
+      path: '/votes'
+      fullPath: '/api/proposals/$proposalId/votes'
+      preLoaderRoute: typeof ApiProposalsProposalIdVotesRouteImport
+      parentRoute: typeof ApiProposalsProposalIdRoute
+    }
   }
 }
 
+interface AgentIdentityRouteChildren {
+  AgentIdentityClaimRoute: typeof AgentIdentityClaimRoute
+}
+
+const AgentIdentityRouteChildren: AgentIdentityRouteChildren = {
+  AgentIdentityClaimRoute: AgentIdentityClaimRoute,
+}
+
+const AgentIdentityRouteWithChildren = AgentIdentityRoute._addFileChildren(
+  AgentIdentityRouteChildren,
+)
+
+interface ApiProposalsProposalIdRouteChildren {
+  ApiProposalsProposalIdVotesRoute: typeof ApiProposalsProposalIdVotesRoute
+}
+
+const ApiProposalsProposalIdRouteChildren: ApiProposalsProposalIdRouteChildren =
+  {
+    ApiProposalsProposalIdVotesRoute: ApiProposalsProposalIdVotesRoute,
+  }
+
+const ApiProposalsProposalIdRouteWithChildren =
+  ApiProposalsProposalIdRoute._addFileChildren(
+    ApiProposalsProposalIdRouteChildren,
+  )
+
+interface ApiProposalsRouteChildren {
+  ApiProposalsProposalIdRoute: typeof ApiProposalsProposalIdRouteWithChildren
+}
+
+const ApiProposalsRouteChildren: ApiProposalsRouteChildren = {
+  ApiProposalsProposalIdRoute: ApiProposalsProposalIdRouteWithChildren,
+}
+
+const ApiProposalsRouteWithChildren = ApiProposalsRoute._addFileChildren(
+  ApiProposalsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthDotmdRoute: AuthDotmdRoute,
   DelegationRoute: DelegationRoute,
+  McpRoute: McpRoute,
+  OpenapiDotjsonRoute: OpenapiDotjsonRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  DotwellKnownSplatRoute: DotwellKnownSplatRoute,
+  AgentIdentityRoute: AgentIdentityRouteWithChildren,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiProposalsRoute: ApiProposalsRouteWithChildren,
+  DocsApiRoute: DocsApiRoute,
+  Oauth2AuthorizeRoute: Oauth2AuthorizeRoute,
+  Oauth2RevokeRoute: Oauth2RevokeRoute,
+  Oauth2TokenRoute: Oauth2TokenRoute,
+  Oauth2UserinfoRoute: Oauth2UserinfoRoute,
   ProposalProposalIdRoute: ProposalProposalIdRoute,
+  AgentEventNotifyRoute: AgentEventNotifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
