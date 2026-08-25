@@ -12,6 +12,10 @@ vi.mock("@aptos-labs/wallet-adapter-react", async () => {
 
 const mockedUseWallet = vi.mocked(useWallet);
 
+const PETRA_ICON =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+const NIGHTLY_ICON = "data:image/svg+xml;base64,PHN2Zy8+";
+
 describe("WalletConnectButton", () => {
   afterEach(cleanup);
 
@@ -69,6 +73,39 @@ describe("WalletConnectButton", () => {
     fireEvent.click(screen.getByRole("button", {name: /connect wallet/i}));
     fireEvent.click(screen.getByRole("menuitem", {name: "Petra"}));
     expect(connect).toHaveBeenCalledWith("Petra");
+  });
+
+  it("renders each wallet's AIP-62 icon next to its name", () => {
+    mockedUseWallet.mockReturnValue({
+      connected: false,
+      account: null,
+      wallets: [
+        {name: "Petra", icon: PETRA_ICON, readyState: "Installed"},
+        {name: "Nightly", icon: NIGHTLY_ICON, readyState: "Installed"},
+        {
+          name: "Unknown",
+          icon: "https://example.com/wallet.png",
+          readyState: "Installed",
+        },
+      ],
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+    } as never);
+
+    render(<WalletConnectButton />);
+    fireEvent.click(screen.getByRole("button", {name: /connect wallet/i}));
+
+    const petra = screen.getByRole("menuitem", {name: "Petra"});
+    const petraIcon = petra.querySelector("img");
+    expect(petraIcon).toHaveAttribute("src", PETRA_ICON);
+    expect(petraIcon).toHaveAttribute("alt", "");
+
+    const nightly = screen.getByRole("menuitem", {name: "Nightly"});
+    expect(nightly.querySelector("img")).toHaveAttribute("src", NIGHTLY_ICON);
+
+    expect(
+      screen.getByRole("menuitem", {name: "Unknown"}).querySelector("img"),
+    ).toBeNull();
   });
 
   it("shows the truncated address and a disconnect control when connected", () => {
