@@ -3,6 +3,7 @@ import {existsSync, readFileSync} from "node:fs";
 import {dirname, resolve} from "node:path";
 import {fileURLToPath} from "node:url";
 import {describe, expect, it} from "vitest";
+import {PUBLIC_PAGE_CACHE_CONTROL} from "~/lib/http-cache";
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -35,5 +36,20 @@ describe("deployment config", () => {
   it("exposes no client-side env vars, since config is server-only", () => {
     const example = readFileSync(resolve(rootDir, ".env.example"), "utf8");
     expect(example).not.toMatch(/^\s*VITE_/m);
+  });
+
+  it("asks Vercel to cache SSR HTML briefly so Aptos is not hit on every request", () => {
+    const vercel = readJson("vercel.json");
+    const headers = vercel.headers as Array<{
+      source: string;
+      headers: Array<{key: string; value: string}>;
+    }>;
+    expect(headers.length).toBeGreaterThan(0);
+    for (const entry of headers) {
+      const cacheControl = entry.headers.find(
+        (header) => header.key === "Cache-Control",
+      );
+      expect(cacheControl?.value).toBe(PUBLIC_PAGE_CACHE_CONTROL);
+    }
   });
 });

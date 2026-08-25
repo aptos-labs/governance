@@ -87,7 +87,7 @@ function PageButton({
       disabled={disabled}
       onClick={onClick}
       aria-current={current ? "page" : undefined}
-      className={`min-w-8 rounded border px-2 py-1 text-center disabled:border-[var(--color-border-light)] disabled:text-[var(--color-text-disabled)] ${
+      className={`min-w-8 rounded-lg border px-2 py-1 text-center disabled:border-[var(--color-border-light)] disabled:text-[var(--color-text-disabled)] ${
         current
           ? "border-[var(--color-text-primary)] bg-[var(--color-text-primary)] text-[var(--color-canvas)]"
           : "border-[var(--color-border)]"

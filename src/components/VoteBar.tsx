@@ -1,5 +1,7 @@
 import {formatOctasToApt} from "~/lib/governance/format";
 
+const BAR_RADIUS = "0.7em";
+
 export function VoteBar({
   yesVotes,
   noVotes,
@@ -33,8 +35,8 @@ export function VoteBar({
         percentage={noPct}
       />
       <div>
-        <div className="mb-1 flex justify-between text-xs">
-          <span className="text-[var(--color-text-secondary)]">
+        <div className="mb-1 flex justify-between px-0.5 text-sm uppercase tracking-wide">
+          <span className="text-[var(--color-text-disabled)]">
             Participation
           </span>
           <span>{participationPct.toFixed(0)}%</span>
@@ -68,11 +70,9 @@ function ResultBar({
   percentage: number;
 }) {
   return (
-    <div>
-      <div className="mb-1 flex justify-between text-xs">
-        <span style={{color}} className="font-semibold tracking-wide">
-          {label}
-        </span>
+    <div title={`${formatOctasToApt(amount, 8)} APT`}>
+      <div className="mb-1 flex justify-between px-0.5 text-sm uppercase tracking-wide">
+        <span style={{color}}>{label}</span>
         <span>
           {formatOctasToApt(amount)} APT {percentage.toFixed(0)}%
         </span>
@@ -83,15 +83,25 @@ function ResultBar({
 }
 
 function Meter({percentage, color}: {percentage: number; color: string}) {
+  const filled = Math.min(100, Math.max(0, percentage));
+  const remainder = 100 - filled;
   return (
     <div
-      className="flex h-2.5 overflow-hidden rounded-full"
-      style={{backgroundColor: "var(--color-border-light)"}}
+      className="flex"
+      style={{borderRadius: BAR_RADIUS, overflow: "hidden"}}
     >
       <div
         style={{
-          width: `${Math.min(100, Math.max(0, percentage))}%`,
+          width: `${filled}%`,
+          paddingTop: BAR_RADIUS,
           backgroundColor: color,
+        }}
+      />
+      <div
+        style={{
+          width: `${remainder}%`,
+          paddingTop: BAR_RADIUS,
+          backgroundColor: "var(--color-chip)",
         }}
       />
     </div>

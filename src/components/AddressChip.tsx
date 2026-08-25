@@ -5,6 +5,30 @@ function explorerAccountUrl(address: string): string {
   return `https://explorer.aptoslabs.com/account/${address}?network=mainnet`;
 }
 
+function Chevron({direction}: {direction: "left" | "right"}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      className="opacity-75"
+    >
+      {direction === "right" ? (
+        <path
+          fill="currentColor"
+          d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+        />
+      ) : (
+        <path
+          fill="currentColor"
+          d="m14 6-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"
+        />
+      )}
+    </svg>
+  );
+}
+
 export function AddressChip({
   address,
   label,
@@ -62,25 +86,23 @@ export function AddressChip({
         aria-expanded={open}
         onFocus={() => setOpen(true)}
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 rounded bg-[var(--color-chip)] px-2 py-0.5 font-mono text-xs text-[var(--color-text-primary)] hover:bg-[var(--color-chip-hover)]"
+        className="inline-flex items-center gap-1 rounded bg-[var(--color-chip)] py-[0.15rem] pr-2 pl-4 font-mono text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-chip-hover)]"
       >
         {label ?? truncateAddress(address)}
-        <span aria-hidden="true" className="opacity-50">
-          ›
-        </span>
+        <Chevron direction="right" />
       </button>
       {open && (
         <div
           id={tooltipId}
           role="tooltip"
-          className="absolute left-0 top-full z-30 mt-1 min-w-max max-w-[min(90vw,36rem)] rounded bg-[var(--color-chip)] px-3 py-1 shadow-lg"
+          className="absolute left-0 top-1/2 z-30 max-w-[min(90vw,42rem)] -translate-y-1/2 overflow-x-auto rounded bg-[var(--color-chip)] py-[0.15rem] pr-2 pl-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <div className="flex items-center gap-2">
             <a
               href={explorerAccountUrl(address)}
               target="_blank"
               rel="noreferrer noopener"
-              className="break-all font-mono text-xs text-[var(--color-text-primary)] underline"
+              className="whitespace-nowrap font-mono text-sm text-[var(--color-text-primary)] underline"
             >
               {address}
             </a>
@@ -91,6 +113,17 @@ export function AddressChip({
               className="shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-paper)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--color-text-secondary)] hover:bg-[var(--color-chip-hover)]"
             >
               {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              type="button"
+              aria-label="Hide address"
+              onClick={(event) => {
+                event.stopPropagation();
+                setOpen(false);
+              }}
+              className="shrink-0 text-[var(--color-text-primary)]"
+            >
+              <Chevron direction="left" />
             </button>
           </div>
         </div>

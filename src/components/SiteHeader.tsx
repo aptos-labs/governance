@@ -32,7 +32,9 @@ export function SiteHeader() {
           My Delegation
         </Link>
         <ThemeToggle />
-        <WalletConnectButton />
+        <div className="sm:hidden">
+          <WalletConnectButton />
+        </div>
       </div>
     </header>
   );

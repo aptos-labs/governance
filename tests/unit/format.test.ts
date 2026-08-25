@@ -3,6 +3,7 @@ import {describe, expect, it} from "vitest";
 import {
   clampVotingPowerOctas,
   formatDurationCompact,
+  formatDurationRemaining,
   formatOctasToApt,
   formatTimestamp,
   parseAptToOctas,
@@ -63,6 +64,16 @@ describe("formatDurationCompact", () => {
 
   it("floors negative durations to 0m rather than showing a negative sign", () => {
     expect(formatDurationCompact(-100n)).toBe("0m");
+  });
+});
+
+describe("formatDurationRemaining", () => {
+  it("always includes days, hours, and minutes like the original UI", () => {
+    expect(formatDurationRemaining(2n * 86400n + 14n * 3600n)).toBe(
+      "2d 14h 0m",
+    );
+    expect(formatDurationRemaining(3n * 3600n + 25n * 60n)).toBe("0d 3h 25m");
+    expect(formatDurationRemaining(45n * 60n)).toBe("0d 0h 45m");
   });
 });
 

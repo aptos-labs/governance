@@ -28,11 +28,29 @@ const API_KEY_ENV_NAMES = [
   "APTOS_API_KEY",
 ] as const;
 
-function readEnv(name: string): string | undefined {
-  const value = process.env[name];
+/**
+ * Vite only inlines `import.meta.env.VITE_*` for *static* property
+ * access. Dynamic `import.meta.env[name]` is undefined in the built
+ * server bundle, which is why a Vercel `VITE_APTOS_API_KEY_MAINNET`
+ * set at build time would be ignored without this map.
+ */
+const VITE_ENV: Record<string, string | undefined> = {
+  VITE_APTOS_BUILD_API_KEY: import.meta.env.VITE_APTOS_BUILD_API_KEY,
+  VITE_GEOMI_API_KEY: import.meta.env.VITE_GEOMI_API_KEY,
+  VITE_APTOS_API_KEY_MAINNET: import.meta.env.VITE_APTOS_API_KEY_MAINNET,
+  VITE_APTOS_API_KEY: import.meta.env.VITE_APTOS_API_KEY,
+  VITE_GEOMI_FULLNODE_URL: import.meta.env.VITE_GEOMI_FULLNODE_URL,
+  VITE_GEOMI_INDEXER_URL: import.meta.env.VITE_GEOMI_INDEXER_URL,
+};
+
+function trimEnv(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+}
+
+export function readEnv(name: string): string | undefined {
+  return trimEnv(process.env[name]) ?? trimEnv(VITE_ENV[name]);
 }
 
 export function classifyApiKey(key: string | undefined): ApiKeyKind {

@@ -2,7 +2,7 @@ import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useQuery} from "@tanstack/react-query";
 import {createFileRoute, useNavigate} from "@tanstack/react-router";
 import {z} from "zod";
-import {HeroDivider} from "~/components/HeroDivider";
+import {PageHeader} from "~/components/PageHeader";
 import {PaginationBar} from "~/components/PaginationBar";
 import {ProposalsTable} from "~/components/ProposalsTable";
 import {fetchMyVotes} from "~/lib/governance/fetch-my-votes";
@@ -77,20 +77,10 @@ function Home() {
 
   return (
     <main>
-      <div className="grid items-center gap-4 sm:grid-cols-2">
-        <div>
-          <p className="mb-1 text-base font-normal uppercase tracking-wide text-[var(--color-info)]">
-            Network
-          </p>
-          <h1 className="text-5xl font-light tracking-tight sm:text-6xl lg:text-7xl">
-            Aptos Governance
-          </h1>
-        </div>
-      </div>
-      <HeroDivider />
+      <PageHeader subtitle="Network" title="Aptos Governance" />
 
-      <div className="mb-12 grid gap-12 sm:grid-cols-2">
-        <p className="font-sans text-lg font-light">
+      <div className="mb-10 grid gap-12 sm:grid-cols-2">
+        <p className="font-sans text-xl font-light">
           Welcome to Aptos Governance. Here you can view and vote on the
           proposals. Learn more about Aptos Governance{" "}
           <a
@@ -117,7 +107,7 @@ function Home() {
                 .getElementById("proposals")
                 ?.scrollIntoView({behavior: "smooth"})
             }
-            className="w-[300px] max-w-full rounded bg-[var(--color-accent)] px-8 py-3 text-[1.1rem] font-normal text-[#121615] hover:brightness-[0.98]"
+            className="w-[300px] max-w-full rounded-lg bg-[var(--color-accent)] px-[34px] py-3 text-[1.1rem] font-normal text-[#121615] hover:brightness-[0.98]"
           >
             View AIPs
           </button>

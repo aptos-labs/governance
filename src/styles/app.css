@@ -13,8 +13,10 @@
 :root {
   color-scheme: light;
 
-  --color-canvas: #fafafa;
-  --color-paper: #ffffff;
+  /* Original explorer-governance greys + teal. Canvas is white; table
+     rows and the vote card sit on grey-50 so they read as inset chips. */
+  --color-canvas: #ffffff;
+  --color-paper: #fafafa;
   --color-text-primary: #121615;
   --color-text-secondary: #4f5352;
   --color-text-disabled: #909099;
@@ -24,13 +26,15 @@
   --color-chip-hover: #d4d4d8;
   --color-row-hover: rgba(18, 22, 21, 0.03);
 
-  --color-info: #008068;
+  --color-primary: #00a380;
+  --color-info: #00a380;
   --color-success: #256b2e;
   --color-error: #b84722;
   --color-warning: #d8bf45;
   --color-vote-for: #00d0a1;
   --color-vote-against: #f97373;
   --color-accent: #00d0a1;
+  --color-title: #00d0a1;
 
   --color-status-active-fill: #badbee;
   --color-status-passed-fill: #daf6d4;
@@ -56,6 +60,7 @@
   --color-chip-hover: #4f5352;
   --color-row-hover: rgba(255, 255, 255, 0.04);
 
+  --color-primary: #2ed8a7;
   --color-info: #5df8cc;
   --color-success: #daf6d4;
   --color-error: #fe805c;
@@ -63,6 +68,7 @@
   --color-vote-for: #00d0a1;
   --color-vote-against: #f97373;
   --color-accent: #00d0a1;
+  --color-title: #00d0a1;
 
   --color-status-active-fill: #badbee;
   --color-status-passed-fill: #daf6d4;
@@ -87,6 +93,7 @@
     --color-chip: #363a39;
     --color-chip-hover: #4f5352;
     --color-row-hover: rgba(255, 255, 255, 0.04);
+    --color-primary: #2ed8a7;
     --color-info: #5df8cc;
     --color-success: #daf6d4;
     --color-error: #fe805c;
@@ -94,6 +101,7 @@
     --color-vote-for: #00d0a1;
     --color-vote-against: #f97373;
     --color-accent: #00d0a1;
+    --color-title: #00d0a1;
     --color-status-active-text: #171612;
     --color-status-passed-text: #171612;
     --color-status-failed-text: #171612;
@@ -113,6 +121,85 @@ h3,
 h4 {
   font-family: var(--font-sans);
   font-weight: 300;
+}
+
+.brand-mark {
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+:root[data-theme="dark"] .brand-mark {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand-mark {
+    filter: invert(1);
+  }
+}
+
+.gov-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.gov-table thead th {
+  padding: 0 1.5rem 0;
+  background: transparent;
+  border: 0;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.gov-table tbody td {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-paper);
+  border: 0;
+  white-space: nowrap;
+}
+
+.gov-table tbody td:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.gov-table tbody td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.gov-table tbody tr {
+  cursor: pointer;
+}
+
+.gov-table tbody tr:hover td {
+  filter: brightness(0.99);
+}
+
+:root[data-theme="dark"] .gov-table tbody tr:hover td {
+  filter: brightness(0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .gov-table tbody tr:hover td {
+    filter: brightness(0.9);
+  }
+}
+
+.gov-table tbody tr:active td {
+  transform: translateY(0.1rem);
+}
+
+.gov-table--static tbody tr {
+  cursor: default;
+}
+
+.gov-table--static tbody tr:hover td,
+.gov-table--static tbody tr:active td {
+  filter: none;
+  transform: none;
 }
 
 #app-shell {

@@ -4,9 +4,9 @@ import {createFileRoute, Link, useNavigate} from "@tanstack/react-router";
 import {z} from "zod";
 import {AddressChip} from "~/components/AddressChip";
 import {ContentRow} from "~/components/ContentRow";
-import {HeroDivider} from "~/components/HeroDivider";
 import {MetadataVerifiedNotice} from "~/components/MetadataVerifiedNotice";
 import {MyVoteBadge} from "~/components/MyVoteBadge";
+import {PageHeader} from "~/components/PageHeader";
 import {PaginationBar} from "~/components/PaginationBar";
 import {StatusLabel} from "~/components/StatusIcon";
 import {VoteBar} from "~/components/VoteBar";
@@ -15,7 +15,7 @@ import {fetchMyVotes} from "~/lib/governance/fetch-my-votes";
 import {getProposalDetail} from "~/lib/governance/fetch-proposal";
 import {PROPOSAL_VOTES_PAGE_SIZE} from "~/lib/governance/fetch-proposal-votes";
 import {
-  formatDurationCompact,
+  formatDurationRemaining,
   formatOctasToApt,
   formatTimestamp,
 } from "~/lib/governance/format";
@@ -79,7 +79,7 @@ function ProposalDetail() {
 
   const remaining =
     proposal.status === "active"
-      ? formatDurationCompact(proposal.expirationSecs - nowSecs)
+      ? formatDurationRemaining(proposal.expirationSecs - nowSecs)
       : null;
 
   const {connected, account} = useWallet();
@@ -110,6 +110,7 @@ function ProposalDetail() {
 
   return (
     <main>
+      <PageHeader title="Proposal" />
       <Link
         to="/"
         search={{page: 0, status: "all"}}
@@ -117,9 +118,6 @@ function ProposalDetail() {
       >
         ← Back
       </Link>
-
-      <h2 className="text-3xl font-light">Proposal</h2>
-      <HeroDivider />
 
       <div className="mt-2 grid gap-6 md:grid-cols-12">
         <div className="md:col-span-8">
@@ -193,7 +191,7 @@ function ProposalDetail() {
         <div className="md:col-span-4">
           <div className="relative">
             <div className="absolute top-2 -left-2 -z-10 h-full w-full rounded border border-gray-500" />
-            <div className="space-y-6 rounded border border-gray-500 bg-[var(--color-canvas)] p-6">
+            <div className="space-y-6 rounded border border-gray-500 bg-[var(--color-paper)] p-6">
               <section>
                 <h3 className="mb-3 text-lg font-light">Vote</h3>
                 <VotingPanel proposalId={proposal.proposalId} />
@@ -245,34 +243,23 @@ function ProposalDetail() {
         ) : (
           <>
             <div className="mt-3 w-auto overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="gov-table gov-table--static min-w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[var(--color-text-secondary)]">
-                    <th className="px-3 py-2 font-normal uppercase tracking-wide">
-                      address
-                    </th>
-                    <th className="px-3 py-2 font-normal uppercase tracking-wide">
-                      vote
-                    </th>
-                    <th className="px-3 py-2 text-right font-normal uppercase tracking-wide">
-                      voting power
-                    </th>
+                  <tr className="text-left">
+                    <th>address</th>
+                    <th>vote</th>
+                    <th className="text-right">voting power</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(votes?.items ?? []).map((vote) => (
-                    <tr
-                      key={vote.stakingPoolAddress}
-                      className="border-t border-[var(--color-border-light)] bg-[var(--color-paper)]"
-                    >
-                      <td className="min-w-[200px] px-3 py-2">
+                    <tr key={vote.stakingPoolAddress}>
+                      <td className="min-w-[200px]">
                         <AddressChip address={vote.stakingPoolAddress} />
                       </td>
-                      <td className="px-3 py-2">
-                        {vote.shouldPass ? "FOR" : "AGAINST"}
-                      </td>
+                      <td>{vote.shouldPass ? "FOR" : "AGAINST"}</td>
                       <td
-                        className="px-3 py-2 text-right"
+                        className="text-right"
                         title={`${formatOctasToApt(BigInt(vote.numVotes), 8)} APT`}
                       >
                         {formatOctasToApt(BigInt(vote.numVotes))} APT

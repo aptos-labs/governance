@@ -117,3 +117,12 @@ export function formatDurationCompact(totalSeconds: bigint): string {
   }
   return `${minutes}m`;
 }
+
+/** Original governance remaining-time copy: always "Xd Xh Xm". */
+export function formatDurationRemaining(totalSeconds: bigint): string {
+  const seconds = totalSeconds < 0n ? 0n : totalSeconds;
+  const days = seconds / 86400n;
+  const hours = (seconds % 86400n) / 3600n;
+  const minutes = (seconds % 3600n) / 60n;
+  return `${days}d ${hours}h ${minutes}m`;
+}

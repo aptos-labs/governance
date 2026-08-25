@@ -4,6 +4,7 @@ import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useQuery} from "@tanstack/react-query";
 import {createFileRoute, Link} from "@tanstack/react-router";
 import {AddressChip} from "~/components/AddressChip";
+import {PageHeader} from "~/components/PageHeader";
 import {formatOctasToApt} from "~/lib/governance/format";
 import {getMyDelegation} from "~/lib/governance/get-my-delegation";
 
@@ -23,7 +24,7 @@ function MyDelegation() {
 
   return (
     <main>
-      <h1 className="text-4xl font-semibold tracking-tight">My Delegation</h1>
+      <PageHeader title="My Delegation" />
 
       {!connected && (
         <p className="mt-4 text-[var(--color-text-secondary)]">
