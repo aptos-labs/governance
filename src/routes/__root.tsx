@@ -19,7 +19,11 @@ export const Route = createRootRoute({
         content: "Delegated governance voting for the Aptos network.",
       },
     ],
-    links: [{rel: "stylesheet", href: appCss}],
+    links: [
+      {rel: "stylesheet", href: appCss},
+      {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
+      {rel: "manifest", href: "/manifest.json"},
+    ],
   }),
   component: RootComponent,
 });

@@ -4,15 +4,16 @@ Frontend app for Aptos governance workflows.
 
 ## Tech Stack
 
-- React 18 + TypeScript
-- Vite 7
+- React 19 + TypeScript
+- TanStack Start (SSR) + TanStack Router + TanStack Query
+- Vite 8 with Nitro as the server build
+- Tailwind CSS 4
+- Aptos TS SDK + wallet adapter
 - pnpm
-- MUI
-- Apollo Client + react-query
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+
 - pnpm 10+
 
 ## Quick Start
@@ -23,55 +24,51 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Open `http://localhost:5173`.
+Open `http://localhost:3000`.
 
 ## Scripts
 
 - `pnpm dev`: start local dev server
-- `pnpm build`: production build to `dist/`
+- `pnpm build`: production build to `.output/` (or `.vercel/output/` on Vercel)
 - `pnpm preview`: preview production build locally
+- `pnpm start`: run the built server
 - `pnpm test`: run unit tests once (Vitest)
 - `pnpm test:watch`: run tests in watch mode
+- `pnpm test:e2e`: run Playwright end-to-end tests
 - `pnpm typecheck`: run TypeScript type checking
-- `pnpm fmt`: format source files with Prettier
-- `pnpm fmt:check`: verify formatting with Prettier
-- `pnpm lint`: run ESLint
+- `pnpm lint`: run Biome
+- `pnpm lint:fix`: apply Biome fixes
 
 ## Environment Variables
 
-Use Vite-prefixed env variables:
+This app renders on the server, so its configuration is read with `process.env`
+inside server functions and never reaches the browser. Do not use the `VITE_`
+prefix for these — anything prefixed with `VITE_` is inlined into the client
+bundle and publicly readable.
 
-- `VITE_GA_TRACKING_ID`
-- `VITE_ADOBE_FONTS` (optional; when omitted, Adobe Typekit is not loaded)
-- `VITE_BASE_PATH` (default `/`; for static hosting under a subpath use `/<repo>/`)
-- `VITE_APTOS_API_KEY` (optional fallback key for custom/fullnode endpoints)
-- `VITE_APTOS_API_KEY_MAINNET` (optional)
-- `VITE_APTOS_API_KEY_TESTNET` (optional)
-- `VITE_APTOS_API_KEY_DEVNET` (optional)
-- `VITE_INDEXER_GRAPHQL_MAINNET`
-- `VITE_INDEXER_GRAPHQL_TESTNET`
-- `VITE_INDEXER_GRAPHQL_DEVNET`
+- `APTOS_BUILD_API_KEY` (optional): Aptos Build API key for fullnode and indexer requests
+- `APTOS_FULLNODE_URL` (optional): fullnode override; defaults to hosted mainnet
+- `APTOS_INDEXER_URL` (optional): indexer override; defaults to `https://api.mainnet.aptoslabs.com/v1/graphql`
 
-Migration note:
+Migration note: the `REACT_APP_*` variables from the CRA version and the
+`VITE_*` variables from the static Vite version are both gone. The app no
+longer reads any client-side environment variables.
 
-- `REACT_APP_*` variables from CRA are now `VITE_*`.
+## Deployment
 
-Legacy -> Vite mapping:
+Production hosting is Vercel. The app is server-rendered and uses TanStack
+Start server functions, so it cannot be deployed to a static host.
 
-- `REACT_APP_ADOBE_FONTS` -> `VITE_ADOBE_FONTS`
-- `REACT_APP_INDEXER_GRAPHQL_MAINNET` -> `VITE_INDEXER_GRAPHQL_MAINNET`
-- `REACT_APP_INDEXER_GRAPHQL_TESTNET` -> `VITE_INDEXER_GRAPHQL_TESTNET`
-- `REACT_APP_INDEXER_GRAPHQL_DEVNET` -> `VITE_INDEXER_GRAPHQL_DEVNET`
-- `GA_TRACKING_ID` -> `VITE_GA_TRACKING_ID`
+`pnpm build` runs Nitro, which detects the platform automatically:
 
-## GitHub Pages
+- Locally it writes a standalone Node server to `.output/`, runnable with `pnpm start`.
+- On Vercel (`VERCEL=1` is set during the build) it writes `.vercel/output/`,
+  which follows Vercel's Build Output API. Static assets are served from the
+  CDN and all other requests go to a single server function.
 
-This repo includes `.github/workflows/deploy-pages.yml` for GitHub Pages deployment.
-
-- Default base path is `/` (root).
-- To deploy under a repo subpath, set repository variable `GH_PAGES_REPO_NAME` to your repository name.
-  - Example: `aptos-governance` -> build base path becomes `/aptos-governance/`
-- The workflow sets `VITE_BASE_PATH` at build time and also adds `dist/404.html` for SPA route refresh fallback.
+`vercel.json` pins the framework preset to `tanstack-start` and the pnpm
+install/build commands so the settings do not depend on dashboard state. Set
+the variables above in the Vercel project's environment variable settings.
 
 ## Quality Gates
 
@@ -79,7 +76,6 @@ Run before creating a PR:
 
 ```bash
 pnpm lint
-pnpm fmt:check
 pnpm typecheck
 pnpm test
 pnpm build
@@ -87,6 +83,9 @@ pnpm build
 
 ## Project Structure
 
-- `src/`: app code
-- `public/`: static assets copied as-is
-- `dist/`: production output (generated)
+- `src/routes/`: file-based routes, including the `__root.tsx` document shell
+- `src/components/`: shared UI components
+- `src/lib/`: Aptos client, governance data fetching, and wallet setup
+- `public/`: static assets served as-is
+- `tests/unit/`, `tests/e2e/`: Vitest and Playwright suites
+- `.output/`: production build (generated)
