@@ -116,9 +116,13 @@ function ProposalRow({
       <td>
         <AddressChip address={proposal.proposer} />
       </td>
-      <td>{formatTimestamp(proposal.creationTimeSecs)}</td>
-      <td>{formatTimestamp(proposal.expirationSecs)}</td>
-      <td className="text-right">
+      <td className="gov-table-wrap">
+        {formatTimestamp(proposal.creationTimeSecs)}
+      </td>
+      <td className="gov-table-wrap">
+        {formatTimestamp(proposal.expirationSecs)}
+      </td>
+      <td className="gov-table-wrap text-right">
         {formatTimestamp(proposal.resolutionTimeSecs)}
       </td>
     </tr>
