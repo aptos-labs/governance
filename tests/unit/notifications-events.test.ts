@@ -8,6 +8,7 @@ import {
   REMINDER_6H_SECS,
 } from "~/lib/notifications/events";
 import type {
+  PollSnapshot,
   ProposalWatchState,
   WatchedProposal,
 } from "~/lib/notifications/types";
@@ -260,7 +261,7 @@ describe("diffProposalEvents", () => {
   });
 
   it("walks 3d → 2d → 1d → 6h without repeating a window", () => {
-    let snapshot = {
+    let snapshot: PollSnapshot = {
       initialized: true,
       nextProposalId: 1,
       proposals: {
