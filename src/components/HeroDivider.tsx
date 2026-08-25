@@ -1,6 +1,6 @@
 export function HeroDivider() {
   return (
-    <div className="mb-8 mt-2 flex items-center text-[var(--color-border)]">
+    <div className="mb-8 mt-2 flex items-stretch text-[var(--color-border)]">
       <div className="mt-[14px] flex-1 border-y border-current" />
       <svg width="52" height="34" aria-hidden="true">
         <path
