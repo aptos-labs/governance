@@ -19,9 +19,6 @@ const KEY_ENVS = [
   "VITE_GEOMI_INDEXER_URL",
   "GEOMI_FULLNODE_URL",
   "GEOMI_INDEXER_URL",
-  "APTOS_API_ORIGIN",
-  "VERCEL_URL",
-  "VERCEL_PROJECT_PRODUCTION_URL",
 ] as const;
 
 const originalEnv: Record<string, string | undefined> = {};
@@ -60,34 +57,28 @@ describe("classifyApiKey", () => {
   });
 });
 
-describe("resolveApiKey", () => {
-  it("prefers APTOS_BUILD_API_KEY over legacy VITE_ names", () => {
+describe("resolveApiKey on the server", () => {
+  it("uses the backend key and ignores the frontend key", () => {
     clearKeyEnvs();
     process.env.APTOS_BUILD_API_KEY = "aptoslabs_server_key";
-    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEY";
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEY";
     const resolved = resolveApiKey();
     expect(resolved.source).toBe("APTOS_BUILD_API_KEY");
     expect(resolved.key).toBe("aptoslabs_server_key");
     expect(resolved.kind).toBe("server");
   });
 
-  it("falls back to the original Vite mainnet key name used on Vercel", () => {
+  it("does not use a VITE_ frontend key for SSR", () => {
     clearKeyEnvs();
     process.env.VITE_APTOS_API_KEY_MAINNET =
       "AG-FL4PYMZ1YX1LGAJCWP2R1ACYTYRCBY1GB";
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEY";
     const resolved = resolveApiKey();
-    expect(resolved.source).toBe("VITE_APTOS_API_KEY_MAINNET");
-    expect(resolved.kind).toBe("client");
+    expect(resolved.kind).toBe("none");
+    expect(resolved.key).toBeUndefined();
   });
 
-  it("accepts VITE_APTOS_BUILD_API_KEY as a legacy alias", () => {
-    clearKeyEnvs();
-    process.env.VITE_APTOS_BUILD_API_KEY = "aptoslabs_from_vite_build";
-    expect(resolveApiKey().source).toBe("VITE_APTOS_BUILD_API_KEY");
-    expect(resolveApiKey().kind).toBe("server");
-  });
-
-  it("accepts GEOMI_API_KEY as an alias", () => {
+  it("accepts GEOMI_API_KEY as a backend alias", () => {
     clearKeyEnvs();
     process.env.GEOMI_API_KEY = "aptoslabs_from_geomi";
     expect(resolveApiKey().source).toBe("GEOMI_API_KEY");
@@ -95,8 +86,8 @@ describe("resolveApiKey", () => {
   });
 });
 
-describe("resolveApiConfig", () => {
-  it("keeps Aptos Labs hosted endpoints when a Geomi/Aptos key is set", () => {
+describe("resolveApiConfig on the server", () => {
+  it("sends the backend key on Aptos Labs hosted endpoints", () => {
     clearKeyEnvs();
     process.env.APTOS_BUILD_API_KEY = "aptoslabs_server_key";
     const config = resolveApiConfig();
@@ -116,35 +107,18 @@ describe("resolveApiConfig", () => {
     expect(config.indexerUrl).toBe("http://localhost:8081/graphql");
   });
 
-  it("does not send a Geomi client key from Node SSR", () => {
+  it("does not send a frontend client key from Node SSR", () => {
     clearKeyEnvs();
-    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEYFROMSSR";
+    const config = resolveApiConfig();
+    expect(config.apiKey).toBeUndefined();
+  });
+
+  it("does not send a client key even when it is stored as the backend env name", () => {
+    clearKeyEnvs();
+    process.env.APTOS_BUILD_API_KEY = "AG-WRONGTYPEFORBACKEND";
     const config = resolveApiConfig();
     expect(config.kind).toBe("client");
-    expect(config.key).toBe("AG-CLIENTKEYFROMSSR");
-    // Geomi client keys 401 with "Origin header is required" when Node
-    // SSR sends them without a browser Origin. Skip them server-side so
-    // the public endpoint is used instead of taking down the page.
-    expect(config.apiKey).toBeUndefined();
-    expect(config.requestOrigin).toBeUndefined();
-  });
-
-  it("sends a client key from SSR when an Origin can be attached", () => {
-    clearKeyEnvs();
-    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
-    process.env.APTOS_API_ORIGIN = "https://governance-pearl.vercel.app";
-    const config = resolveApiConfig();
-    expect(config.apiKey).toBe("AG-CLIENTKEYFROMSSR");
-    expect(config.requestOrigin).toBe("https://governance-pearl.vercel.app");
-  });
-
-  it("does not guess Origin from Vercel hostnames, which may not be allowlisted", () => {
-    clearKeyEnvs();
-    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
-    process.env.VERCEL_PROJECT_PRODUCTION_URL = "governance-pearl.vercel.app";
-    process.env.VERCEL_URL = "governance-pearl.vercel.app";
-    const config = resolveApiConfig();
-    expect(config.requestOrigin).toBeUndefined();
     expect(config.apiKey).toBeUndefined();
   });
 });

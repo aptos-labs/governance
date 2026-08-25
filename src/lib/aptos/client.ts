@@ -13,12 +13,11 @@ let cachedClient: Aptos | null = null;
  * Safe to call from server functions and from client code — this
  * only wraps read/view/submit RPC calls, never private keys.
  *
- * API keys: Geomi (formerly Aptos Build / Aptos Labs Developer Portal)
- * keys are sent as `Authorization: Bearer`. A server key (`aptoslabs_…`)
- * is the right type for this SSR app. Legacy Vercel names such as
- * `VITE_APTOS_API_KEY_MAINNET` are still accepted so an existing
- * dashboard secret keeps working. Keys authenticate against Aptos Labs
- * hosted URLs — do not point fullnode/indexer at api.geomi.dev.
+ * API keys are split by runtime:
+ * - Server: `APTOS_BUILD_API_KEY` (Geomi server key, `aptoslabs_…`)
+ * - Browser: `VITE_APTOS_API_KEY` (Geomi client key, `AG-…`)
+ * Keys authenticate against Aptos Labs hosted URLs — do not point
+ * fullnode/indexer at api.geomi.dev.
  */
 export function getAptosClient(): Aptos {
   if (!cachedClient) {
@@ -28,12 +27,7 @@ export function getAptosClient(): Aptos {
       new AptosConfig({
         network: Network.MAINNET,
         fullnode: config.fullnodeUrl,
-        clientConfig: {
-          ...(config.apiKey ? {API_KEY: config.apiKey} : {}),
-          ...(config.requestOrigin
-            ? {HEADERS: {Origin: config.requestOrigin}}
-            : {}),
-        },
+        clientConfig: config.apiKey ? {API_KEY: config.apiKey} : undefined,
       }),
     );
   }

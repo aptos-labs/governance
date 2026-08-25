@@ -4,6 +4,7 @@ import {Network} from "@aptos-labs/ts-sdk";
 import {AptosWalletAdapterProvider} from "@aptos-labs/wallet-adapter-react";
 import {ClientOnly} from "@tanstack/react-router";
 import type {ReactNode} from "react";
+import {resolveApiConfig} from "~/lib/governance/api-config";
 
 /**
  * AIP-62 wallet discovery runs entirely client-side (window event
@@ -16,18 +17,30 @@ import type {ReactNode} from "react";
 export function AppWalletProvider({children}: {children: ReactNode}) {
   return (
     <ClientOnly fallback={<>{children}</>}>
-      <AptosWalletAdapterProvider
-        autoConnect
-        dappConfig={{network: Network.MAINNET}}
-        onError={(error) => {
-          // Non-fatal: connection/signing errors surface inline in the
-          // components that triggered them (WalletConnectButton,
-          // VotingPanel) — this is a last-resort console log only.
-          console.error("[wallet-adapter]", error);
-        }}
-      >
-        {children}
-      </AptosWalletAdapterProvider>
+      <WalletAdapterWithFrontendKey>{children}</WalletAdapterWithFrontendKey>
     </ClientOnly>
+  );
+}
+
+function WalletAdapterWithFrontendKey({children}: {children: ReactNode}) {
+  const frontendKey = resolveApiConfig().apiKey;
+  return (
+    <AptosWalletAdapterProvider
+      autoConnect
+      dappConfig={{
+        network: Network.MAINNET,
+        aptosApiKeys: frontendKey
+          ? {[Network.MAINNET]: frontendKey}
+          : undefined,
+      }}
+      onError={(error) => {
+        // Non-fatal: connection/signing errors surface inline in the
+        // components that triggered them (WalletConnectButton,
+        // VotingPanel) — this is a last-resort console log only.
+        console.error("[wallet-adapter]", error);
+      }}
+    >
+      {children}
+    </AptosWalletAdapterProvider>
   );
 }

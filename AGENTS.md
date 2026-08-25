@@ -32,8 +32,9 @@ If any fail, report exact failure and do not claim success.
 ## Environment
 
 - Use `.env.local` for local config.
-- Config is read server-side with `process.env`; do not use the `VITE_*` prefix,
-  which would inline the value into the public client bundle.
+- Backend secrets are read with `process.env` (no `VITE_*` prefix).
+- The frontend Geomi client key uses `VITE_APTOS_API_KEY` so Vite inlines it
+  into the browser bundle. Do not put a server key (`aptoslabs_…`) there.
 - Current supported vars are listed in `.env.example`.
 - Production hosting is Vercel; set the same vars in the Vercel project.
 
