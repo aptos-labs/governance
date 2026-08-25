@@ -22,6 +22,10 @@ describe("EventTypeFields", () => {
   it("lists every notification event and can uncheck one", () => {
     render(<Harness />);
     expect(screen.getByLabelText("New proposal")).toBeChecked();
+    expect(screen.getByLabelText("Proposal executed")).toBeChecked();
+    expect(
+      screen.getByLabelText("Countdown (3d / 2d / 1d / 6h left)"),
+    ).toBeChecked();
     fireEvent.click(screen.getByLabelText("Proposal executed"));
     expect(screen.getByLabelText("Proposal executed")).not.toBeChecked();
     expect(screen.getByLabelText("New proposal")).toBeChecked();
