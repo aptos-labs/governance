@@ -11,13 +11,13 @@ export function PageHeader({
   return (
     <>
       <div className="grid items-center gap-4 sm:grid-cols-2">
-        <div>
+        <div className="min-w-0">
           {subtitle ? (
             <>
               <p className="mb-1 text-base font-normal uppercase leading-tight tracking-wide text-[var(--color-primary)]">
                 {subtitle}
               </p>
-              <h1 className="text-6xl font-light tracking-tight sm:text-7xl lg:text-[6rem]">
+              <h1 className="break-words text-4xl font-light tracking-tight sm:text-6xl lg:text-[6rem]">
                 {title}
               </h1>
             </>

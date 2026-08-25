@@ -155,6 +155,9 @@ h4 {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-text-secondary);
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .gov-table tbody td {
@@ -162,6 +165,12 @@ h4 {
   background: var(--color-paper);
   border: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gov-table tbody td.gov-table-wrap {
+  white-space: normal;
 }
 
 .gov-table tbody td:first-child {
@@ -208,4 +217,5 @@ h4 {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: clip;
 }

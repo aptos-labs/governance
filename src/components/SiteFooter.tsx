@@ -4,6 +4,7 @@ import githubIcon from "~/assets/svg/github.svg";
 import mediumIcon from "~/assets/svg/medium.svg";
 import twitterIcon from "~/assets/svg/twitter.svg";
 import {BrandMark} from "~/components/BrandMark";
+import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
 
 const SOCIAL = [
   {
@@ -27,7 +28,9 @@ const SOCIAL = [
 export function SiteFooter() {
   return (
     <footer className="mt-16 bg-[var(--color-paper)]">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 py-8 md:flex-row">
+      <div
+        className={`mx-auto flex ${PAGE_SHELL_WIDTH_CLASS} flex-col items-center gap-4 px-6 py-8 md:flex-row`}
+      >
         <a
           href="https://aptosfoundation.org/"
           target="_blank"

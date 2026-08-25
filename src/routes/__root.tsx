@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import {SiteFooter} from "~/components/SiteFooter";
 import {SiteHeader} from "~/components/SiteHeader";
+import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
 import {AppWalletProvider} from "~/lib/wallet/provider";
 import appCss from "~/styles/app.css?url";
 
@@ -53,7 +54,9 @@ function RootComponent() {
       <AppWalletProvider>
         <div id="app-shell">
           <SiteHeader />
-          <div className="mx-auto w-full max-w-7xl flex-1 px-6 pt-8">
+          <div
+            className={`mx-auto w-full ${PAGE_SHELL_WIDTH_CLASS} flex-1 px-6 pt-8`}
+          >
             <Outlet />
           </div>
           <SiteFooter />
