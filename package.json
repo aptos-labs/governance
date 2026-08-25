@@ -1,86 +1,52 @@
 {
-  "name": "aptos-governance",
-  "version": "0.0.1",
+  "name": "aptos-governance-app",
   "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build && tsc --noEmit",
+    "preview": "vite preview",
+    "start": "node .output/server/index.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "check-contrast": "python3 .claude/skills/aptos-design-system/scripts/check_contrast.py",
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write ."
+  },
   "dependencies": {
-    "@apollo/client": "3.14.0",
-    "@aptos-labs/ts-sdk": "6.0.0",
-    "@aptos-labs/wallet-adapter-mui-design": "5.5.3",
-    "@aptos-labs/wallet-adapter-react": "8.3.0",
-    "@emotion/react": "11.10.0",
-    "@emotion/styled": "11.10.0",
-    "@mui/icons-material": "5.18.0",
-    "@mui/material": "5.18.0",
-    "@mui/system": "5.18.0",
-    "@mui/x-date-pickers": "5.0.20",
-    "@sentry/react": "7.120.4",
-    "@sentry/tracing": "7.120.4",
-    "@types/lodash": "4.17.24",
-    "@types/react": "18.0.17",
-    "@types/react-dom": "18.0.6",
-    "aptos-node-checker-client": "0.0.2",
-    "date-fns": "2.30.0",
-    "graphql": "16.13.0",
-    "js-sha3": "0.8.0",
-    "lodash": "4.18.1",
-    "moment": "2.30.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-ga4": "1.4.1",
-    "react-intersection-observer": "9.16.0",
-    "react-number-format": "4.9.4",
-    "react-query": "3.39.3",
-    "react-router-dom": "6.30.3",
-    "recharts": "2.15.4",
-    "ts-results": "3.3.0",
-    "typescript": "4.7.4"
+    "@aptos-labs/ts-sdk": "^7.3.0",
+    "@aptos-labs/wallet-adapter-react": "^8.3.3",
+    "@noble/hashes": "^2.3.0",
+    "@tanstack/react-query": "^5.101.4",
+    "@tanstack/react-router": "^1.170.31",
+    "@tanstack/react-router-ssr-query": "^1.167.1",
+    "@tanstack/react-start": "^1.168.48",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
-    "@vitejs/plugin-react": "5.1.4",
-    "jsdom": "27.4.0",
-    "vite": "7.3.3",
-    "vite-plugin-svgr": "4.5.0",
-    "vitest": "3.2.4"
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^22.5.4",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^30.0.1",
+    "nitro": "^3.0.260311-beta",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.2",
+    "vite": "^8.0.14",
+    "vitest": "^3.2.4"
   },
-  "scripts": {
-    "dev": "vite",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "biome check src/",
-    "lint:fix": "biome check --write src/",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "fmt": "biome format --write src/",
-    "fmt:check": "biome format --check src/"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "packageManager": "pnpm@10.33.2",
-  "pnpm": {
-    "overrides": {
-      "axios": "1.16.0",
-      "minimatch@^9": "9.0.7",
-      "flatted": "3.4.2",
-      "picomatch@^2": "2.3.2",
-      "picomatch@^4": "4.0.4",
-      "yaml@^1": "1.10.3",
-      "postcss": "8.5.10",
-      "brace-expansion@^2": "2.0.3",
-      "brace-expansion@^1": "1.1.13"
-    },
-    "onlyBuiltDependencies": []
-  }
+  "packageManager": "pnpm@10.33.2"
 }

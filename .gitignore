@@ -1,30 +1,19 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Local git worktrees (isolated implementation workspaces)
+.worktrees/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Atlas agent tool state (session scaffolding, not project content)
+.atlas/
 
-# testing
-/coverage
+# Brainstorming visual-companion scratch state (mockup previews, server pid/logs)
+.superpowers/
 
-# production
-/build
-/dist
-
-# IDEs and editors
-/.idea
-/.vscode
-
-# misc
-.DS_Store
+# Node / build (added ahead of scaffolding the app)
+node_modules/
+dist/
+.output/
+.vercel/
+.netlify/
+*.local
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+.DS_Store
