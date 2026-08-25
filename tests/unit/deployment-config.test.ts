@@ -63,7 +63,10 @@ describe("deployment config", () => {
     expect(pkg.dependencies["@vercel/analytics"]).toBeDefined();
     expect(pkg.dependencies["@vercel/speed-insights"]).toBeDefined();
 
-    const root = readFileSync(resolve(rootDir, "src/routes/__root.tsx"), "utf8");
+    const root = readFileSync(
+      resolve(rootDir, "src/routes/__root.tsx"),
+      "utf8",
+    );
     expect(root).toContain("VercelAnalytics");
   });
 

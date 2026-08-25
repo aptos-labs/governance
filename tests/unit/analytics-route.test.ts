@@ -8,8 +8,8 @@ describe("analyticsRouteFromPath", () => {
   });
 
   it("replaces dynamic segments so proposal pages group together", () => {
-    expect(
-      analyticsRouteFromPath("/proposal/42", {proposalId: "42"}),
-    ).toBe("/proposal/[proposalId]");
+    expect(analyticsRouteFromPath("/proposal/42", {proposalId: "42"})).toBe(
+      "/proposal/[proposalId]",
+    );
   });
 });
