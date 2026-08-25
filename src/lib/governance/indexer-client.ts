@@ -1,4 +1,8 @@
-import {logResolvedApiKey, resolveApiConfig} from "~/lib/governance/api-config";
+import {
+  aptosRequestHeaders,
+  logResolvedApiKey,
+  resolveApiConfig,
+} from "~/lib/governance/api-config";
 
 interface GraphQLResponse<T> {
   data?: T;
@@ -20,10 +24,8 @@ export async function executeIndexerQuery<T>(
   logResolvedApiKey(config);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...aptosRequestHeaders(config),
   };
-  if (config.apiKey) {
-    headers.Authorization = `Bearer ${config.apiKey}`;
-  }
 
   const response = await fetch(config.indexerUrl, {
     method: "POST",

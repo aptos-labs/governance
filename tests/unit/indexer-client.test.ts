@@ -80,6 +80,23 @@ describe("executeIndexerQuery", () => {
     );
   });
 
+  it("does not send a frontend client key from the server", async () => {
+    snapshotEnv();
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEYFROMSSR";
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({data: {ok: true}}),
+    });
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+    await executeIndexerQuery("query Foo { x }");
+
+    const init = mockFetch.mock.calls[0]?.[1] as {
+      headers?: Record<string, string>;
+    };
+    expect(init.headers?.Authorization).toBeUndefined();
+  });
+
   it("throws a descriptive error when the GraphQL response contains errors", async () => {
     snapshotEnv();
     globalThis.fetch = vi.fn().mockResolvedValue({

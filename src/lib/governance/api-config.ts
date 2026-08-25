@@ -14,31 +14,32 @@ export interface ResolvedApiConfig extends ResolvedApiKey {
 
 const DEFAULT_INDEXER_URL = "https://api.mainnet.aptoslabs.com/v1/graphql";
 
-/** Env names accepted for a Geomi / Aptos Labs API key. First match wins.
- *  Vercel historically used the Vite-prefixed names from the CRA app;
- *  this server-rendered app prefers APTOS_BUILD_API_KEY so the secret
- *  is not inlined into the client bundle. */
-const API_KEY_ENV_NAMES = [
+/** Unprefixed names — available to Vercel serverless at runtime, never
+ *  inlined into the browser bundle. Use a Geomi *server* key
+ *  (`aptoslabs_…`) here. */
+const SERVER_KEY_ENV_NAMES = [
   "APTOS_BUILD_API_KEY",
   "GEOMI_API_KEY",
-  "VITE_APTOS_BUILD_API_KEY",
-  "VITE_GEOMI_API_KEY",
-  "VITE_APTOS_API_KEY_MAINNET",
-  "VITE_APTOS_API_KEY",
   "APTOS_API_KEY",
+] as const;
+
+/** Vite-prefixed names — inlined into the public client bundle. Use a
+ *  Geomi *client* key (`AG-…`) here so the browser Origin check works. */
+const CLIENT_KEY_ENV_NAMES = [
+  "VITE_APTOS_API_KEY",
+  "VITE_APTOS_API_KEY_MAINNET",
+  "VITE_GEOMI_API_KEY",
 ] as const;
 
 /**
  * Vite only inlines `import.meta.env.VITE_*` for *static* property
  * access. Dynamic `import.meta.env[name]` is undefined in the built
- * server bundle, which is why a Vercel `VITE_APTOS_API_KEY_MAINNET`
- * set at build time would be ignored without this map.
+ * bundle.
  */
 const VITE_ENV: Record<string, string | undefined> = {
-  VITE_APTOS_BUILD_API_KEY: import.meta.env.VITE_APTOS_BUILD_API_KEY,
-  VITE_GEOMI_API_KEY: import.meta.env.VITE_GEOMI_API_KEY,
-  VITE_APTOS_API_KEY_MAINNET: import.meta.env.VITE_APTOS_API_KEY_MAINNET,
   VITE_APTOS_API_KEY: import.meta.env.VITE_APTOS_API_KEY,
+  VITE_APTOS_API_KEY_MAINNET: import.meta.env.VITE_APTOS_API_KEY_MAINNET,
+  VITE_GEOMI_API_KEY: import.meta.env.VITE_GEOMI_API_KEY,
   VITE_GEOMI_FULLNODE_URL: import.meta.env.VITE_GEOMI_FULLNODE_URL,
   VITE_GEOMI_INDEXER_URL: import.meta.env.VITE_GEOMI_INDEXER_URL,
 };
@@ -60,14 +61,48 @@ export function classifyApiKey(key: string | undefined): ApiKeyKind {
   return "unknown";
 }
 
+function isBrowser(): boolean {
+  return typeof window !== "undefined";
+}
+
 export function resolveApiKey(): ResolvedApiKey {
-  for (const source of API_KEY_ENV_NAMES) {
+  const names = isBrowser() ? CLIENT_KEY_ENV_NAMES : SERVER_KEY_ENV_NAMES;
+  const expectedKind: ApiKeyKind = isBrowser() ? "client" : "server";
+  let firstWrongKind: ResolvedApiKey | undefined;
+  for (const source of names) {
     const key = readEnv(source);
-    if (key) {
-      return {key, source, kind: classifyApiKey(key)};
+    if (!key) continue;
+    const kind = classifyApiKey(key);
+    if (kind === expectedKind) {
+      return {key, source, kind};
     }
+    firstWrongKind ??= {key, source, kind};
   }
-  return {kind: "none"};
+  return firstWrongKind ?? {kind: "none"};
+}
+
+/**
+ * Key attached to outgoing Aptos/Geomi requests. Backend keys stay on
+ * the server; frontend keys stay in the browser. Mixing them is what
+ * 401'd SSR (`Origin header is required` for `AG-…` keys) and would
+ * leak an `aptoslabs_…` secret if inlined.
+ */
+export function outgoingApiKey(resolved: ResolvedApiKey): string | undefined {
+  if (!resolved.key) return undefined;
+  if (isBrowser()) {
+    return resolved.kind === "client" ? resolved.key : undefined;
+  }
+  return resolved.kind === "server" ? resolved.key : undefined;
+}
+
+export function aptosRequestHeaders(
+  config: ResolvedApiConfig,
+): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (config.apiKey) {
+    headers.Authorization = `Bearer ${config.apiKey}`;
+  }
+  return headers;
 }
 
 let loggedApiKey = false;
@@ -75,27 +110,32 @@ let loggedApiKey = false;
 export function logResolvedApiKey(resolved: ResolvedApiKey): void {
   if (loggedApiKey || process.env.VITEST) return;
   loggedApiKey = true;
+  const side = isBrowser() ? "frontend" : "backend";
   if (resolved.kind === "none") {
     console.warn(
-      "[aptos] No API key found. Set APTOS_BUILD_API_KEY to a Geomi/Aptos Labs server key (aptoslabs_…) on Vercel to avoid public-endpoint rate limits. Legacy names such as VITE_APTOS_API_KEY_MAINNET are also accepted.",
+      isBrowser()
+        ? "[aptos] No frontend API key found. Set VITE_APTOS_API_KEY to a Geomi client key (AG-…) for browser Aptos calls."
+        : "[aptos] No backend API key found. Set APTOS_BUILD_API_KEY to a Geomi server key (aptoslabs_…) on Vercel to avoid public-endpoint rate limits.",
+    );
+    return;
+  }
+  const outgoing = outgoingApiKey(resolved);
+  if (!outgoing) {
+    console.warn(
+      `[aptos] Ignoring ${resolved.kind} API key from ${resolved.source} on the ${side}. Use aptoslabs_… as APTOS_BUILD_API_KEY (server) and AG-… as VITE_APTOS_API_KEY (browser).`,
     );
     return;
   }
   console.info(
-    `[aptos] Using ${resolved.kind} API key from ${resolved.source}`,
+    `[aptos] Using ${side} ${resolved.kind} API key from ${resolved.source}`,
   );
-  if (resolved.kind === "client") {
-    console.warn(
-      "[aptos] This looks like a Geomi/Aptos client key (AG-…). Prefer a server key (aptoslabs_…) for Vercel SSR — client keys apply Origin and per-IP limits meant for browsers.",
-    );
-  }
 }
 
 export function resolveApiConfig(): ResolvedApiConfig {
   const resolved = resolveApiKey();
   return {
     ...resolved,
-    apiKey: resolved.key,
+    apiKey: outgoingApiKey(resolved),
     fullnodeUrl:
       readEnv("APTOS_FULLNODE_URL") || readEnv("VITE_GEOMI_FULLNODE_URL"),
     indexerUrl:

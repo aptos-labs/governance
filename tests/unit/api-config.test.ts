@@ -57,34 +57,28 @@ describe("classifyApiKey", () => {
   });
 });
 
-describe("resolveApiKey", () => {
-  it("prefers APTOS_BUILD_API_KEY over legacy VITE_ names", () => {
+describe("resolveApiKey on the server", () => {
+  it("uses the backend key and ignores the frontend key", () => {
     clearKeyEnvs();
     process.env.APTOS_BUILD_API_KEY = "aptoslabs_server_key";
-    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEY";
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEY";
     const resolved = resolveApiKey();
     expect(resolved.source).toBe("APTOS_BUILD_API_KEY");
     expect(resolved.key).toBe("aptoslabs_server_key");
     expect(resolved.kind).toBe("server");
   });
 
-  it("falls back to the original Vite mainnet key name used on Vercel", () => {
+  it("does not use a VITE_ frontend key for SSR", () => {
     clearKeyEnvs();
     process.env.VITE_APTOS_API_KEY_MAINNET =
       "AG-FL4PYMZ1YX1LGAJCWP2R1ACYTYRCBY1GB";
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEY";
     const resolved = resolveApiKey();
-    expect(resolved.source).toBe("VITE_APTOS_API_KEY_MAINNET");
-    expect(resolved.kind).toBe("client");
+    expect(resolved.kind).toBe("none");
+    expect(resolved.key).toBeUndefined();
   });
 
-  it("accepts VITE_APTOS_BUILD_API_KEY as a legacy alias", () => {
-    clearKeyEnvs();
-    process.env.VITE_APTOS_BUILD_API_KEY = "aptoslabs_from_vite_build";
-    expect(resolveApiKey().source).toBe("VITE_APTOS_BUILD_API_KEY");
-    expect(resolveApiKey().kind).toBe("server");
-  });
-
-  it("accepts GEOMI_API_KEY as an alias", () => {
+  it("accepts GEOMI_API_KEY as a backend alias", () => {
     clearKeyEnvs();
     process.env.GEOMI_API_KEY = "aptoslabs_from_geomi";
     expect(resolveApiKey().source).toBe("GEOMI_API_KEY");
@@ -92,8 +86,8 @@ describe("resolveApiKey", () => {
   });
 });
 
-describe("resolveApiConfig", () => {
-  it("keeps Aptos Labs hosted endpoints when a Geomi/Aptos key is set", () => {
+describe("resolveApiConfig on the server", () => {
+  it("sends the backend key on Aptos Labs hosted endpoints", () => {
     clearKeyEnvs();
     process.env.APTOS_BUILD_API_KEY = "aptoslabs_server_key";
     const config = resolveApiConfig();
@@ -111,5 +105,30 @@ describe("resolveApiConfig", () => {
     const config = resolveApiConfig();
     expect(config.fullnodeUrl).toBe("http://localhost:8081/v1");
     expect(config.indexerUrl).toBe("http://localhost:8081/graphql");
+  });
+
+  it("does not send a frontend client key from Node SSR", () => {
+    clearKeyEnvs();
+    process.env.VITE_APTOS_API_KEY = "AG-CLIENTKEYFROMSSR";
+    const config = resolveApiConfig();
+    expect(config.apiKey).toBeUndefined();
+  });
+
+  it("does not send a client key even when it is stored as the backend env name", () => {
+    clearKeyEnvs();
+    process.env.APTOS_BUILD_API_KEY = "AG-WRONGTYPEFORBACKEND";
+    const config = resolveApiConfig();
+    expect(config.kind).toBe("client");
+    expect(config.apiKey).toBeUndefined();
+  });
+
+  it("skips a wrong-kind backend env and uses a later server key", () => {
+    clearKeyEnvs();
+    process.env.APTOS_BUILD_API_KEY = "AG-WRONGTYPEFORBACKEND";
+    process.env.GEOMI_API_KEY = "aptoslabs_from_geomi";
+    const resolved = resolveApiKey();
+    expect(resolved.source).toBe("GEOMI_API_KEY");
+    expect(resolved.kind).toBe("server");
+    expect(resolveApiConfig().apiKey).toBe("aptoslabs_from_geomi");
   });
 });

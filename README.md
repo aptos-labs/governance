@@ -41,44 +41,36 @@ Open `http://localhost:3000`.
 
 ## Environment Variables
 
-This app renders on the server, so its configuration is read with `process.env`
-inside server functions and never reaches the browser. Prefer unprefixed names
-so secrets are not inlined into the client bundle.
+This app uses **two** Geomi / Aptos Labs API keys. Mixing them is what 401s
+SSR: a browser client key (`AG-…`) sent from Node has no `Origin` header.
 
-- `APTOS_BUILD_API_KEY` (optional, recommended in production): Geomi / Aptos
-  Labs **server** API key (`aptoslabs_…`) sent as `Authorization: Bearer` on
-  fullnode and indexer requests. Create one at https://geomi.dev. This is the
+- `APTOS_BUILD_API_KEY` (backend, recommended in production): Geomi **server**
+  key (`aptoslabs_…`). Read with `process.env` in server functions and never
+  inlined into the client bundle. Create one at https://geomi.dev. This is the
   key that avoids public-endpoint rate limits on Vercel SSR.
+  Also accepted: `GEOMI_API_KEY`, `APTOS_API_KEY`.
+  `VITE_APTOS_BUILD_API_KEY` is **not** read — a `VITE_` name would inline the
+  server secret. Copy that value to `APTOS_BUILD_API_KEY` and delete the
+  `VITE_` variable.
+- `VITE_APTOS_API_KEY` (frontend): Geomi **client** key (`AG-…`), inlined into
+  the browser bundle. Allowlist this site's origin on the key. Used by the
+  wallet adapter and client-side Aptos SDK calls (`waitForTransaction`).
+  Also accepted: `VITE_APTOS_API_KEY_MAINNET`, `VITE_GEOMI_API_KEY`.
 - `APTOS_FULLNODE_URL` (optional): fullnode override; defaults to hosted mainnet
 - `APTOS_INDEXER_URL` (optional): indexer override; defaults to
   `https://api.mainnet.aptoslabs.com/v1/graphql`
 
-Geomi keys authenticate against those Aptos Labs hosts. Do not point the
-endpoints at `api.geomi.dev`.
-
-A client key (`AG-…`) will still be sent, but Geomi applies Origin / per-IP
-limits meant for browsers. Prefer a server key for this deployment.
-
-If you already set a key on Vercel under a legacy name, it is still read, in
-this order: `APTOS_BUILD_API_KEY`, `GEOMI_API_KEY`, `VITE_APTOS_BUILD_API_KEY`,
-`VITE_GEOMI_API_KEY`, `VITE_APTOS_API_KEY_MAINNET`, `VITE_APTOS_API_KEY`,
-`APTOS_API_KEY`. `VITE_*` names are also read from `import.meta.env` so a key
-that was only present at build time still works.
+Geomi keys authenticate against those Aptos Labs hosts. Do not point
+`APTOS_FULLNODE_URL` / `APTOS_INDEXER_URL` at `api.geomi.dev`.
 
 **Is the Vercel key the right type?** After a deploy, open the serverless
 function logs. You should see one of:
 
-- `[aptos] Using server API key from APTOS_BUILD_API_KEY` — correct.
-  Server keys start with `aptoslabs_`.
-- `[aptos] Using client API key from VITE_…` — the value is a browser
-  (`AG-…`) key. It will still be sent, but Geomi applies Origin / per-IP
-  limits meant for wallets, so SSR on Vercel can still 429. Create a
-  **server** key at https://geomi.dev and store it as `APTOS_BUILD_API_KEY`.
-- `[aptos] No API key found` — the dashboard name does not match any of
-  the names above (or the variable is empty). Add `APTOS_BUILD_API_KEY`.
-
-Do not point `APTOS_FULLNODE_URL` / `APTOS_INDEXER_URL` at `api.geomi.dev`.
-Geomi keys authenticate against the hosted Aptos Labs URLs.
+- `[aptos] Using backend server API key from APTOS_BUILD_API_KEY` — correct.
+- `[aptos] No backend API key found` — add `APTOS_BUILD_API_KEY` (server key).
+- `[aptos] Ignoring client API key from APTOS_BUILD_API_KEY` — that value is an
+  `AG-…` key. Put the client key in `VITE_APTOS_API_KEY` and a server key in
+  `APTOS_BUILD_API_KEY`.
 
 List and proposal HTML is cached at the Vercel edge for 15 seconds
 (`s-maxage=15`, `stale-while-revalidate=45`), matching the in-process TTL

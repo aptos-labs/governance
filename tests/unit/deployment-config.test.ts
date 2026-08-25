@@ -33,9 +33,12 @@ describe("deployment config", () => {
     }
   });
 
-  it("exposes no client-side env vars, since config is server-only", () => {
+  it("keeps the backend key unprefixed and the frontend key Vite-prefixed", () => {
     const example = readFileSync(resolve(rootDir, ".env.example"), "utf8");
-    expect(example).not.toMatch(/^\s*VITE_/m);
+    expect(example).toMatch(/^APTOS_BUILD_API_KEY=/m);
+    expect(example).toMatch(/^VITE_APTOS_API_KEY=/m);
+    // A VITE_ backend key would inline the secret into the public bundle.
+    expect(example).not.toMatch(/^VITE_APTOS_BUILD_API_KEY=/m);
   });
 
   it("asks Vercel to cache SSR HTML briefly so Aptos is not hit on every request", () => {
