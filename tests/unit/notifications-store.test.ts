@@ -1,12 +1,19 @@
 import {mkdtemp, readFile} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import path from "node:path";
-import {describe, expect, it} from "vitest";
+import {afterEach, describe, expect, it} from "vitest";
+import type {NotificationConfig} from "~/lib/notifications/config";
 import {
+  createNotificationStore,
   FileNotificationStore,
   normalizeStoreState,
+  resetNotificationStoreForTests,
 } from "~/lib/notifications/store";
-import {EMPTY_SNAPSHOT, EMPTY_STORE_STATE} from "~/lib/notifications/types";
+import {
+  EMPTY_SNAPSHOT,
+  EMPTY_STORE_STATE,
+  GOVERNANCE_SLACK_CHANNEL,
+} from "~/lib/notifications/types";
 
 describe("FileNotificationStore", () => {
   it("persists the poll snapshot across store instances", async () => {
@@ -87,5 +94,46 @@ describe("normalizeStoreState", () => {
         },
       },
     });
+  });
+});
+
+const config: NotificationConfig = {
+  cronSecret: undefined,
+  publicAppUrl: "https://gov.example",
+  slackChannel: GOVERNANCE_SLACK_CHANNEL,
+  slackWebhookUrl: undefined,
+  slackBotToken: undefined,
+  upstashUrl: undefined,
+  upstashToken: undefined,
+  storePath: undefined,
+};
+
+describe("createNotificationStore", () => {
+  afterEach(() => {
+    resetNotificationStoreForTests();
+  });
+
+  it("uses a file store off Vercel so a persistent host does not need Upstash", () => {
+    const previous = process.env.VERCEL;
+    delete process.env.VERCEL;
+    try {
+      const store = createNotificationStore(config);
+      expect(store.kind).toBe("file");
+    } finally {
+      if (previous === undefined) delete process.env.VERCEL;
+      else process.env.VERCEL = previous;
+    }
+  });
+
+  it("uses memory on Vercel when no store path is set", () => {
+    const previous = process.env.VERCEL;
+    process.env.VERCEL = "1";
+    try {
+      const store = createNotificationStore(config);
+      expect(store.kind).toBe("memory");
+    } finally {
+      if (previous === undefined) delete process.env.VERCEL;
+      else process.env.VERCEL = previous;
+    }
   });
 });

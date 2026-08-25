@@ -78,26 +78,40 @@ cache used by the fullnode/indexer loaders.
 
 ## Governance notifications
 
-The app posts alerts to Aptos Labs Slack **`#governance`** when a proposal
+The poller posts alerts to Aptos Labs Slack **`#governance`** when a proposal
 is created, when voting closes (pass or fail), when a proposal is executed,
 and when voting is about to end (3d / 2d / 1d / 6h countdown reminders).
 There is no public subscribe page.
 
-1. Set `CRON_SECRET` and `NOTIFICATIONS_PUBLIC_APP_URL`.
-2. On Vercel, set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
-   so the poll snapshot survives across serverless invocations. Locally the
-   store defaults to `.data/notifications.json`.
-3. Point Slack at `#governance` using **one** of:
-   - `NOTIFICATIONS_SLACK_WEBHOOK_URL` — Incoming Webhook created in
-     Aptos Labs Slack `#governance`
-   - `NOTIFICATIONS_SLACK_BOT_TOKEN` — bot invited to `#governance`; the
-     app posts with `chat.postMessage` to that channel name
-4. Vercel Cron hits `GET /api/cron/notifications` every 5 minutes
-   (`vercel.json`). Hobby plans only allow one cron per day — use Pro, or
-   an external scheduler with `Authorization: Bearer $CRON_SECRET`.
+Run it as a **persistent process** on any machine with disk (a VM, a home
+server, systemd). The proposal snapshot is a local JSON file, so Upstash
+is not required.
+
+```bash
+# long-running (polls every 5 minutes)
+pnpm notifications:worker
+
+# one shot (cron / systemd timer)
+pnpm notifications:worker --once
+
+# preview without posting or writing the snapshot
+pnpm notifications:worker --once --dry-run
+```
+
+Copy `.env.example` to `.env.notifications` (or `.env.local`) on that
+machine and set:
+
+- `APTOS_BUILD_API_KEY` — Geomi server key
+- `NOTIFICATIONS_PUBLIC_APP_URL` — origin used in Slack links
+- `NOTIFICATIONS_SLACK_WEBHOOK_URL` or `NOTIFICATIONS_SLACK_BOT_TOKEN`
+- `NOTIFICATIONS_STORE_PATH` — defaults to `.data/notifications.json`
+
+A sample systemd unit is in `deploy/governance-notifications.service`.
+Point `WorkingDirectory` and `--env-file` at that machine's checkout.
 
 The first successful poll records the current on-chain state and does **not**
-fan out historical proposals.
+fan out historical proposals. Do not also hit `/api/cron/notifications` on
+the same snapshot or you can double-post.
 
 ## Deployment
 

@@ -18,6 +18,7 @@ export interface NotificationPollResult {
   failed: number;
   eventTypes: string[];
   slackConfigured: boolean;
+  dryRun: boolean;
 }
 
 export async function runNotificationPoll(input: {
@@ -31,11 +32,13 @@ export async function runNotificationPoll(input: {
     nowSecs: bigint,
   ) => Promise<WatchedProposal[]>;
   deliver?: typeof deliverEvent;
+  dryRun?: boolean;
 }): Promise<NotificationPollResult> {
   const nowSecs = input.nowSecs ?? BigInt(Math.floor(Date.now() / 1000));
   const loadForum = input.loadForum ?? loadForumForNotifications;
   const loadProposals = input.loadProposals ?? loadWatchedProposals;
   const deliver = input.deliver ?? deliverEvent;
+  const dryRun = Boolean(input.dryRun);
   const destinations = slackDestinations(input.config);
 
   const forum = await loadForum();
@@ -45,23 +48,33 @@ export async function runNotificationPoll(input: {
   }));
   const proposals = await loadProposals(forum.handle, ids, nowSecs);
 
-  const events = await input.store.withLock(async (state) => {
-    const diff = diffProposalEvents({
-      snapshot: state.snapshot,
-      nextProposalId: forum.nextProposalId,
-      proposals,
-      nowSecs,
-    });
-    return {
-      state: {...state, snapshot: diff.snapshot},
-      result: diff.events,
-    };
-  });
+  const events = dryRun
+    ? await input.store.withLock(async (state) => {
+        const diff = diffProposalEvents({
+          snapshot: state.snapshot,
+          nextProposalId: forum.nextProposalId,
+          proposals,
+          nowSecs,
+        });
+        return {state, result: diff.events};
+      })
+    : await input.store.withLock(async (state) => {
+        const diff = diffProposalEvents({
+          snapshot: state.snapshot,
+          nextProposalId: forum.nextProposalId,
+          proposals,
+          nowSecs,
+        });
+        return {
+          state: {...state, snapshot: diff.snapshot},
+          result: diff.events,
+        };
+      });
 
   let delivered = 0;
   let failed = 0;
   for (const event of events) {
-    if (destinations.length === 0) continue;
+    if (dryRun || destinations.length === 0) continue;
     try {
       const result = await deliver(destinations, event, input.config);
       delivered += result.delivered;
@@ -81,5 +94,6 @@ export async function runNotificationPoll(input: {
     failed,
     eventTypes: events.map((event: ProposalEvent) => event.type),
     slackConfigured: destinations.length > 0,
+    dryRun,
   };
 }

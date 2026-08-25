@@ -42,19 +42,18 @@ describe("deployment config", () => {
     expect(example).toMatch(/^CRON_SECRET=/m);
     expect(example).toMatch(/^NOTIFICATIONS_SLACK_WEBHOOK_URL=/m);
     expect(example).toMatch(/^NOTIFICATIONS_SLACK_BOT_TOKEN=/m);
+    expect(example).toMatch(/^NOTIFICATIONS_STORE_PATH=/m);
     expect(example).not.toMatch(/^NOTIFICATIONS_TELEGRAM_/m);
     expect(example).not.toMatch(/^NOTIFICATIONS_DISCORD_/m);
-    expect(example).toMatch(/^UPSTASH_REDIS_REST_URL=/m);
+    expect(example).not.toMatch(/^UPSTASH_/m);
     expect(example).not.toMatch(/^VITE_CRON_SECRET=/m);
     expect(example).not.toMatch(/^VITE_NOTIFICATIONS_/m);
     expect(example).not.toMatch(/^VITE_UPSTASH_/m);
   });
 
-  it("schedules the notifications poll on Vercel Cron", () => {
+  it("does not schedule Vercel Cron for notifications", () => {
     const vercel = readJson("vercel.json");
-    expect(vercel.crons).toEqual([
-      {path: "/api/cron/notifications", schedule: "*/5 * * * *"},
-    ]);
+    expect(vercel.crons).toBeUndefined();
   });
 
   it("asks Vercel to cache SSR HTML briefly so Aptos is not hit on every request", () => {

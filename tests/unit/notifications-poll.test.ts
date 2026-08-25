@@ -137,4 +137,58 @@ describe("runNotificationPoll", () => {
     expect(store.state.snapshot.nextProposalId).toBe(1);
     expect(store.state.snapshot.proposals["0"]?.status).toBe("active");
   });
+
+  it("dry-run reports events without delivering or writing the snapshot", async () => {
+    const store = new MemoryNotificationStore(undefined, true);
+    await runNotificationPoll({
+      config,
+      store,
+      nowSecs: 10n,
+      loadForum: async () => ({nextProposalId: 1, handle: "h"}),
+      loadProposals: async () => [
+        {
+          proposalId: "0",
+          status: "active",
+          title: "Existing",
+          yesVotes: 1n,
+          noVotes: 0n,
+          expirationSecs: 10_000_000n,
+          creationTimeSecs: 1n,
+        } satisfies WatchedProposal,
+      ],
+      deliver: async () => ({attempted: 0, delivered: 0, failed: 0}),
+    });
+    const snapshotAfterBaseline = structuredClone(store.state.snapshot);
+    const deliver = vi.fn(
+      async (_destinations: unknown, _event: unknown, _config: unknown) => ({
+        attempted: 1,
+        delivered: 1,
+        failed: 0,
+      }),
+    );
+
+    const result = await runNotificationPoll({
+      config,
+      store,
+      nowSecs: 20n,
+      dryRun: true,
+      loadForum: async () => ({nextProposalId: 2, handle: "h"}),
+      loadProposals: async (_handle, ids) =>
+        ids.map((id) => ({
+          proposalId: id,
+          status: "active" as const,
+          title: id === "1" ? "Brand new" : "Existing",
+          yesVotes: 1n,
+          noVotes: 0n,
+          expirationSecs: 10_000_000n,
+          creationTimeSecs: 1n,
+        })),
+      deliver,
+    });
+
+    expect(result.dryRun).toBe(true);
+    expect(result.eventTypes).toEqual(["proposal.created"]);
+    expect(deliver).not.toHaveBeenCalled();
+    expect(store.state.snapshot).toEqual(snapshotAfterBaseline);
+  });
 });

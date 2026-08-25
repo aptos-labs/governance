@@ -1,7 +1,7 @@
 import {mkdir, readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import type {NotificationConfig} from "~/lib/notifications/config";
-import {isProductionRuntime} from "~/lib/notifications/config";
+import {isVercelRuntime} from "~/lib/notifications/config";
 import {
   EMPTY_STORE_STATE,
   type NotificationStoreState,
@@ -218,10 +218,10 @@ export function createNotificationStore(
   if (config.upstashUrl && config.upstashToken) {
     return new UpstashNotificationStore(config.upstashUrl, config.upstashToken);
   }
-  if (isProductionRuntime()) {
+  const filePath = config.storePath || path.resolve(".data/notifications.json");
+  if (isVercelRuntime() && !config.storePath) {
     return new MemoryNotificationStore();
   }
-  const filePath = config.storePath || path.resolve(".data/notifications.json");
   return new FileNotificationStore(filePath);
 }
 

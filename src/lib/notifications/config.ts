@@ -68,6 +68,10 @@ export function resolveNotificationConfig(): NotificationConfig {
   };
 }
 
+export function isVercelRuntime(): boolean {
+  return Boolean(readEnv("VERCEL"));
+}
+
 export function isProductionRuntime(): boolean {
-  return Boolean(readEnv("VERCEL")) || readEnv("NODE_ENV") === "production";
+  return isVercelRuntime() || readEnv("NODE_ENV") === "production";
 }
