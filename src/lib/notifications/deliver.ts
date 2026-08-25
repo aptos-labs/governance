@@ -1,10 +1,5 @@
 import type {NotificationConfig} from "~/lib/notifications/config";
-import {
-  formatDiscordPayload,
-  formatSlackPayload,
-  formatTelegramHtml,
-  proposalPageUrl,
-} from "~/lib/notifications/format";
+import {formatSlackPayload, proposalPageUrl} from "~/lib/notifications/format";
 import type {Destination, ProposalEvent} from "~/lib/notifications/types";
 
 export interface DeliveryResult {
@@ -16,13 +11,17 @@ export interface DeliveryResult {
 async function postJson(
   url: string,
   body: unknown,
-): Promise<{ok: boolean; status: number}> {
+  headers: Record<string, string> = {},
+): Promise<{ok: boolean; status: number; json?: Record<string, unknown>}> {
   const response = await fetch(url, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {"Content-Type": "application/json", ...headers},
     body: JSON.stringify(body),
   });
-  return {ok: response.ok, status: response.status};
+  const json = (await response.json().catch(() => undefined)) as
+    | Record<string, unknown>
+    | undefined;
+  return {ok: response.ok, status: response.status, json};
 }
 
 export async function sendToDestination(
@@ -31,34 +30,19 @@ export async function sendToDestination(
   config: NotificationConfig,
 ): Promise<boolean> {
   const proposalUrl = proposalPageUrl(config.publicAppUrl, event.proposalId);
+  const payload = formatSlackPayload(event, proposalUrl, destination.channel);
 
-  if (destination.channel === "slack") {
-    const payload = formatSlackPayload(event, proposalUrl);
+  if (destination.via === "webhook") {
     const result = await postJson(destination.webhookUrl, payload);
     return result.ok;
   }
 
-  if (destination.channel === "discord") {
-    const payload = formatDiscordPayload(event, proposalUrl);
-    const result = await postJson(destination.webhookUrl, payload);
-    return result.ok;
-  }
-
-  if (!config.telegramBotToken) return false;
-  const response = await fetch(
-    `https://api.telegram.org/bot${config.telegramBotToken}/sendMessage`,
-    {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        chat_id: destination.chatId,
-        text: formatTelegramHtml(event, proposalUrl),
-        parse_mode: "HTML",
-        disable_web_page_preview: false,
-      }),
-    },
+  const result = await postJson(
+    "https://slack.com/api/chat.postMessage",
+    payload,
+    {Authorization: `Bearer ${destination.botToken}`},
   );
-  return response.ok;
+  return result.ok && result.json?.ok === true;
 }
 
 export async function deliverEvent(
@@ -71,10 +55,7 @@ export async function deliverEvent(
       try {
         return await sendToDestination(destination, event, config);
       } catch (error) {
-        console.error(
-          `[notifications] ${destination.channel} delivery failed`,
-          error,
-        );
+        console.error("[notifications] Slack delivery failed", error);
         return false;
       }
     }),

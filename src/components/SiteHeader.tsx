@@ -29,12 +29,6 @@ export function SiteHeader() {
           mainnet
         </span>
         <Link
-          to="/notifications"
-          className="hidden text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] sm:inline"
-        >
-          Notifications
-        </Link>
-        <Link
           to="/delegation"
           className="hidden text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] sm:inline"
         >

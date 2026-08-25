@@ -2,10 +2,10 @@ import {mkdir, readFile, writeFile} from "node:fs/promises";
 import path from "node:path";
 import type {NotificationConfig} from "~/lib/notifications/config";
 import {isProductionRuntime} from "~/lib/notifications/config";
-import {normalizeStoreState} from "~/lib/notifications/subscriptions";
 import {
   EMPTY_STORE_STATE,
   type NotificationStoreState,
+  normalizeWatchState,
 } from "~/lib/notifications/types";
 
 export type StoreKind = "memory" | "file" | "upstash";
@@ -24,6 +24,32 @@ export interface NotificationStore {
 const STATE_KEY = "aptos-gov:notifications:v1";
 const LOCK_KEY = "aptos-gov:notifications:lock";
 const LOCK_TTL_SECONDS = 55;
+
+export function normalizeStoreState(value: unknown): NotificationStoreState {
+  if (!value || typeof value !== "object") return EMPTY_STORE_STATE;
+  const record = value as Partial<NotificationStoreState>;
+  if (record.version !== 1) return EMPTY_STORE_STATE;
+  return {
+    version: 1,
+    snapshot: {
+      initialized: Boolean(record.snapshot?.initialized),
+      nextProposalId: Number(record.snapshot?.nextProposalId) || 0,
+      proposals: normalizeSnapshotProposals(record.snapshot?.proposals),
+    },
+  };
+}
+
+function normalizeSnapshotProposals(
+  value: unknown,
+): NotificationStoreState["snapshot"]["proposals"] {
+  if (!value || typeof value !== "object") return {};
+  const proposals: NotificationStoreState["snapshot"]["proposals"] = {};
+  for (const [id, watch] of Object.entries(value)) {
+    const normalized = normalizeWatchState(watch);
+    if (normalized) proposals[id] = normalized;
+  }
+  return proposals;
+}
 
 export class MemoryNotificationStore implements NotificationStore {
   readonly kind = "memory" as const;

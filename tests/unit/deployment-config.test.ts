@@ -41,7 +41,9 @@ describe("deployment config", () => {
     expect(example).not.toMatch(/^VITE_APTOS_BUILD_API_KEY=/m);
     expect(example).toMatch(/^CRON_SECRET=/m);
     expect(example).toMatch(/^NOTIFICATIONS_SLACK_WEBHOOK_URL=/m);
-    expect(example).toMatch(/^NOTIFICATIONS_TELEGRAM_BOT_TOKEN=/m);
+    expect(example).toMatch(/^NOTIFICATIONS_SLACK_BOT_TOKEN=/m);
+    expect(example).not.toMatch(/^NOTIFICATIONS_TELEGRAM_/m);
+    expect(example).not.toMatch(/^NOTIFICATIONS_DISCORD_/m);
     expect(example).toMatch(/^UPSTASH_REDIS_REST_URL=/m);
     expect(example).not.toMatch(/^VITE_CRON_SECRET=/m);
     expect(example).not.toMatch(/^VITE_NOTIFICATIONS_/m);

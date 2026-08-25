@@ -1,13 +1,12 @@
 import type {NotificationConfig} from "~/lib/notifications/config";
 import {deliverEvent} from "~/lib/notifications/deliver";
+import {slackDestinations} from "~/lib/notifications/destinations";
 import {diffProposalEvents, idsToFetch} from "~/lib/notifications/events";
 import {
   loadForumForNotifications,
   loadWatchedProposals,
 } from "~/lib/notifications/load-proposals";
 import type {NotificationStore} from "~/lib/notifications/store";
-import {destinationsForEvent} from "~/lib/notifications/subscriptions";
-import {ensureTelegramWebhook} from "~/lib/notifications/telegram";
 import type {ProposalEvent, WatchedProposal} from "~/lib/notifications/types";
 
 export interface NotificationPollResult {
@@ -18,6 +17,7 @@ export interface NotificationPollResult {
   delivered: number;
   failed: number;
   eventTypes: string[];
+  slackConfigured: boolean;
 }
 
 export async function runNotificationPoll(input: {
@@ -36,12 +36,7 @@ export async function runNotificationPoll(input: {
   const loadForum = input.loadForum ?? loadForumForNotifications;
   const loadProposals = input.loadProposals ?? loadWatchedProposals;
   const deliver = input.deliver ?? deliverEvent;
-
-  if (input.config.telegramBotToken) {
-    await ensureTelegramWebhook(input.config, input.store).catch((error) => {
-      console.error("[notifications] failed to set Telegram webhook", error);
-    });
-  }
+  const destinations = slackDestinations(input.config);
 
   const forum = await loadForum();
   const ids = await input.store.withLock(async (state) => ({
@@ -66,10 +61,6 @@ export async function runNotificationPoll(input: {
   let delivered = 0;
   let failed = 0;
   for (const event of events) {
-    const destinations = await input.store.withLock(async (state) => ({
-      state,
-      result: destinationsForEvent(state, input.config, event.type),
-    }));
     if (destinations.length === 0) continue;
     try {
       const result = await deliver(destinations, event, input.config);
@@ -89,5 +80,6 @@ export async function runNotificationPoll(input: {
     delivered,
     failed,
     eventTypes: events.map((event: ProposalEvent) => event.type),
+    slackConfigured: destinations.length > 0,
   };
 }

@@ -1,10 +1,8 @@
 import {describe, expect, it} from "vitest";
 import {
   eventHeadline,
-  formatDiscordPayload,
   formatPlainText,
   formatSlackPayload,
-  formatTelegramHtml,
   proposalPageUrl,
 } from "~/lib/notifications/format";
 import type {ProposalEvent} from "~/lib/notifications/types";
@@ -67,21 +65,11 @@ describe("notification formatters", () => {
     ).toBe("6 hours left to vote");
   });
 
-  it("escapes HTML in Telegram bodies", () => {
-    const html = formatTelegramHtml(event, url);
-    expect(html).toContain("Enable feature &lt;X&gt; &amp; Y");
-    expect(html).toContain(`href="${url}"`);
-    expect(html).not.toContain("Enable feature <X>");
-  });
-
-  it("includes the proposal link in Slack and Discord payloads", () => {
+  it("includes the proposal link and #governance channel in Slack payloads", () => {
     const slack = formatSlackPayload(event, url);
+    expect(slack.channel).toBe("#governance");
     expect(slack.text).toContain("#12");
     expect(JSON.stringify(slack.blocks)).toContain(url);
-
-    const discord = formatDiscordPayload(event, url);
-    expect(discord.embeds[0]?.url).toBe(url);
-    expect(discord.embeds[0]?.title).toContain("#12");
   });
 
   it("keeps a plain-text fallback with title and URL", () => {

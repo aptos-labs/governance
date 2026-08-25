@@ -1,6 +1,9 @@
 import {formatDurationCompact, formatOctasToApt} from "~/lib/governance/format";
 import type {ProposalEvent} from "~/lib/notifications/types";
-import {EVENT_TYPE_LABELS} from "~/lib/notifications/types";
+import {
+  EVENT_TYPE_LABELS,
+  GOVERNANCE_SLACK_CHANNEL,
+} from "~/lib/notifications/types";
 
 export function proposalPageUrl(appUrl: string, proposalId: string): string {
   const base = appUrl.replace(/\/+$/, "");
@@ -62,33 +65,12 @@ export function formatPlainText(
   );
 }
 
-export function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-export function formatTelegramHtml(
-  event: ProposalEvent,
-  proposalUrl: string,
-): string {
-  const remaining = remainingLine(event);
-  const lines = [
-    `<b>${escapeHtml(eventHeadline(event))}</b>`,
-    `<a href="${escapeHtml(proposalUrl)}">#${escapeHtml(event.proposalId)} ${escapeHtml(event.title)}</a>`,
-    `Status: ${escapeHtml(event.status)}`,
-    escapeHtml(voteLine(event)),
-  ];
-  if (remaining) lines.push(escapeHtml(remaining));
-  return lines.join("\n");
-}
-
 export function formatSlackPayload(
   event: ProposalEvent,
   proposalUrl: string,
+  channel: string = GOVERNANCE_SLACK_CHANNEL,
 ): {
+  channel: string;
   text: string;
   blocks: Array<Record<string, unknown>>;
 } {
@@ -102,6 +84,7 @@ export function formatSlackPayload(
     .join("\n");
 
   return {
+    channel,
     text: `${eventHeadline(event)}: #${event.proposalId} ${event.title}`,
     blocks: [
       {
@@ -120,40 +103,6 @@ export function formatSlackPayload(
             text: EVENT_TYPE_LABELS[event.type],
           },
         ],
-      },
-    ],
-  };
-}
-
-export function formatDiscordPayload(
-  event: ProposalEvent,
-  proposalUrl: string,
-): {
-  content: string;
-  embeds: Array<Record<string, unknown>>;
-} {
-  const color =
-    event.type === "proposal.voting_failed"
-      ? 0xfe805c
-      : event.type === "proposal.voting_passed" ||
-          event.type === "proposal.executed"
-        ? 0x256b2e
-        : event.type === "proposal.voting_ending_soon"
-          ? 0xd8bf45
-          : 0x34648f;
-
-  const remaining = remainingLine(event);
-  return {
-    content: eventHeadline(event),
-    embeds: [
-      {
-        title: `#${event.proposalId} ${event.title}`.slice(0, 256),
-        url: proposalUrl,
-        color,
-        description: [voteLine(event), remaining]
-          .filter((line): line is string => Boolean(line))
-          .join("\n"),
-        fields: [{name: "Status", value: event.status, inline: true}],
       },
     ],
   };

@@ -1,24 +1,18 @@
 import {describe, expect, it, vi} from "vitest";
-import {
-  cronAuthorized,
-  telegramWebhookAuthorized,
-} from "~/lib/notifications/auth";
+import {cronAuthorized} from "~/lib/notifications/auth";
 import type {NotificationConfig} from "~/lib/notifications/config";
 import {runNotificationPoll} from "~/lib/notifications/poll";
 import {MemoryNotificationStore} from "~/lib/notifications/store";
 import type {WatchedProposal} from "~/lib/notifications/types";
+import {GOVERNANCE_SLACK_CHANNEL} from "~/lib/notifications/types";
 
 const config: NotificationConfig = {
   cronSecret: "secret",
   publicAppUrl: "https://gov.example",
-  slackWebhookUrls: [
+  slackChannel: GOVERNANCE_SLACK_CHANNEL,
+  slackWebhookUrl:
     "https://hooks.slack.com/services/TTEST/BTEST/not-a-real-token",
-  ],
-  discordWebhookUrls: [],
-  telegramBotToken: undefined,
-  telegramBotUsername: undefined,
-  telegramChatIds: [],
-  telegramWebhookSecret: "tg-secret",
+  slackBotToken: undefined,
   upstashUrl: undefined,
   upstashToken: undefined,
   storePath: undefined,
@@ -39,20 +33,6 @@ describe("cronAuthorized", () => {
       headers: {authorization: "Bearer nope"},
     });
     expect(cronAuthorized(wrong, "secret")).toBe(false);
-  });
-});
-
-describe("telegramWebhookAuthorized", () => {
-  it("checks the Telegram secret-token header when configured", () => {
-    const request = new Request(
-      "https://gov.example/api/notifications/telegram",
-      {
-        headers: {"x-telegram-bot-api-secret-token": "tg-secret"},
-      },
-    );
-    expect(telegramWebhookAuthorized(request, "tg-secret")).toBe(true);
-    expect(telegramWebhookAuthorized(request, "other")).toBe(false);
-    expect(telegramWebhookAuthorized(request, undefined)).toBe(true);
   });
 });
 
@@ -108,6 +88,12 @@ describe("runNotificationPoll", () => {
 
     expect(second.eventTypes).toEqual(["proposal.created"]);
     expect(deliver).toHaveBeenCalledTimes(1);
+    expect(deliver.mock.calls[0]?.[0]).toEqual([
+      expect.objectContaining({
+        via: "webhook",
+        channel: "#governance",
+      }),
+    ]);
     expect(deliver.mock.calls[0]?.[1]).toMatchObject({
       type: "proposal.created",
       proposalId: "1",

@@ -18,7 +18,8 @@ export const EVENT_TYPE_LABELS: Record<NotificationEventType, string> = {
   "proposal.voting_ending_soon": "Countdown (3d / 2d / 1d / 6h left)",
 };
 
-export type NotificationChannel = "slack" | "telegram" | "discord";
+/** Aptos Labs Slack channel that receives every governance alert. */
+export const GOVERNANCE_SLACK_CHANNEL = "#governance";
 
 export interface WatchedProposal {
   proposalId: string;
@@ -65,48 +66,26 @@ export interface ProposalEvent {
   reminderWindow?: ReminderWindow;
 }
 
-export interface Subscription {
-  id: string;
-  channel: NotificationChannel;
-  events: NotificationEventType[];
-  createdAt: string;
-  unsubscribeToken: string;
-  slackWebhookUrl?: string;
-  discordWebhookUrl?: string;
-  telegramChatId?: string;
-}
-
 export interface NotificationStoreState {
   version: 1;
   snapshot: PollSnapshot;
-  subscriptions: Subscription[];
-  telegramWebhookUrl?: string;
 }
 
 export const EMPTY_STORE_STATE: NotificationStoreState = {
   version: 1,
   snapshot: EMPTY_SNAPSHOT,
-  subscriptions: [],
 };
 
 export type Destination =
   | {
-      channel: "slack";
-      source: "env" | "subscription";
+      via: "webhook";
       webhookUrl: string;
-      events: NotificationEventType[] | "all";
+      channel: typeof GOVERNANCE_SLACK_CHANNEL;
     }
   | {
-      channel: "discord";
-      source: "env" | "subscription";
-      webhookUrl: string;
-      events: NotificationEventType[] | "all";
-    }
-  | {
-      channel: "telegram";
-      source: "env" | "subscription";
-      chatId: string;
-      events: NotificationEventType[] | "all";
+      via: "bot";
+      botToken: string;
+      channel: typeof GOVERNANCE_SLACK_CHANNEL;
     };
 
 export type ReminderFlags = Pick<
@@ -166,13 +145,6 @@ export function normalizeWatchState(value: unknown): ProposalWatchState | null {
     expirationSecs,
     ...reminderFlagsFromUnknown(record),
   };
-}
-
-export function wantsEvent(
-  filter: NotificationEventType[] | "all",
-  type: NotificationEventType,
-): boolean {
-  return filter === "all" || filter.length === 0 || filter.includes(type);
 }
 
 export function proposalTitle(proposal: {

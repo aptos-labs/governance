@@ -14,11 +14,3 @@ export function cronAuthorized(
   }
   return !isProductionRuntime();
 }
-
-export function telegramWebhookAuthorized(
-  request: Request,
-  secret: string | undefined,
-): boolean {
-  if (!secret) return true;
-  return request.headers.get("x-telegram-bot-api-secret-token") === secret;
-}
