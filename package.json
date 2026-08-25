@@ -42,11 +42,16 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^6.0.1",
     "jsdom": "^30.0.1",
-    "nitro": "^3.0.260311-beta",
+    "nitro": "3.0.260429-beta",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.2",
     "vite": "^8.0.14",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@10.33.2",
+  "pnpm": {
+    "overrides": {
+      "uuid": "11.1.1"
+    }
+  }
 }
