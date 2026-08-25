@@ -56,6 +56,20 @@ describe("deployment config", () => {
     }
   });
 
+  it("includes Vercel Web Analytics and Speed Insights in the document shell", () => {
+    const pkg = readJson("package.json") as {
+      dependencies: Record<string, string>;
+    };
+    expect(pkg.dependencies["@vercel/analytics"]).toBeDefined();
+    expect(pkg.dependencies["@vercel/speed-insights"]).toBeDefined();
+
+    const root = readFileSync(
+      resolve(rootDir, "src/routes/__root.tsx"),
+      "utf8",
+    );
+    expect(root).toContain("VercelAnalytics");
+  });
+
   it("uses patched nitro and uuid versions for known GHSA advisories", () => {
     const pkg = readJson("package.json") as {
       devDependencies: {nitro: string};

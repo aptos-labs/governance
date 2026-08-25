@@ -92,6 +92,12 @@ Start server functions, so it cannot be deployed to a static host.
 install/build commands so the settings do not depend on dashboard state. Set
 the variables above in the Vercel project's environment variable settings.
 
+Vercel Web Analytics and Speed Insights are wired in the document shell via
+`@vercel/analytics` and `@vercel/speed-insights`. Enable **Web Analytics**
+and **Speed Insights** on the project in the Vercel dashboard so
+`/_vercel/insights/*` and `/_vercel/speed-insights/*` are served after the
+next deploy.
+
 ## Quality Gates
 
 Run before creating a PR:
