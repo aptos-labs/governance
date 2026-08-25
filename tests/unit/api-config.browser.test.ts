@@ -54,4 +54,14 @@ describe("resolveApiKey in the browser", () => {
     expect(config.kind).toBe("server");
     expect(config.apiKey).toBeUndefined();
   });
+
+  it("skips a server key in VITE_APTOS_API_KEY and uses a later client key", () => {
+    clearKeyEnvs();
+    process.env.VITE_APTOS_API_KEY = "aptoslabs_leaked_server_key";
+    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-LEGACYCLIENT";
+    const resolved = resolveApiKey();
+    expect(resolved.source).toBe("VITE_APTOS_API_KEY_MAINNET");
+    expect(resolved.kind).toBe("client");
+    expect(resolveApiConfig().apiKey).toBe("AG-LEGACYCLIENT");
+  });
 });

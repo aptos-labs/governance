@@ -121,4 +121,14 @@ describe("resolveApiConfig on the server", () => {
     expect(config.kind).toBe("client");
     expect(config.apiKey).toBeUndefined();
   });
+
+  it("skips a wrong-kind backend env and uses a later server key", () => {
+    clearKeyEnvs();
+    process.env.APTOS_BUILD_API_KEY = "AG-WRONGTYPEFORBACKEND";
+    process.env.GEOMI_API_KEY = "aptoslabs_from_geomi";
+    const resolved = resolveApiKey();
+    expect(resolved.source).toBe("GEOMI_API_KEY");
+    expect(resolved.kind).toBe("server");
+    expect(resolveApiConfig().apiKey).toBe("aptoslabs_from_geomi");
+  });
 });

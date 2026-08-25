@@ -49,6 +49,9 @@ SSR: a browser client key (`AG-…`) sent from Node has no `Origin` header.
   inlined into the client bundle. Create one at https://geomi.dev. This is the
   key that avoids public-endpoint rate limits on Vercel SSR.
   Also accepted: `GEOMI_API_KEY`, `APTOS_API_KEY`.
+  `VITE_APTOS_BUILD_API_KEY` is **not** read — a `VITE_` name would inline the
+  server secret. Copy that value to `APTOS_BUILD_API_KEY` and delete the
+  `VITE_` variable.
 - `VITE_APTOS_API_KEY` (frontend): Geomi **client** key (`AG-…`), inlined into
   the browser bundle. Allowlist this site's origin on the key. Used by the
   wallet adapter and client-side Aptos SDK calls (`waitForTransaction`).

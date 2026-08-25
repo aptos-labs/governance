@@ -67,13 +67,18 @@ function isBrowser(): boolean {
 
 export function resolveApiKey(): ResolvedApiKey {
   const names = isBrowser() ? CLIENT_KEY_ENV_NAMES : SERVER_KEY_ENV_NAMES;
+  const expectedKind: ApiKeyKind = isBrowser() ? "client" : "server";
+  let firstWrongKind: ResolvedApiKey | undefined;
   for (const source of names) {
     const key = readEnv(source);
-    if (key) {
-      return {key, source, kind: classifyApiKey(key)};
+    if (!key) continue;
+    const kind = classifyApiKey(key);
+    if (kind === expectedKind) {
+      return {key, source, kind};
     }
+    firstWrongKind ??= {key, source, kind};
   }
-  return {kind: "none"};
+  return firstWrongKind ?? {kind: "none"};
 }
 
 /**
