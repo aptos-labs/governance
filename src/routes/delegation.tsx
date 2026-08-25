@@ -67,6 +67,7 @@ function MyDelegation() {
                       <Link
                         to="/proposal/$proposalId"
                         params={{proposalId: h.proposalId}}
+                        search={{votesPage: 0}}
                         className="underline"
                       >
                         Proposal #{h.proposalId}

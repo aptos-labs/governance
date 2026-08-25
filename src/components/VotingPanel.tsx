@@ -231,6 +231,7 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
         return (
           <div
             key={pool.poolAddress}
+            data-testid={`vote-pool-${pool.poolAddress}`}
             className="rounded-lg border border-[var(--color-border-light)] p-4"
           >
             <div className="flex items-center justify-between">

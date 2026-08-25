@@ -70,6 +70,7 @@ function ProposalRow({
         navigate({
           to: "/proposal/$proposalId",
           params: {proposalId: proposal.proposalId},
+          search: {votesPage: 0},
         })
       }
     >
