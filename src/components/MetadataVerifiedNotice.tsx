@@ -1,4 +1,5 @@
 import type {MetadataVerificationResult} from "~/lib/governance/types";
+import {isNavigableHttpUrl} from "~/lib/governance/urls";
 
 export function MetadataVerifiedNotice({
   result,
@@ -22,30 +23,42 @@ export function MetadataVerifiedNotice({
     );
   }
 
+  const sourceUrl = isNavigableHttpUrl(result.metadata.source_code_url)
+    ? result.metadata.source_code_url
+    : null;
+  const discussionUrl = isNavigableHttpUrl(result.metadata.discussion_url)
+    ? result.metadata.discussion_url
+    : null;
+
   return (
     <div>
-      {/* Plain text content only — React escapes this, never parsed as HTML. */}
       <p className="whitespace-pre-wrap text-[var(--color-text-primary)]">
         {result.metadata.description}
       </p>
-      <div className="mt-4 flex gap-4 text-sm">
-        <a
-          href={result.metadata.source_code_url}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="text-[var(--color-info)] underline"
-        >
-          Source code
-        </a>
-        <a
-          href={result.metadata.discussion_url}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="text-[var(--color-info)] underline"
-        >
-          Discussion
-        </a>
-      </div>
+      {(sourceUrl || discussionUrl) && (
+        <div className="mt-4 flex gap-4 text-sm">
+          {sourceUrl && (
+            <a
+              href={sourceUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-[var(--color-info)] underline"
+            >
+              Source code
+            </a>
+          )}
+          {discussionUrl && (
+            <a
+              href={discussionUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-[var(--color-info)] underline"
+            >
+              Discussion
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }

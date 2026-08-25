@@ -38,6 +38,7 @@ export function ProposalCard({
     <Link
       to="/proposal/$proposalId"
       params={{proposalId: proposal.proposalId}}
+      search={{votesPage: 0}}
       className="block rounded-xl border border-[var(--color-border-light)] bg-[var(--color-paper)] p-5 hover:border-[var(--color-border)]"
     >
       <div className="flex items-start justify-between gap-4">

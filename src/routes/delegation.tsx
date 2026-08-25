@@ -3,7 +3,9 @@
 import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useQuery} from "@tanstack/react-query";
 import {createFileRoute, Link} from "@tanstack/react-router";
-import {formatOctasToApt, truncateAddress} from "~/lib/governance/format";
+import {AddressChip} from "~/components/AddressChip";
+import {PageHeader} from "~/components/PageHeader";
+import {formatOctasToApt} from "~/lib/governance/format";
 import {getMyDelegation} from "~/lib/governance/get-my-delegation";
 
 export const Route = createFileRoute("/delegation")({
@@ -21,8 +23,8 @@ function MyDelegation() {
   });
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="font-serif text-4xl font-semibold">My Delegation</h1>
+    <main>
+      <PageHeader title="My Delegation" />
 
       {!connected && (
         <p className="mt-4 text-[var(--color-text-secondary)]">
@@ -48,9 +50,7 @@ function MyDelegation() {
               className="rounded-xl border border-[var(--color-border-light)] p-5"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-sm">
-                  {truncateAddress(pool.poolAddress)}
-                </span>
+                <AddressChip address={pool.poolAddress} />
                 <span className="text-xs uppercase text-[var(--color-text-secondary)]">
                   {pool.poolKind === "stake_pool"
                     ? "Stake pool"
@@ -68,6 +68,7 @@ function MyDelegation() {
                       <Link
                         to="/proposal/$proposalId"
                         params={{proposalId: h.proposalId}}
+                        search={{votesPage: 0}}
                         className="underline"
                       >
                         Proposal #{h.proposalId}

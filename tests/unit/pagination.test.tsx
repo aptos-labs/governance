@@ -1,21 +1,9 @@
-// tests/unit/pagination.test.tsx
 import {describe, expect, it} from "vitest";
-
-function getTotalPages(totalCount: number, pageSize: number): number {
-  return Math.max(1, Math.ceil(totalCount / pageSize));
-}
-
-function hasPrevPage(page: number): boolean {
-  return page > 0;
-}
-
-function hasNextPage(
-  page: number,
-  totalCount: number,
-  pageSize: number,
-): boolean {
-  return (page + 1) * pageSize < totalCount;
-}
+import {
+  getTotalPages,
+  hasNextPage,
+  hasPrevPage,
+} from "~/lib/governance/pagination";
 
 describe("getTotalPages", () => {
   it("returns 1 when totalCount <= pageSize", () => {
@@ -25,6 +13,9 @@ describe("getTotalPages", () => {
   it("returns multiple pages for larger totalCount", () => {
     expect(getTotalPages(50, 20)).toBe(3);
     expect(getTotalPages(1, 20)).toBe(1);
+  });
+  it("returns 0 pages when there are no items", () => {
+    expect(getTotalPages(0, 20)).toBe(0);
   });
 });
 

@@ -3,7 +3,9 @@ import {describe, expect, it} from "vitest";
 import {
   clampVotingPowerOctas,
   formatDurationCompact,
+  formatDurationRemaining,
   formatOctasToApt,
+  formatTimestamp,
   parseAptToOctas,
   truncateAddress,
 } from "~/lib/governance/format";
@@ -65,6 +67,16 @@ describe("formatDurationCompact", () => {
   });
 });
 
+describe("formatDurationRemaining", () => {
+  it("always includes days, hours, and minutes like the original UI", () => {
+    expect(formatDurationRemaining(2n * 86400n + 14n * 3600n)).toBe(
+      "2d 14h 0m",
+    );
+    expect(formatDurationRemaining(3n * 3600n + 25n * 60n)).toBe("0d 3h 25m");
+    expect(formatDurationRemaining(45n * 60n)).toBe("0d 0h 45m");
+  });
+});
+
 // --- Task 16: Voting power amount helpers ---
 
 describe("parseAptToOctas", () => {
@@ -94,6 +106,14 @@ describe("parseAptToOctas", () => {
 
   it("returns null for more than 8 fractional digits (finer than 1 octa)", () => {
     expect(parseAptToOctas("1.123456789")).toBeNull();
+  });
+});
+
+describe("formatTimestamp", () => {
+  it("renders a local datetime and a dash for missing or zero values", () => {
+    expect(formatTimestamp(null)).toBe("—");
+    expect(formatTimestamp(0n)).toBe("—");
+    expect(formatTimestamp(1_700_000_000n)).toMatch(/\d{4}/);
   });
 });
 

@@ -4,5 +4,33 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "devCommand": "pnpm dev",
-  "outputDirectory": null
+  "outputDirectory": null,
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=15, stale-while-revalidate=45"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=15, stale-while-revalidate=45"
+        }
+      ]
+    },
+    {
+      "source": "/proposal/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=15, stale-while-revalidate=45"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, s-maxage=15, stale-while-revalidate=45"
+        }
+      ]
+    }
+  ]
 }

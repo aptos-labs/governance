@@ -1,6 +1,6 @@
 import {useWallet, type WalletInfo} from "@aptos-labs/wallet-adapter-react";
 import {useState} from "react";
-import {truncateAddress} from "~/lib/governance/format";
+import {AddressChip} from "~/components/AddressChip";
 
 const FEATURED_WALLETS = ["Petra", "Petra Web"];
 
@@ -22,13 +22,11 @@ export function WalletConnectButton() {
   if (connected && account) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-sm">
-          {truncateAddress(account.address.toString())}
-        </span>
+        <AddressChip address={account.address.toString()} />
         <button
           type="button"
           onClick={() => disconnect()}
-          className="rounded-full border border-[var(--color-border)] px-3 py-1 text-sm"
+          className="rounded border border-[var(--color-border)] px-3 py-1 text-sm"
         >
           Disconnect
         </button>
@@ -41,14 +39,14 @@ export function WalletConnectButton() {
       <button
         type="button"
         onClick={() => setPickerOpen((open) => !open)}
-        className="rounded-full bg-[var(--color-text-primary)] px-4 py-1.5 text-sm font-semibold text-[var(--color-canvas)]"
+        className="rounded-lg bg-[var(--color-accent)] px-[25px] py-[10px] text-[1.1rem] font-normal text-[#121615] hover:brightness-[0.98]"
       >
         Connect Wallet
       </button>
       {pickerOpen && (
         <ul
           role="menu"
-          className="absolute right-0 mt-2 w-48 rounded-xl border border-[var(--color-border-light)] bg-[var(--color-paper)] p-1 shadow-lg"
+          className="absolute right-0 z-30 mt-2 w-48 rounded-lg border border-[var(--color-border-light)] bg-[var(--color-paper)] p-1 shadow-lg"
         >
           {sortWithFeaturedFirst(wallets).map((wallet) => (
             <li key={wallet.name} role="none">

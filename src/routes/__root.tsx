@@ -4,25 +4,44 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import {WalletConnectButton} from "~/components/WalletConnectButton";
+import {SiteFooter} from "~/components/SiteFooter";
+import {SiteHeader} from "~/components/SiteHeader";
 import {AppWalletProvider} from "~/lib/wallet/provider";
 import appCss from "~/styles/app.css?url";
+
+const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem("aptos-gov-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}})();`;
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
       {charSet: "utf-8"},
       {name: "viewport", content: "width=device-width, initial-scale=1"},
-      {title: "Aptos Gov"},
+      {title: "Aptos Governance"},
       {
         name: "description",
-        content: "Delegated governance voting for the Aptos network.",
+        content: "Aptos Governance Decentralized App.",
+      },
+      {property: "og:title", content: "Aptos Governance"},
+      {
+        property: "og:description",
+        content: "Aptos Governance Decentralized App.",
       },
     ],
     links: [
       {rel: "stylesheet", href: appCss},
+      {rel: "icon", type: "image/svg+xml", href: "/favicon.svg"},
       {rel: "icon", type: "image/x-icon", href: "/favicon.ico"},
       {rel: "manifest", href: "/manifest.json"},
+      {rel: "preconnect", href: "https://fonts.googleapis.com"},
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600&display=swap",
+      },
     ],
   }),
   component: RootComponent,
@@ -32,13 +51,13 @@ function RootComponent() {
   return (
     <RootDocument>
       <AppWalletProvider>
-        <header className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <a href="/" className="font-serif text-lg font-semibold">
-            Aptos Gov
-          </a>
-          <WalletConnectButton />
-        </header>
-        <Outlet />
+        <div id="app-shell">
+          <SiteHeader />
+          <div className="mx-auto w-full max-w-7xl flex-1 px-6 pt-8">
+            <Outlet />
+          </div>
+          <SiteFooter />
+        </div>
       </AppWalletProvider>
     </RootDocument>
   );
@@ -51,6 +70,7 @@ function RootDocument({children}: {children: React.ReactNode}) {
         <HeadContent />
       </head>
       <body>
+        <script dangerouslySetInnerHTML={{__html: THEME_BOOTSTRAP}} />
         {children}
         <Scripts />
       </body>

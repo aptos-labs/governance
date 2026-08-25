@@ -5,6 +5,7 @@
 // older majors).
 import {sha3_256} from "@noble/hashes/sha3.js";
 import {bytesToHex} from "@noble/hashes/utils.js";
+import {metadataCache, metadataMissCache} from "~/lib/governance/server-cache";
 import type {
   MetadataVerificationResult,
   ProposalMetadata,
@@ -101,6 +102,25 @@ export function verifyProposalMetadata(
  * explicit "unverified" state to show, per design spec §5.3/§10.
  */
 export async function fetchAndVerifyProposalMetadata(
+  locationUrl: string,
+  expectedHashHex: string,
+): Promise<MetadataVerificationResult> {
+  const cacheKey = `${expectedHashHex}:${locationUrl}`;
+  const cached = (metadataCache.get(cacheKey) ??
+    metadataMissCache.get(cacheKey)) as MetadataVerificationResult | undefined;
+  if (cached) return cached;
+
+  const result = (await metadataMissCache.getOrSet(cacheKey, () =>
+    fetchAndVerifyProposalMetadataUncached(locationUrl, expectedHashHex),
+  )) as MetadataVerificationResult;
+
+  if (result.verified) {
+    metadataCache.set(cacheKey, result);
+  }
+  return result;
+}
+
+async function fetchAndVerifyProposalMetadataUncached(
   locationUrl: string,
   expectedHashHex: string,
 ): Promise<MetadataVerificationResult> {

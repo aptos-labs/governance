@@ -104,6 +104,6 @@ describe("ProposalCard", () => {
   it("links to the proposal detail page", async () => {
     renderWithRouter(<ProposalCard proposal={baseProposal} nowSecs={500n} />);
     const link = await screen.findByRole("link");
-    expect(link).toHaveAttribute("href", "/proposal/142");
+    expect(link).toHaveAttribute("href", "/proposal/142?votesPage=0");
   });
 });

@@ -13,7 +13,16 @@ import {routeTree} from "./routeTree.gen";
  * error against a live dev server before this fix.
  */
 export function getRouter() {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 30_000,
+        gcTime: 30 * 60_000,
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  });
 
   const router = createRouter({
     routeTree,

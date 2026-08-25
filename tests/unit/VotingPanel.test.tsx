@@ -383,8 +383,7 @@ describe("VotingPanel", () => {
     await waitFor(() => screen.getByText(/0xstakepool1/i));
 
     // Fail pool 1's vote.
-    const pool1Card = screen.getByText(/0xstakepool1/i).closest("div")!
-      .parentElement!;
+    const pool1Card = screen.getByTestId("vote-pool-0xstakepool1");
     fireEvent.click(within(pool1Card).getByRole("button", {name: /^yes$/i}));
     fireEvent.click(
       within(pool1Card).getByRole("button", {name: /review vote/i}),
@@ -398,8 +397,7 @@ describe("VotingPanel", () => {
 
     // Pool 2's own UI must never show pool 1's error — errors are
     // scoped per pool/draft, not rendered once for the whole panel.
-    const pool2Card = screen.getByText(/0xstakepool2/i).closest("div")!
-      .parentElement!;
+    const pool2Card = screen.getByTestId("vote-pool-0xstakepool2");
     expect(
       within(pool2Card).queryByText(/user rejected/i),
     ).not.toBeInTheDocument();

@@ -2,47 +2,39 @@
 import {createServerFn} from "@tanstack/react-start";
 import {z} from "zod";
 import {
-  APTOS_GOVERNANCE_ADDRESS,
   getAptosClient,
   VOTING_FORUM_PROPOSAL_VALUE_TYPE,
-  VOTING_FORUM_RESOURCE_TYPE,
 } from "~/lib/aptos/client";
 import {
-  fetchProposalVotes,
-  type ProposalVoteRow,
+  fetchProposalVotesPage,
+  PROPOSAL_VOTES_PAGE_SIZE,
+  type ProposalVotesPage,
 } from "~/lib/governance/fetch-proposal-votes";
+import {loadVotingForum} from "~/lib/governance/load-forum";
 import {fetchAndVerifyProposalMetadata} from "~/lib/governance/metadata";
 import {
   buildProposalListItem,
   parseRawProposalCore,
 } from "~/lib/governance/parse-raw-proposal";
+import {proposalItemCache} from "~/lib/governance/server-cache";
 import type {ProposalListItem, RawProposal} from "~/lib/governance/types";
 
 const getProposalInputSchema = z.object({
   proposalId: z
     .string()
     .regex(/^\d+$/, "proposalId must be a non-negative integer string"),
+  votesPage: z.number().int().min(0).default(0),
 });
-
-interface VotingForumResource {
-  next_proposal_id: string;
-  proposals: {handle: string};
-}
 
 export interface ProposalDetailResult {
   proposal: ProposalListItem;
-  votes: ProposalVoteRow[];
+  votes: ProposalVotesPage;
 }
 
 export const getProposalDetail = createServerFn({method: "GET"})
   .validator(getProposalInputSchema)
   .handler(async ({data}): Promise<ProposalDetailResult> => {
-    const aptos = getAptosClient();
-
-    const forum = await aptos.getAccountResource<VotingForumResource>({
-      accountAddress: APTOS_GOVERNANCE_ADDRESS,
-      resourceType: VOTING_FORUM_RESOURCE_TYPE,
-    });
+    const forum = await loadVotingForum();
 
     const nextProposalId = BigInt(forum.next_proposal_id);
     if (BigInt(data.proposalId) >= nextProposalId) {
@@ -51,19 +43,33 @@ export const getProposalDetail = createServerFn({method: "GET"})
       );
     }
 
+    const aptos = getAptosClient();
+
     const [raw, votes] = await Promise.all([
-      aptos.getTableItem<RawProposal>({
-        handle: forum.proposals.handle,
-        data: {
-          key_type: "u64",
-          value_type: VOTING_FORUM_PROPOSAL_VALUE_TYPE,
-          key: data.proposalId,
-        },
-      }),
+      proposalItemCache.getOrSet(data.proposalId, async () =>
+        aptos.getTableItem<RawProposal>({
+          handle: forum.proposals.handle,
+          data: {
+            key_type: "u64",
+            value_type: VOTING_FORUM_PROPOSAL_VALUE_TYPE,
+            key: data.proposalId,
+          },
+        }),
+      ) as Promise<RawProposal>,
       // Indexer failure degrades to an empty vote list rather than
       // failing the whole page — the fullnode-sourced yes/no tally
       // fetched above remains authoritative either way (design spec §6.3).
-      fetchProposalVotes(data.proposalId).catch(() => [] as ProposalVoteRow[]),
+      fetchProposalVotesPage(data.proposalId, {
+        page: data.votesPage,
+        pageSize: PROPOSAL_VOTES_PAGE_SIZE,
+      }).catch(
+        (): ProposalVotesPage => ({
+          items: [],
+          totalCount: 0,
+          page: data.votesPage,
+          pageSize: PROPOSAL_VOTES_PAGE_SIZE,
+        }),
+      ),
     ]);
 
     const core = parseRawProposalCore(data.proposalId, raw);
