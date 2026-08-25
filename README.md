@@ -76,6 +76,33 @@ List and proposal HTML is cached at the Vercel edge for 15 seconds
 (`s-maxage=15`, `stale-while-revalidate=45`), matching the in-process TTL
 cache used by the fullnode/indexer loaders.
 
+## Governance notifications
+
+The app can post alerts when a proposal is created, when voting closes
+(pass or fail), when a proposal is executed, and when voting is about to
+end (24h / 6h reminders). Slack and Telegram are the primary channels;
+Discord incoming webhooks are also supported.
+
+1. Set `CRON_SECRET` and `NOTIFICATIONS_PUBLIC_APP_URL`.
+2. On Vercel, set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+   so the poll snapshot and subscriptions survive across serverless
+   invocations. Locally the store defaults to `.data/notifications.json`.
+3. Operator destinations (optional):
+   - `NOTIFICATIONS_SLACK_WEBHOOK_URL`
+   - `NOTIFICATIONS_TELEGRAM_BOT_TOKEN`, `NOTIFICATIONS_TELEGRAM_BOT_USERNAME`,
+     and `NOTIFICATIONS_TELEGRAM_CHAT_IDS`
+   - `NOTIFICATIONS_DISCORD_WEBHOOK_URL`
+4. Vercel Cron hits `GET /api/cron/notifications` every 5 minutes
+   (`vercel.json`). Hobby plans only allow one cron per day — use Pro, or
+   an external scheduler with `Authorization: Bearer $CRON_SECRET`.
+5. People can also subscribe from `/notifications`:
+   - Slack: paste an Incoming Webhook URL
+   - Telegram: open the bot and send `/subscribe` (or `/subscribe` in a group)
+   - Discord: paste a channel webhook URL
+
+The first successful poll records the current on-chain state and does **not**
+fan out historical proposals.
+
 ## Deployment
 
 Production hosting is Vercel. The app is server-rendered and uses TanStack

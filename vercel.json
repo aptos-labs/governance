@@ -5,6 +5,12 @@
   "buildCommand": "pnpm build",
   "devCommand": "pnpm dev",
   "outputDirectory": null,
+  "crons": [
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/",

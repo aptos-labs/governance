@@ -1,0 +1,151 @@
+import {formatDurationCompact, formatOctasToApt} from "~/lib/governance/format";
+import type {ProposalEvent} from "~/lib/notifications/types";
+import {EVENT_TYPE_LABELS} from "~/lib/notifications/types";
+
+export function proposalPageUrl(appUrl: string, proposalId: string): string {
+  const base = appUrl.replace(/\/+$/, "");
+  return `${base}/proposal/${proposalId}`;
+}
+
+export function eventHeadline(event: ProposalEvent): string {
+  switch (event.type) {
+    case "proposal.created":
+      return "New Aptos governance proposal";
+    case "proposal.voting_passed":
+      return "Proposal passed voting";
+    case "proposal.voting_failed":
+      return "Proposal failed voting";
+    case "proposal.executed":
+      return "Proposal executed";
+    case "proposal.voting_ending_soon":
+      return event.reminderWindow === "6h"
+        ? "Voting ends in under 6 hours"
+        : "Voting ends in under 24 hours";
+  }
+}
+
+function voteLine(event: ProposalEvent): string {
+  return `Yes ${formatOctasToApt(BigInt(event.yesVotes))} APT · No ${formatOctasToApt(BigInt(event.noVotes))} APT`;
+}
+
+function remainingLine(event: ProposalEvent): string | null {
+  if (event.remainingSecs === undefined) return null;
+  return `Time left: ${formatDurationCompact(BigInt(event.remainingSecs))}`;
+}
+
+export function eventBodyLines(event: ProposalEvent): string[] {
+  const lines = [
+    `#${event.proposalId} ${event.title}`,
+    `Status: ${event.status}`,
+    voteLine(event),
+  ];
+  const remaining = remainingLine(event);
+  if (remaining) lines.push(remaining);
+  return lines;
+}
+
+export function formatPlainText(
+  event: ProposalEvent,
+  proposalUrl: string,
+): string {
+  return [eventHeadline(event), ...eventBodyLines(event), proposalUrl].join(
+    "\n",
+  );
+}
+
+export function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+export function formatTelegramHtml(
+  event: ProposalEvent,
+  proposalUrl: string,
+): string {
+  const remaining = remainingLine(event);
+  const lines = [
+    `<b>${escapeHtml(eventHeadline(event))}</b>`,
+    `<a href="${escapeHtml(proposalUrl)}">#${escapeHtml(event.proposalId)} ${escapeHtml(event.title)}</a>`,
+    `Status: ${escapeHtml(event.status)}`,
+    escapeHtml(voteLine(event)),
+  ];
+  if (remaining) lines.push(escapeHtml(remaining));
+  return lines.join("\n");
+}
+
+export function formatSlackPayload(
+  event: ProposalEvent,
+  proposalUrl: string,
+): {
+  text: string;
+  blocks: Array<Record<string, unknown>>;
+} {
+  const body = [
+    `*<${proposalUrl}|#${event.proposalId} ${event.title}>*`,
+    `Status: ${event.status}`,
+    voteLine(event),
+    remainingLine(event),
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join("\n");
+
+  return {
+    text: `${eventHeadline(event)}: #${event.proposalId} ${event.title}`,
+    blocks: [
+      {
+        type: "header",
+        text: {type: "plain_text", text: eventHeadline(event), emoji: true},
+      },
+      {
+        type: "section",
+        text: {type: "mrkdwn", text: body},
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: EVENT_TYPE_LABELS[event.type],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+export function formatDiscordPayload(
+  event: ProposalEvent,
+  proposalUrl: string,
+): {
+  content: string;
+  embeds: Array<Record<string, unknown>>;
+} {
+  const color =
+    event.type === "proposal.voting_failed"
+      ? 0xfe805c
+      : event.type === "proposal.voting_passed" ||
+          event.type === "proposal.executed"
+        ? 0x256b2e
+        : event.type === "proposal.voting_ending_soon"
+          ? 0xd8bf45
+          : 0x34648f;
+
+  const remaining = remainingLine(event);
+  return {
+    content: eventHeadline(event),
+    embeds: [
+      {
+        title: `#${event.proposalId} ${event.title}`.slice(0, 256),
+        url: proposalUrl,
+        color,
+        description: [voteLine(event), remaining]
+          .filter((line): line is string => Boolean(line))
+          .join("\n"),
+        fields: [{name: "Status", value: event.status, inline: true}],
+      },
+    ],
+  };
+}

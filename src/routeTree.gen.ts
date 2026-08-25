@@ -11,7 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DelegationRouteImport } from './routes/delegation'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as NotificationsUnsubscribeRouteImport } from './routes/notifications.unsubscribe'
 import { Route as ProposalProposalIdRouteImport } from './routes/proposal.$proposalId'
+import { Route as ApiCronNotificationsRouteImport } from './routes/api/cron.notifications'
+import { Route as ApiNotificationsTelegramRouteImport } from './routes/api/notifications.telegram'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +27,98 @@ const DelegationRoute = DelegationRouteImport.update({
   path: '/delegation',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsUnsubscribeRoute = NotificationsUnsubscribeRouteImport.update({
+  id: '/notifications/unsubscribe',
+  path: '/notifications/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProposalProposalIdRoute = ProposalProposalIdRouteImport.update({
   id: '/proposal/$proposalId',
   path: '/proposal/$proposalId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronNotificationsRoute = ApiCronNotificationsRouteImport.update({
+  id: '/api/cron/notifications',
+  path: '/api/cron/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsTelegramRoute = ApiNotificationsTelegramRouteImport.update({
+  id: '/api/notifications/telegram',
+  path: '/api/notifications/telegram',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/delegation': typeof DelegationRoute
+  '/notifications': typeof NotificationsRoute
+  '/notifications/unsubscribe': typeof NotificationsUnsubscribeRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
+  '/api/notifications/telegram': typeof ApiNotificationsTelegramRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/delegation': typeof DelegationRoute
+  '/notifications': typeof NotificationsRoute
+  '/notifications/unsubscribe': typeof NotificationsUnsubscribeRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
+  '/api/notifications/telegram': typeof ApiNotificationsTelegramRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/delegation': typeof DelegationRoute
+  '/notifications': typeof NotificationsRoute
+  '/notifications/unsubscribe': typeof NotificationsUnsubscribeRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
+  '/api/notifications/telegram': typeof ApiNotificationsTelegramRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/delegation' | '/proposal/$proposalId'
+  fullPaths:
+    | '/'
+    | '/delegation'
+    | '/notifications'
+    | '/notifications/unsubscribe'
+    | '/proposal/$proposalId'
+    | '/api/cron/notifications'
+    | '/api/notifications/telegram'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/delegation' | '/proposal/$proposalId'
-  id: '__root__' | '/' | '/delegation' | '/proposal/$proposalId'
+  to:
+    | '/'
+    | '/delegation'
+    | '/notifications'
+    | '/notifications/unsubscribe'
+    | '/proposal/$proposalId'
+    | '/api/cron/notifications'
+    | '/api/notifications/telegram'
+  id:
+    | '__root__'
+    | '/'
+    | '/delegation'
+    | '/notifications'
+    | '/notifications/unsubscribe'
+    | '/proposal/$proposalId'
+    | '/api/cron/notifications'
+    | '/api/notifications/telegram'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DelegationRoute: typeof DelegationRoute
+  NotificationsRoute: typeof NotificationsRoute
+  NotificationsUnsubscribeRoute: typeof NotificationsUnsubscribeRoute
   ProposalProposalIdRoute: typeof ProposalProposalIdRoute
+  ApiCronNotificationsRoute: typeof ApiCronNotificationsRoute
+  ApiNotificationsTelegramRoute: typeof ApiNotificationsTelegramRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +137,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DelegationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications/unsubscribe': {
+      id: '/notifications/unsubscribe'
+      path: '/notifications/unsubscribe'
+      fullPath: '/notifications/unsubscribe'
+      preLoaderRoute: typeof NotificationsUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/proposal/$proposalId': {
       id: '/proposal/$proposalId'
       path: '/proposal/$proposalId'
       fullPath: '/proposal/$proposalId'
       preLoaderRoute: typeof ProposalProposalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/notifications': {
+      id: '/api/cron/notifications'
+      path: '/api/cron/notifications'
+      fullPath: '/api/cron/notifications'
+      preLoaderRoute: typeof ApiCronNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/telegram': {
+      id: '/api/notifications/telegram'
+      path: '/api/notifications/telegram'
+      fullPath: '/api/notifications/telegram'
+      preLoaderRoute: typeof ApiNotificationsTelegramRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,7 +178,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DelegationRoute: DelegationRoute,
+  NotificationsRoute: NotificationsRoute,
+  NotificationsUnsubscribeRoute: NotificationsUnsubscribeRoute,
   ProposalProposalIdRoute: ProposalProposalIdRoute,
+  ApiCronNotificationsRoute: ApiCronNotificationsRoute,
+  ApiNotificationsTelegramRoute: ApiNotificationsTelegramRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
