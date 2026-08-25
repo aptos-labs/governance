@@ -55,4 +55,26 @@ describe("deployment config", () => {
       expect(cacheControl?.value).toBe(PUBLIC_PAGE_CACHE_CONTROL);
     }
   });
+
+  it("uses patched nitro and uuid versions for known GHSA advisories", () => {
+    const pkg = readJson("package.json") as {
+      devDependencies: {nitro: string};
+      pnpm?: {overrides?: Record<string, string>};
+    };
+
+    const nitroSpecifier = pkg.devDependencies.nitro.replace(/^\^/, "");
+    const nitroBuild = Number(
+      nitroSpecifier.match(/^3\.0\.(\d+)-beta$/)?.[1] ?? 0,
+    );
+    // GHSA-5w89-w975-hf9q / GHSA-9phm-9p8f-hw5m: nitro < 3.0.260429-beta
+    expect(nitroBuild).toBeGreaterThanOrEqual(260429);
+
+    // GHSA-w5hq-g745-h8pq: uuid < 11.1.1. 11.1.1 keeps CJS require()
+    // for @aptos-connect/web-transport; uuid 14 is ESM-only.
+    expect(pkg.pnpm?.overrides?.uuid).toBe("11.1.1");
+
+    const lock = readFileSync(resolve(rootDir, "pnpm-lock.yaml"), "utf8");
+    expect(lock).toMatch(/^ {2}uuid@11\.1\.1:/m);
+    expect(lock).not.toMatch(/^ {2}uuid@(?:[0-9]\.|10\.|11\.0\.|11\.1\.0)/m);
+  });
 });
