@@ -1,6 +1,6 @@
 import {useWallet, type WalletInfo} from "@aptos-labs/wallet-adapter-react";
 import {useState} from "react";
-import {truncateAddress} from "~/lib/governance/format";
+import {AddressChip} from "~/components/AddressChip";
 
 const FEATURED_WALLETS = ["Petra", "Petra Web"];
 
@@ -22,9 +22,7 @@ export function WalletConnectButton() {
   if (connected && account) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-sm">
-          {truncateAddress(account.address.toString())}
-        </span>
+        <AddressChip address={account.address.toString()} />
         <button
           type="button"
           onClick={() => disconnect()}

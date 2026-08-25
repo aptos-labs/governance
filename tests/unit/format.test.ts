@@ -4,6 +4,7 @@ import {
   clampVotingPowerOctas,
   formatDurationCompact,
   formatOctasToApt,
+  formatTimestamp,
   parseAptToOctas,
   truncateAddress,
 } from "~/lib/governance/format";
@@ -94,6 +95,14 @@ describe("parseAptToOctas", () => {
 
   it("returns null for more than 8 fractional digits (finer than 1 octa)", () => {
     expect(parseAptToOctas("1.123456789")).toBeNull();
+  });
+});
+
+describe("formatTimestamp", () => {
+  it("renders a local datetime and a dash for missing or zero values", () => {
+    expect(formatTimestamp(null)).toBe("—");
+    expect(formatTimestamp(0n)).toBe("—");
+    expect(formatTimestamp(1_700_000_000n)).toMatch(/\d{4}/);
   });
 });
 

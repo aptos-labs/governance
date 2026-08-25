@@ -13,33 +13,87 @@ export function VoteBar({
   const yesPct = total > 0n ? Number((yesVotes * 1000n) / total) / 10 : 0;
   const noPct = total > 0n ? Number((noVotes * 1000n) / total) / 10 : 0;
   const thresholdMet = total >= minVoteThreshold;
+  const participationPct =
+    minVoteThreshold > 0n
+      ? Math.min(100, Number((total * 1000n) / minVoteThreshold) / 10)
+      : 0;
 
   return (
+    <div className="space-y-4">
+      <ResultBar
+        label="FOR"
+        color="var(--color-vote-for)"
+        amount={yesVotes}
+        percentage={yesPct}
+      />
+      <ResultBar
+        label="AGAINST"
+        color="var(--color-vote-against)"
+        amount={noVotes}
+        percentage={noPct}
+      />
+      <div>
+        <div className="mb-1 flex justify-between text-xs">
+          <span className="text-[var(--color-text-secondary)]">
+            Participation
+          </span>
+          <span>{participationPct.toFixed(0)}%</span>
+        </div>
+        <Meter
+          percentage={participationPct}
+          color="var(--color-text-disabled)"
+        />
+        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+          {formatOctasToApt(yesVotes)} APT for · {formatOctasToApt(noVotes)} APT
+          against
+          {" · "}
+          {thresholdMet ? "Threshold met" : "Threshold not yet met"}
+          {" · min "}
+          {formatOctasToApt(minVoteThreshold, 0)} APT
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ResultBar({
+  label,
+  color,
+  amount,
+  percentage,
+}: {
+  label: string;
+  color: string;
+  amount: bigint;
+  percentage: number;
+}) {
+  return (
     <div>
-      <div
-        className="flex h-1.5 overflow-hidden rounded-full"
-        style={{backgroundColor: "var(--color-border-light)"}}
-      >
-        <div
-          style={{
-            width: `${yesPct}%`,
-            backgroundColor: "var(--color-status-passed-fill)",
-          }}
-        />
-        <div
-          style={{
-            width: `${noPct}%`,
-            backgroundColor: "var(--color-status-failed-fill)",
-          }}
-        />
-      </div>
-      <div className="mt-1 flex justify-between text-xs text-[var(--color-text-secondary)]">
-        <span>
-          {formatOctasToApt(yesVotes)} APT for &middot;{" "}
-          {formatOctasToApt(noVotes)} APT against
+      <div className="mb-1 flex justify-between text-xs">
+        <span style={{color}} className="font-semibold tracking-wide">
+          {label}
         </span>
-        <span>{thresholdMet ? "Threshold met" : "Threshold not yet met"}</span>
+        <span>
+          {formatOctasToApt(amount)} APT {percentage.toFixed(0)}%
+        </span>
       </div>
+      <Meter percentage={percentage} color={color} />
+    </div>
+  );
+}
+
+function Meter({percentage, color}: {percentage: number; color: string}) {
+  return (
+    <div
+      className="flex h-2.5 overflow-hidden rounded-full"
+      style={{backgroundColor: "var(--color-border-light)"}}
+    >
+      <div
+        style={{
+          width: `${Math.min(100, Math.max(0, percentage))}%`,
+          backgroundColor: color,
+        }}
+      />
     </div>
   );
 }

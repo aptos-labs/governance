@@ -3,16 +3,13 @@
 import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useState} from "react";
+import {AddressChip} from "~/components/AddressChip";
 import {getAptosClient} from "~/lib/aptos/client";
 import {
   buildVoteTransactionPayload,
   type VoteTransactionPayload,
 } from "~/lib/governance/build-vote-payload";
-import {
-  formatOctasToApt,
-  parseAptToOctas,
-  truncateAddress,
-} from "~/lib/governance/format";
+import {formatOctasToApt, parseAptToOctas} from "~/lib/governance/format";
 import {getEligiblePools} from "~/lib/governance/get-eligible-pools";
 import type {EligiblePool} from "~/lib/governance/types";
 
@@ -112,6 +109,7 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
       queryClient.invalidateQueries({
         queryKey: ["proposal", variables.submittedProposalId],
       });
+      queryClient.invalidateQueries({queryKey: ["proposal-votes"]});
       queryClient.invalidateQueries({queryKey: ["proposals"]});
       queryClient.invalidateQueries({
         queryKey: [
@@ -224,10 +222,8 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
         if (pool.hasEntirelyVoted) {
           return (
             <div key={pool.poolAddress} className="text-sm">
-              <span className="font-mono">
-                {truncateAddress(pool.poolAddress)}
-              </span>{" "}
-              has already used all its voting power on this proposal.
+              <AddressChip address={pool.poolAddress} /> has already used all
+              its voting power on this proposal.
             </div>
           );
         }
@@ -238,9 +234,7 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
             className="rounded-lg border border-[var(--color-border-light)] p-4"
           >
             <div className="flex items-center justify-between">
-              <span className="font-mono text-sm">
-                {truncateAddress(pool.poolAddress)}
-              </span>
+              <AddressChip address={pool.poolAddress} />
               <span className="text-xs text-[var(--color-text-secondary)]">
                 {formatOctasToApt(pool.remainingVotingPower)} APT available
               </span>

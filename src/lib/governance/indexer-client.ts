@@ -1,10 +1,4 @@
-// src/lib/governance/indexer-client.ts
-
-/** Overridable per design spec §9 — defaults to the hosted mainnet
- *  endpoint; Task 18's e2e test points this at a local mock instead. */
-const INDEXER_URL =
-  process.env.APTOS_INDEXER_URL ||
-  "https://api.mainnet.aptoslabs.com/v1/graphql";
+import {logResolvedApiKey, resolveApiConfig} from "~/lib/governance/api-config";
 
 interface GraphQLResponse<T> {
   data?: T;
@@ -22,14 +16,16 @@ export async function executeIndexerQuery<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
+  const config = resolveApiConfig();
+  logResolvedApiKey(config);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (process.env.APTOS_BUILD_API_KEY) {
-    headers.Authorization = `Bearer ${process.env.APTOS_BUILD_API_KEY}`;
+  if (config.apiKey) {
+    headers.Authorization = `Bearer ${config.apiKey}`;
   }
 
-  const response = await fetch(INDEXER_URL, {
+  const response = await fetch(config.indexerUrl, {
     method: "POST",
     headers,
     body: JSON.stringify({query, variables}),

@@ -27,6 +27,13 @@ export interface ProposalStatusInput extends VotingClosedInput {
   minVoteThreshold: bigint;
 }
 
+export const STATUS_DISPLAY: Record<ProposalStatus, string> = {
+  active: "Voting In Progress",
+  passed: "Awaiting Execution",
+  executed: "Executed",
+  failed: "Failed",
+};
+
 /**
  * Derives the UI-facing ProposalStatus from on-chain facts. Mirrors
  * aptos_framework::voting::get_proposal_state (PENDING/SUCCEEDED/FAILED)

@@ -42,17 +42,27 @@ Open `http://localhost:3000`.
 ## Environment Variables
 
 This app renders on the server, so its configuration is read with `process.env`
-inside server functions and never reaches the browser. Do not use the `VITE_`
-prefix for these — anything prefixed with `VITE_` is inlined into the client
-bundle and publicly readable.
+inside server functions and never reaches the browser. Prefer unprefixed names
+so secrets are not inlined into the client bundle.
 
-- `APTOS_BUILD_API_KEY` (optional): Aptos Build API key for fullnode and indexer requests
+- `APTOS_BUILD_API_KEY` (optional, recommended in production): Geomi / Aptos
+  Labs **server** API key (`aptoslabs_…`) sent as `Authorization: Bearer` on
+  fullnode and indexer requests. Create one at https://geomi.dev. This is the
+  key that avoids public-endpoint rate limits on Vercel SSR.
 - `APTOS_FULLNODE_URL` (optional): fullnode override; defaults to hosted mainnet
-- `APTOS_INDEXER_URL` (optional): indexer override; defaults to `https://api.mainnet.aptoslabs.com/v1/graphql`
+- `APTOS_INDEXER_URL` (optional): indexer override; defaults to
+  `https://api.mainnet.aptoslabs.com/v1/graphql`
 
-Migration note: the `REACT_APP_*` variables from the CRA version and the
-`VITE_*` variables from the static Vite version are both gone. The app no
-longer reads any client-side environment variables.
+Geomi keys authenticate against those Aptos Labs hosts. Do not point the
+endpoints at `api.geomi.dev`.
+
+A client key (`AG-…`) will still be sent, but Geomi applies Origin / per-IP
+limits meant for browsers. Prefer a server key for this deployment.
+
+If you already set a key on Vercel under a legacy name, it is still read, in
+this order: `APTOS_BUILD_API_KEY`, `GEOMI_API_KEY`, `VITE_APTOS_BUILD_API_KEY`,
+`VITE_GEOMI_API_KEY`, `VITE_APTOS_API_KEY_MAINNET`, `VITE_APTOS_API_KEY`,
+`APTOS_API_KEY`.
 
 ## Deployment
 

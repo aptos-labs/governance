@@ -1,4 +1,5 @@
 import {Aptos, AptosConfig, Network} from "@aptos-labs/ts-sdk";
+import {logResolvedApiKey, resolveApiConfig} from "~/lib/governance/api-config";
 
 let cachedClient: Aptos | null = null;
 
@@ -11,16 +12,23 @@ let cachedClient: Aptos | null = null;
  * point at a local mock fullnode instead of real mainnet.
  * Safe to call from server functions and from client code — this
  * only wraps read/view/submit RPC calls, never private keys.
+ *
+ * API keys: Geomi (formerly Aptos Build / Aptos Labs Developer Portal)
+ * keys are sent as `Authorization: Bearer`. A server key (`aptoslabs_…`)
+ * is the right type for this SSR app. Legacy Vercel names such as
+ * `VITE_APTOS_API_KEY_MAINNET` are still accepted so an existing
+ * dashboard secret keeps working. Keys authenticate against Aptos Labs
+ * hosted URLs — do not point fullnode/indexer at api.geomi.dev.
  */
 export function getAptosClient(): Aptos {
   if (!cachedClient) {
+    const config = resolveApiConfig();
+    logResolvedApiKey(config);
     cachedClient = new Aptos(
       new AptosConfig({
         network: Network.MAINNET,
-        fullnode: process.env.APTOS_FULLNODE_URL || undefined,
-        clientConfig: process.env.APTOS_BUILD_API_KEY
-          ? {API_KEY: process.env.APTOS_BUILD_API_KEY}
-          : undefined,
+        fullnode: config.fullnodeUrl,
+        clientConfig: config.apiKey ? {API_KEY: config.apiKey} : undefined,
       }),
     );
   }

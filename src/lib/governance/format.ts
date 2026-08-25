@@ -83,6 +83,26 @@ export function clampVotingPowerOctas(
   return requestedOctas;
 }
 
+/**
+ * Local datetime for proposal creation / expiration / execution, matching
+ * the original governance UI's "D MMM YYYY HH:mm:ss" shape. Zero and
+ * missing values render as an em dash because those mean "not executed".
+ */
+export function formatTimestamp(secs: bigint | null | undefined): string {
+  if (secs === null || secs === undefined || secs === 0n) return "—";
+  const date = new Date(Number(secs) * 1000);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
 export function formatDurationCompact(totalSeconds: bigint): string {
   const seconds = totalSeconds < 0n ? 0n : totalSeconds;
   const days = seconds / 86400n;

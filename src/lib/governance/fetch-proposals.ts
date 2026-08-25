@@ -2,16 +2,19 @@
 import {createServerFn} from "@tanstack/react-start";
 import {z} from "zod";
 import {
-  APTOS_GOVERNANCE_ADDRESS,
   getAptosClient,
   VOTING_FORUM_PROPOSAL_VALUE_TYPE,
-  VOTING_FORUM_RESOURCE_TYPE,
 } from "~/lib/aptos/client";
+import {loadVotingForum} from "~/lib/governance/load-forum";
 import {fetchAndVerifyProposalMetadata} from "~/lib/governance/metadata";
 import {
   buildProposalListItem,
   parseRawProposalCore,
 } from "~/lib/governance/parse-raw-proposal";
+import {
+  proposalItemCache,
+  proposalListCache,
+} from "~/lib/governance/server-cache";
 import type {ProposalListItem, RawProposal} from "~/lib/governance/types";
 
 const PAGE_SIZE = 20;
@@ -20,16 +23,28 @@ const listProposalsInputSchema = z.object({
   page: z.number().int().min(0).default(0),
 });
 
-interface VotingForumResource {
-  next_proposal_id: string;
-  proposals: {handle: string};
-}
-
 export interface ListProposalsResult {
   items: ProposalListItem[];
   totalCount: number;
   page: number;
   pageSize: number;
+}
+
+async function loadRawProposal(
+  handle: string,
+  id: string,
+): Promise<RawProposal> {
+  return proposalItemCache.getOrSet(id, async () => {
+    const aptos = getAptosClient();
+    return aptos.getTableItem<RawProposal>({
+      handle,
+      data: {
+        key_type: "u64",
+        value_type: VOTING_FORUM_PROPOSAL_VALUE_TYPE,
+        key: id,
+      },
+    });
+  }) as Promise<RawProposal>;
 }
 
 /**
@@ -41,55 +56,47 @@ export interface ListProposalsResult {
 export const listProposals = createServerFn({method: "GET"})
   .validator(listProposalsInputSchema)
   .handler(async ({data}): Promise<ListProposalsResult> => {
-    const aptos = getAptosClient();
+    return proposalListCache.getOrSet(`page:${data.page}`, async () => {
+      const forum = await loadVotingForum();
 
-    const forum = await aptos.getAccountResource<VotingForumResource>({
-      accountAddress: APTOS_GOVERNANCE_ADDRESS,
-      resourceType: VOTING_FORUM_RESOURCE_TYPE,
-    });
+      const totalCount = Number(forum.next_proposal_id);
+      const nowSecs = BigInt(Math.floor(Date.now() / 1000));
 
-    const totalCount = Number(forum.next_proposal_id);
-    const nowSecs = BigInt(Math.floor(Date.now() / 1000));
+      const highestId = totalCount - 1 - data.page * PAGE_SIZE;
+      const lowestId = Math.max(0, highestId - PAGE_SIZE + 1);
 
-    const highestId = totalCount - 1 - data.page * PAGE_SIZE;
-    const lowestId = Math.max(0, highestId - PAGE_SIZE + 1);
+      if (highestId < 0) {
+        return {items: [], totalCount, page: data.page, pageSize: PAGE_SIZE};
+      }
 
-    if (highestId < 0) {
-      return {items: [], totalCount, page: data.page, pageSize: PAGE_SIZE};
-    }
+      const ids: number[] = [];
+      for (let id = highestId; id >= lowestId; id--) {
+        ids.push(id);
+      }
 
-    const ids: number[] = [];
-    for (let id = highestId; id >= lowestId; id--) {
-      ids.push(id);
-    }
+      const items = await Promise.all(
+        ids.map(async (id) => {
+          const raw = await loadRawProposal(
+            forum.proposals.handle,
+            id.toString(),
+          );
+          const core = parseRawProposalCore(id.toString(), raw);
 
-    const items = await Promise.all(
-      ids.map(async (id) => {
-        const raw = await aptos.getTableItem<RawProposal>({
-          handle: forum.proposals.handle,
-          data: {
-            key_type: "u64",
-            value_type: VOTING_FORUM_PROPOSAL_VALUE_TYPE,
-            key: id.toString(),
-          },
-        });
+          const metadataResult =
+            core.metadataLocation && core.metadataHashHex
+              ? await fetchAndVerifyProposalMetadata(
+                  core.metadataLocation,
+                  core.metadataHashHex,
+                )
+              : {
+                  verified: false as const,
+                  reason: "proposal has no metadata_location/metadata_hash set",
+                };
 
-        const core = parseRawProposalCore(id.toString(), raw);
+          return buildProposalListItem(core, metadataResult, nowSecs);
+        }),
+      );
 
-        const metadataResult =
-          core.metadataLocation && core.metadataHashHex
-            ? await fetchAndVerifyProposalMetadata(
-                core.metadataLocation,
-                core.metadataHashHex,
-              )
-            : {
-                verified: false as const,
-                reason: "proposal has no metadata_location/metadata_hash set",
-              };
-
-        return buildProposalListItem(core, metadataResult, nowSecs);
-      }),
-    );
-
-    return {items, totalCount, page: data.page, pageSize: PAGE_SIZE};
+      return {items, totalCount, page: data.page, pageSize: PAGE_SIZE};
+    }) as Promise<ListProposalsResult>;
   });

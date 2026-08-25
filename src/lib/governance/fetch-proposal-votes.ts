@@ -1,10 +1,18 @@
-// src/lib/governance/fetch-proposal-votes.ts
 import {executeIndexerQuery} from "~/lib/governance/indexer-client";
+import {pageOffset} from "~/lib/governance/pagination";
+import {votesCache} from "~/lib/governance/server-cache";
 
 export interface ProposalVoteRow {
   stakingPoolAddress: string;
   shouldPass: boolean;
   numVotes: bigint;
+}
+
+export interface ProposalVotesPage {
+  items: ProposalVoteRow[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 
 interface ProposalVotesQueryResult {
@@ -13,6 +21,9 @@ interface ProposalVotesQueryResult {
     should_pass: boolean;
     num_votes: string;
   }>;
+  proposal_votes_aggregate?: {
+    aggregate: {count: number} | null;
+  };
 }
 
 const PROPOSAL_VOTES_QUERY = `
@@ -27,13 +38,16 @@ const PROPOSAL_VOTES_QUERY = `
       should_pass
       num_votes
     }
+    proposal_votes_aggregate(where: { proposal_id: { _eq: $proposalId } }) {
+      aggregate {
+        count
+      }
+    }
   }
 `;
 
-/** Default page size for fetchProposalVotes — exported so callers (e.g.
- *  the proposal detail route's "load more" logic in Task 13) can detect
- *  a full page without duplicating this number. */
-export const PROPOSAL_VOTES_PAGE_SIZE = 25;
+/** Matches the original governance UI's votes table page size. */
+export const PROPOSAL_VOTES_PAGE_SIZE = 20;
 
 /**
  * Fetches the paginated per-pool vote breakdown for one proposal.
@@ -47,14 +61,39 @@ export async function fetchProposalVotes(
   limit = PROPOSAL_VOTES_PAGE_SIZE,
   offset = 0,
 ): Promise<ProposalVoteRow[]> {
-  const result = await executeIndexerQuery<ProposalVotesQueryResult>(
-    PROPOSAL_VOTES_QUERY,
-    {proposalId, limit, offset},
-  );
+  const page = await fetchProposalVotesPage(proposalId, {
+    page: Math.floor(offset / limit),
+    pageSize: limit,
+  });
+  return page.items;
+}
 
-  return result.proposal_votes.map((row) => ({
-    stakingPoolAddress: row.staking_pool_address,
-    shouldPass: row.should_pass,
-    numVotes: BigInt(row.num_votes),
-  }));
+export async function fetchProposalVotesPage(
+  proposalId: string,
+  options: {page?: number; pageSize?: number} = {},
+): Promise<ProposalVotesPage> {
+  const page = options.page ?? 0;
+  const pageSize = options.pageSize ?? PROPOSAL_VOTES_PAGE_SIZE;
+  const offset = pageOffset(page, pageSize);
+  const cacheKey = `votes:${proposalId}:${pageSize}:${offset}`;
+
+  return votesCache.getOrSet(cacheKey, async () => {
+    const result = await executeIndexerQuery<ProposalVotesQueryResult>(
+      PROPOSAL_VOTES_QUERY,
+      {proposalId, limit: pageSize, offset},
+    );
+
+    return {
+      items: result.proposal_votes.map((row) => ({
+        stakingPoolAddress: row.staking_pool_address,
+        shouldPass: row.should_pass,
+        numVotes: BigInt(row.num_votes),
+      })),
+      totalCount:
+        result.proposal_votes_aggregate?.aggregate?.count ??
+        result.proposal_votes.length,
+      page,
+      pageSize,
+    };
+  }) as Promise<ProposalVotesPage>;
 }

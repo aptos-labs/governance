@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import "@testing-library/jest-dom/vitest";
-import {render, screen} from "@testing-library/react";
-import {describe, expect, it} from "vitest";
+import {cleanup, render, screen} from "@testing-library/react";
+import {afterEach, describe, expect, it} from "vitest";
 import {MetadataVerifiedNotice} from "~/components/MetadataVerifiedNotice";
 
 describe("MetadataVerifiedNotice", () => {
+  afterEach(cleanup);
   it("shows nothing alarming and renders the verified description when verified", () => {
     render(
       <MetadataVerifiedNotice
@@ -29,6 +30,48 @@ describe("MetadataVerifiedNotice", () => {
       "https://example.com/discuss",
     );
     expect(screen.queryByText(/unverified/i)).not.toBeInTheDocument();
+  });
+
+  it("hides the discussion link when the URL does not go anywhere", () => {
+    render(
+      <MetadataVerifiedNotice
+        result={{
+          verified: true,
+          metadata: {
+            title: "T",
+            description: "A verified description.",
+            source_code_url: "https://example.com/src",
+            discussion_url: "",
+          },
+        }}
+      />,
+    );
+    expect(screen.getByRole("link", {name: /source/i})).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", {name: /discussion/i}),
+    ).not.toBeInTheDocument();
+  });
+
+  it("hides a hash-only or placeholder discussion URL", () => {
+    render(
+      <MetadataVerifiedNotice
+        result={{
+          verified: true,
+          metadata: {
+            title: "T",
+            description: "A verified description.",
+            source_code_url: "n/a",
+            discussion_url: "#",
+          },
+        }}
+      />,
+    );
+    expect(
+      screen.queryByRole("link", {name: /source/i}),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", {name: /discussion/i}),
+    ).not.toBeInTheDocument();
   });
 
   it("shows an explicit warning and the failure reason when unverified", () => {

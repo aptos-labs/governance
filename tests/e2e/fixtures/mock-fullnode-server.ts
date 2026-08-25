@@ -346,7 +346,14 @@ export async function startMockFullnodeServer(port = 8081) {
         typeof body.query === "string" &&
         body.query.includes("proposal_votes")
       ) {
-        res.end(JSON.stringify({data: {proposal_votes: []}}));
+        res.end(
+          JSON.stringify({
+            data: {
+              proposal_votes: [],
+              proposal_votes_aggregate: {aggregate: {count: 0}},
+            },
+          }),
+        );
         return;
       }
       res.statusCode = 400;

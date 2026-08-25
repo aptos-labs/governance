@@ -4,6 +4,7 @@ import {
   fetchAndVerifyProposalMetadata,
   verifyProposalMetadata,
 } from "~/lib/governance/metadata";
+import {resetServerCachesForTests} from "~/lib/governance/server-cache";
 
 // Real fixture: the exact bytes and on-chain hash confirmed against
 // mainnet proposal id 200's metadata_location/metadata_hash on 2026-08-20.
@@ -83,6 +84,7 @@ describe("fetchAndVerifyProposalMetadata", () => {
   afterEach(() => {
     globalThis.fetch = originalFetch;
     vi.restoreAllMocks();
+    resetServerCachesForTests();
   });
 
   // Uses the real, native `Response` constructor (available globally in
