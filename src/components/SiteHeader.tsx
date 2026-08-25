@@ -3,11 +3,14 @@ import logoIcon from "~/assets/svg/aptos_logo_icon.svg";
 import {BrandMark} from "~/components/BrandMark";
 import {ThemeToggle} from "~/components/ThemeToggle";
 import {WalletConnectButton} from "~/components/WalletConnectButton";
+import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-transparent bg-[var(--color-canvas)]/80 backdrop-blur-[10px]">
-      <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-6">
+      <div
+        className={`mx-auto flex h-20 ${PAGE_SHELL_WIDTH_CLASS} items-center gap-4 px-6`}
+      >
         <Link
           to="/"
           search={{page: 0, status: "all"}}
