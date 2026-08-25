@@ -32,8 +32,10 @@ If any fail, report exact failure and do not claim success.
 ## Environment
 
 - Use `.env.local` for local config.
-- Client-side vars must use `VITE_*`.
+- Config is read server-side with `process.env`; do not use the `VITE_*` prefix,
+  which would inline the value into the public client bundle.
 - Current supported vars are listed in `.env.example`.
+- Production hosting is Vercel; set the same vars in the Vercel project.
 
 ## Code Editing Guidance
 
@@ -47,4 +49,8 @@ If any fail, report exact failure and do not claim success.
 - Package manager: `pnpm` (not Yarn/NPM scripts in docs).
 - Build tool: `Vite` (not `react-scripts` / CRA).
 - SVG React components should use `?react` imports.
+- The app is server-rendered by TanStack Start; there is no static `dist/` build
+  and no root `index.html`. The document shell lives in `src/routes/__root.tsx`.
+- Hosting is Vercel (`vercel.json`), not Netlify or GitHub Pages. Nitro emits
+  `.vercel/output` during Vercel builds and `.output` everywhere else.
 
