@@ -25,6 +25,7 @@ export function VoteBar({
       <ResultBar
         label="FOR"
         color="var(--color-vote-for)"
+        labelColor="var(--color-success)"
         amount={yesVotes}
         percentage={yesPct}
       />
@@ -61,18 +62,20 @@ export function VoteBar({
 function ResultBar({
   label,
   color,
+  labelColor,
   amount,
   percentage,
 }: {
   label: string;
   color: string;
+  labelColor?: string;
   amount: bigint;
   percentage: number;
 }) {
   return (
     <div title={`${formatOctasToApt(amount, 8)} APT`}>
       <div className="mb-1 flex justify-between px-0.5 text-sm uppercase tracking-wide">
-        <span style={{color}}>{label}</span>
+        <span style={{color: labelColor ?? color}}>{label}</span>
         <span>
           {formatOctasToApt(amount)} APT {percentage.toFixed(0)}%
         </span>

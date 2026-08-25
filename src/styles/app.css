@@ -13,8 +13,10 @@
 :root {
   color-scheme: light;
 
-  /* Original explorer-governance greys + teal. Canvas is white; table
-     rows and the vote card sit on grey-50 so they read as inset chips. */
+  /* Layout greys from the original governance UI, with Aptos brand green
+     (mint #DAF6D4 fills; #256B2E a11y green for text/links). Canvas is
+     white; table rows and the vote card sit on grey-50 so they read as
+     inset chips. */
   --color-canvas: #ffffff;
   --color-paper: #fafafa;
   --color-text-primary: #121615;
@@ -26,15 +28,15 @@
   --color-chip-hover: #d4d4d8;
   --color-row-hover: rgba(18, 22, 21, 0.03);
 
-  --color-primary: #00a380;
-  --color-info: #00a380;
+  --color-primary: #256b2e;
+  --color-info: #256b2e;
   --color-success: #256b2e;
   --color-error: #b84722;
   --color-warning: #d8bf45;
-  --color-vote-for: #00d0a1;
+  --color-vote-for: #256b2e;
   --color-vote-against: #f97373;
-  --color-accent: #00d0a1;
-  --color-title: #00d0a1;
+  --color-accent: #daf6d4;
+  --color-title: #256b2e;
 
   --color-status-active-fill: #badbee;
   --color-status-passed-fill: #daf6d4;
@@ -60,15 +62,15 @@
   --color-chip-hover: #4f5352;
   --color-row-hover: rgba(255, 255, 255, 0.04);
 
-  --color-primary: #2ed8a7;
-  --color-info: #5df8cc;
+  --color-primary: #daf6d4;
+  --color-info: #daf6d4;
   --color-success: #daf6d4;
   --color-error: #fe805c;
   --color-warning: #d8bf45;
-  --color-vote-for: #00d0a1;
+  --color-vote-for: #daf6d4;
   --color-vote-against: #f97373;
-  --color-accent: #00d0a1;
-  --color-title: #00d0a1;
+  --color-accent: #daf6d4;
+  --color-title: #daf6d4;
 
   --color-status-active-fill: #badbee;
   --color-status-passed-fill: #daf6d4;
@@ -93,15 +95,15 @@
     --color-chip: #363a39;
     --color-chip-hover: #4f5352;
     --color-row-hover: rgba(255, 255, 255, 0.04);
-    --color-primary: #2ed8a7;
-    --color-info: #5df8cc;
+    --color-primary: #daf6d4;
+    --color-info: #daf6d4;
     --color-success: #daf6d4;
     --color-error: #fe805c;
     --color-warning: #d8bf45;
-    --color-vote-for: #00d0a1;
+    --color-vote-for: #daf6d4;
     --color-vote-against: #f97373;
-    --color-accent: #00d0a1;
-    --color-title: #00d0a1;
+    --color-accent: #daf6d4;
+    --color-title: #daf6d4;
     --color-status-active-text: #171612;
     --color-status-passed-text: #171612;
     --color-status-failed-text: #171612;

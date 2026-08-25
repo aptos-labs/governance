@@ -136,7 +136,7 @@ function ProposalDetail() {
             <p className="text-sm uppercase tracking-wide text-[var(--color-text-secondary)]">
               Time remaining
             </p>
-            <p className="text-3xl font-light text-[var(--color-accent)]">
+            <p className="text-3xl font-light text-[var(--color-title)]">
               {remaining}
             </p>
           </div>

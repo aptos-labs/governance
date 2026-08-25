@@ -4,7 +4,7 @@ import type {ProposalStatus} from "~/lib/governance/types";
 const STATUS_COLOR: Record<ProposalStatus, string> = {
   active: "var(--color-text-disabled)",
   passed: "var(--color-warning)",
-  executed: "var(--color-accent)",
+  executed: "var(--color-success)",
   failed: "var(--color-vote-against)",
 };
 

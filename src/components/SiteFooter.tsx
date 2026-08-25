@@ -38,7 +38,7 @@ export function SiteFooter() {
           <BrandMark
             src={foundationMark}
             label="Aptos Foundation"
-            className="h-12 w-10"
+            className="h-10 w-10"
           />
         </a>
         <p className="text-xs text-[var(--color-text-secondary)]">
