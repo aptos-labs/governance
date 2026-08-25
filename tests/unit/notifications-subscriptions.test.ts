@@ -6,6 +6,7 @@ import {
   destinationsForEvent,
   envDestinations,
   MAX_SUBSCRIPTIONS,
+  normalizeStoreState,
   removeSubscriptionByToken,
   removeTelegramChat,
 } from "~/lib/notifications/subscriptions";
@@ -25,6 +26,50 @@ const ALL: NotificationEventType[] = [
   "proposal.executed",
   "proposal.voting_ending_soon",
 ];
+
+describe("normalizeStoreState", () => {
+  it("migrates legacy 24h/6h reminder flags onto the 3d/2d/1d/6h windows", () => {
+    const migrated = normalizeStoreState({
+      version: 1,
+      snapshot: {
+        initialized: true,
+        nextProposalId: 1,
+        proposals: {
+          "0": {
+            status: "active",
+            expirationSecs: "100",
+            reminded24h: true,
+            reminded6h: false,
+          },
+          "1": {
+            status: "passed",
+            expirationSecs: "200",
+            reminded24h: true,
+            reminded6h: true,
+          },
+        },
+      },
+      subscriptions: [],
+    });
+
+    expect(migrated.snapshot.proposals["0"]).toEqual({
+      status: "active",
+      expirationSecs: "100",
+      reminded3d: true,
+      reminded2d: true,
+      reminded1d: true,
+      reminded6h: false,
+    });
+    expect(migrated.snapshot.proposals["1"]).toEqual({
+      status: "passed",
+      expirationSecs: "200",
+      reminded3d: true,
+      reminded2d: true,
+      reminded1d: true,
+      reminded6h: true,
+    });
+  });
+});
 
 describe("webhook subscriptions", () => {
   it("adds a Slack webhook and is idempotent on the same URL", () => {

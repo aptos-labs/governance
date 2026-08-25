@@ -41,9 +41,30 @@ describe("notification formatters", () => {
       eventHeadline({
         ...event,
         type: "proposal.voting_ending_soon",
+        reminderWindow: "3d",
+      }),
+    ).toBe("3 days left to vote");
+    expect(
+      eventHeadline({
+        ...event,
+        type: "proposal.voting_ending_soon",
+        reminderWindow: "2d",
+      }),
+    ).toBe("2 days left to vote");
+    expect(
+      eventHeadline({
+        ...event,
+        type: "proposal.voting_ending_soon",
+        reminderWindow: "1d",
+      }),
+    ).toBe("1 day left to vote");
+    expect(
+      eventHeadline({
+        ...event,
+        type: "proposal.voting_ending_soon",
         reminderWindow: "6h",
       }),
-    ).toBe("Voting ends in under 6 hours");
+    ).toBe("6 hours left to vote");
   });
 
   it("escapes HTML in Telegram bodies", () => {

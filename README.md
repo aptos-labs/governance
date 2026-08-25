@@ -80,8 +80,8 @@ cache used by the fullnode/indexer loaders.
 
 The app can post alerts when a proposal is created, when voting closes
 (pass or fail), when a proposal is executed, and when voting is about to
-end (24h / 6h reminders). Slack and Telegram are the primary channels;
-Discord incoming webhooks are also supported.
+end (3d / 2d / 1d / 6h countdown reminders). Slack and Telegram are the
+primary channels; Discord incoming webhooks are also supported.
 
 1. Set `CRON_SECRET` and `NOTIFICATIONS_PUBLIC_APP_URL`.
 2. On Vercel, set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`

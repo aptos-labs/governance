@@ -15,7 +15,7 @@ export const EVENT_TYPE_LABELS: Record<NotificationEventType, string> = {
   "proposal.voting_passed": "Voting passed",
   "proposal.voting_failed": "Voting failed",
   "proposal.executed": "Proposal executed",
-  "proposal.voting_ending_soon": "Voting ending soon",
+  "proposal.voting_ending_soon": "Countdown (3d / 2d / 1d / 6h left)",
 };
 
 export type NotificationChannel = "slack" | "telegram" | "discord";
@@ -33,7 +33,9 @@ export interface WatchedProposal {
 export interface ProposalWatchState {
   status: "active" | "passed";
   expirationSecs: string;
-  reminded24h: boolean;
+  reminded3d: boolean;
+  reminded2d: boolean;
+  reminded1d: boolean;
   reminded6h: boolean;
 }
 
@@ -49,7 +51,7 @@ export const EMPTY_SNAPSHOT: PollSnapshot = {
   proposals: {},
 };
 
-export type ReminderWindow = "24h" | "6h";
+export type ReminderWindow = "3d" | "2d" | "1d" | "6h";
 
 export interface ProposalEvent {
   type: NotificationEventType;
@@ -106,6 +108,65 @@ export type Destination =
       chatId: string;
       events: NotificationEventType[] | "all";
     };
+
+export type ReminderFlags = Pick<
+  ProposalWatchState,
+  "reminded3d" | "reminded2d" | "reminded1d" | "reminded6h"
+>;
+
+export function emptyReminderFlags(): ReminderFlags {
+  return {
+    reminded3d: false,
+    reminded2d: false,
+    reminded1d: false,
+    reminded6h: false,
+  };
+}
+
+export function reminderFlagsFromUnknown(value: unknown): ReminderFlags {
+  if (!value || typeof value !== "object") return emptyReminderFlags();
+  const record = value as Record<string, unknown>;
+  const hasNewKeys =
+    typeof record.reminded3d === "boolean" ||
+    typeof record.reminded2d === "boolean" ||
+    typeof record.reminded1d === "boolean";
+
+  if (hasNewKeys) {
+    return {
+      reminded3d: Boolean(record.reminded3d),
+      reminded2d: Boolean(record.reminded2d),
+      reminded1d: Boolean(record.reminded1d),
+      reminded6h: Boolean(record.reminded6h),
+    };
+  }
+
+  const reminded6h = Boolean(record.reminded6h);
+  const reminded24h = Boolean(record.reminded24h);
+  return {
+    reminded3d: reminded6h || reminded24h,
+    reminded2d: reminded6h || reminded24h,
+    reminded1d: reminded6h || reminded24h,
+    reminded6h,
+  };
+}
+
+export function normalizeWatchState(value: unknown): ProposalWatchState | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  if (record.status !== "active" && record.status !== "passed") return null;
+  const expirationSecs =
+    typeof record.expirationSecs === "string"
+      ? record.expirationSecs
+      : typeof record.expirationSecs === "number"
+        ? String(record.expirationSecs)
+        : "";
+  if (!expirationSecs) return null;
+  return {
+    status: record.status,
+    expirationSecs,
+    ...reminderFlagsFromUnknown(record),
+  };
+}
 
 export function wantsEvent(
   filter: NotificationEventType[] | "all",

@@ -149,7 +149,7 @@ async function subscribeChat(
   }
   return {
     text: result.created
-      ? "Subscribed this chat to Aptos Governance alerts (new proposals, voting results, execution, and ending-soon reminders)."
+      ? "Subscribed this chat to Aptos Governance alerts (new proposals, voting results, execution, and 3d / 2d / 1d / 6h countdown reminders)."
       : "This chat is already subscribed. Alerts will keep coming here.",
   };
 }

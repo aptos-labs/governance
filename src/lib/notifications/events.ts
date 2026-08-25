@@ -6,11 +6,28 @@ import type {
   ReminderWindow,
   WatchedProposal,
 } from "~/lib/notifications/types";
-import {EMPTY_SNAPSHOT} from "~/lib/notifications/types";
+import {
+  EMPTY_SNAPSHOT,
+  reminderFlagsFromUnknown,
+} from "~/lib/notifications/types";
 
 const HOUR_SECS = 3600n;
-export const REMINDER_24H_SECS = 24n * HOUR_SECS;
+const DAY_SECS = 24n * HOUR_SECS;
+export const REMINDER_3D_SECS = 3n * DAY_SECS;
+export const REMINDER_2D_SECS = 2n * DAY_SECS;
+export const REMINDER_1D_SECS = 1n * DAY_SECS;
 export const REMINDER_6H_SECS = 6n * HOUR_SECS;
+
+const REMINDER_WINDOWS: ReadonlyArray<{
+  window: ReminderWindow;
+  threshold: bigint;
+  flag: keyof ReturnType<typeof reminderFlagsFromUnknown>;
+}> = [
+  {window: "3d", threshold: REMINDER_3D_SECS, flag: "reminded3d"},
+  {window: "2d", threshold: REMINDER_2D_SECS, flag: "reminded2d"},
+  {window: "1d", threshold: REMINDER_1D_SECS, flag: "reminded1d"},
+  {window: "6h", threshold: REMINDER_6H_SECS, flag: "reminded6h"},
+];
 
 export function idsToFetch(
   snapshot: PollSnapshot,
@@ -56,11 +73,46 @@ function isWatchable(
   return status === "active" || status === "passed";
 }
 
+function applyDueReminder(
+  watch: ProposalWatchState,
+  proposal: WatchedProposal,
+  nowSecs: bigint,
+  emitCountdown: boolean,
+  events: ProposalEvent[],
+): void {
+  const remaining = proposal.expirationSecs - nowSecs;
+  if (remaining <= 0n) return;
+
+  let firedIndex = -1;
+  for (let i = REMINDER_WINDOWS.length - 1; i >= 0; i--) {
+    const step = REMINDER_WINDOWS[i];
+    if (remaining <= step.threshold && !watch[step.flag]) {
+      firedIndex = i;
+      break;
+    }
+  }
+  if (firedIndex < 0) return;
+
+  const fired = REMINDER_WINDOWS[firedIndex];
+  if (emitCountdown) {
+    events.push(
+      toEvent("proposal.voting_ending_soon", proposal, {
+        remainingSecs: remaining.toString(),
+        reminderWindow: fired.window,
+      }),
+    );
+  }
+  for (let i = 0; i <= firedIndex; i++) {
+    watch[REMINDER_WINDOWS[i].flag] = true;
+  }
+}
+
 function nextWatchState(
   proposal: WatchedProposal,
   prev: ProposalWatchState | undefined,
   nowSecs: bigint,
   allowReminders: boolean,
+  emitCountdown: boolean,
   events: ProposalEvent[],
 ): ProposalWatchState | null {
   if (!isWatchable(proposal.status)) return null;
@@ -68,49 +120,37 @@ function nextWatchState(
   const watch: ProposalWatchState = {
     status: proposal.status,
     expirationSecs: proposal.expirationSecs.toString(),
-    reminded24h: prev?.reminded24h ?? false,
-    reminded6h: prev?.reminded6h ?? false,
+    ...reminderFlagsFromUnknown(prev),
   };
 
   if (allowReminders && proposal.status === "active") {
-    const remaining = proposal.expirationSecs - nowSecs;
-    if (remaining > 0n && remaining <= REMINDER_6H_SECS && !watch.reminded6h) {
-      const window: ReminderWindow = "6h";
-      events.push(
-        toEvent("proposal.voting_ending_soon", proposal, {
-          remainingSecs: remaining.toString(),
-          reminderWindow: window,
-        }),
-      );
-      watch.reminded6h = true;
-      watch.reminded24h = true;
-    } else if (
-      remaining > 0n &&
-      remaining <= REMINDER_24H_SECS &&
-      !watch.reminded24h
-    ) {
-      const window: ReminderWindow = "24h";
-      events.push(
-        toEvent("proposal.voting_ending_soon", proposal, {
-          remainingSecs: remaining.toString(),
-          reminderWindow: window,
-        }),
-      );
-      watch.reminded24h = true;
-    }
+    applyDueReminder(watch, proposal, nowSecs, emitCountdown, events);
   }
 
   return watch;
+}
+
+function createdExtras(
+  proposal: WatchedProposal,
+  nowSecs: bigint,
+): Partial<Pick<ProposalEvent, "remainingSecs">> {
+  if (proposal.status !== "active") return {};
+  const remaining = proposal.expirationSecs - nowSecs;
+  if (remaining <= 0n) return {};
+  return {remainingSecs: remaining.toString()};
 }
 
 function pushLifecycleEvents(
   prevStatus: ProposalStatus | undefined,
   proposal: WatchedProposal,
   isNew: boolean,
+  nowSecs: bigint,
   events: ProposalEvent[],
 ): void {
   if (isNew) {
-    events.push(toEvent("proposal.created", proposal));
+    events.push(
+      toEvent("proposal.created", proposal, createdExtras(proposal, nowSecs)),
+    );
   }
 
   const from = prevStatus ?? (isNew ? "active" : undefined);
@@ -169,7 +209,7 @@ export function diffProposalEvents(input: {
       numericId >= snapshot.nextProposalId;
 
     if (allowLifecycle) {
-      pushLifecycleEvents(prev?.status, proposal, isNew, events);
+      pushLifecycleEvents(prev?.status, proposal, isNew, input.nowSecs, events);
     }
 
     const watch = nextWatchState(
@@ -177,6 +217,7 @@ export function diffProposalEvents(input: {
       prev,
       input.nowSecs,
       allowReminders,
+      !isNew,
       events,
     );
     if (watch) nextWatches[id] = watch;

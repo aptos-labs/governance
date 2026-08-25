@@ -12,4 +12,9 @@ test("notifications page offers Slack and Telegram subscribe paths", async ({
   await expect(
     page.getByText("Incoming Webhook", {exact: false}),
   ).toBeVisible();
+  await expect(page.getByText("New proposal").first()).toBeVisible();
+  await expect(page.getByText("Proposal executed").first()).toBeVisible();
+  await expect(
+    page.getByText("Countdown (3d / 2d / 1d / 6h left)").first(),
+  ).toBeVisible();
 });

@@ -6,7 +6,11 @@ import type {
   NotificationStoreState,
   Subscription,
 } from "~/lib/notifications/types";
-import {EMPTY_STORE_STATE, wantsEvent} from "~/lib/notifications/types";
+import {
+  EMPTY_STORE_STATE,
+  normalizeWatchState,
+  wantsEvent,
+} from "~/lib/notifications/types";
 import {
   isDiscordWebhookUrl,
   isSlackWebhookUrl,
@@ -24,11 +28,7 @@ export function normalizeStoreState(value: unknown): NotificationStoreState {
     snapshot: {
       initialized: Boolean(record.snapshot?.initialized),
       nextProposalId: Number(record.snapshot?.nextProposalId) || 0,
-      proposals:
-        record.snapshot?.proposals &&
-        typeof record.snapshot.proposals === "object"
-          ? record.snapshot.proposals
-          : {},
+      proposals: normalizeSnapshotProposals(record.snapshot?.proposals),
     },
     subscriptions: Array.isArray(record.subscriptions)
       ? record.subscriptions.filter(isSubscription)
@@ -38,6 +38,18 @@ export function normalizeStoreState(value: unknown): NotificationStoreState {
         ? record.telegramWebhookUrl
         : undefined,
   };
+}
+
+function normalizeSnapshotProposals(
+  value: unknown,
+): NotificationStoreState["snapshot"]["proposals"] {
+  if (!value || typeof value !== "object") return {};
+  const proposals: NotificationStoreState["snapshot"]["proposals"] = {};
+  for (const [id, watch] of Object.entries(value)) {
+    const normalized = normalizeWatchState(watch);
+    if (normalized) proposals[id] = normalized;
+  }
+  return proposals;
 }
 
 function isSubscription(value: unknown): value is Subscription {

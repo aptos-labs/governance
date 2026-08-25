@@ -18,9 +18,18 @@ export function eventHeadline(event: ProposalEvent): string {
     case "proposal.executed":
       return "Proposal executed";
     case "proposal.voting_ending_soon":
-      return event.reminderWindow === "6h"
-        ? "Voting ends in under 6 hours"
-        : "Voting ends in under 24 hours";
+      switch (event.reminderWindow) {
+        case "3d":
+          return "3 days left to vote";
+        case "2d":
+          return "2 days left to vote";
+        case "1d":
+          return "1 day left to vote";
+        case "6h":
+          return "6 hours left to vote";
+        default:
+          return "Voting ending soon";
+      }
   }
 }
 

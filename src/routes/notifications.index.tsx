@@ -42,7 +42,8 @@ function NotificationsPage() {
       <p className="mb-8 max-w-3xl font-sans text-xl font-light">
         Subscribe a Slack channel, Telegram chat, or Discord webhook to Aptos
         Governance events: new proposals, voting results (pass or fail),
-        execution, and ending-soon reminders.
+        execution, and countdown reminders when 3 days, 2 days, 1 day, or 6
+        hours remain to vote.
       </p>
 
       {!config.durable ? (

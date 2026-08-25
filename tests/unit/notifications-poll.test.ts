@@ -111,6 +111,7 @@ describe("runNotificationPoll", () => {
     expect(deliver.mock.calls[0]?.[1]).toMatchObject({
       type: "proposal.created",
       proposalId: "1",
+      remainingSecs: String(10_000_000n - 20n),
     });
   });
 
