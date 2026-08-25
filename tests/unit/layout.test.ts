@@ -27,4 +27,14 @@ describe("page shell width", () => {
       expect(source, relative).not.toContain("max-w-7xl");
     }
   });
+
+  it("places Report Issue in the header and footer chrome", () => {
+    for (const relative of [
+      "src/components/SiteHeader.tsx",
+      "src/components/SiteFooter.tsx",
+    ]) {
+      const source = readFileSync(path.join(rootDir, relative), "utf8");
+      expect(source, relative).toContain("ReportIssueButton");
+    }
+  });
 });

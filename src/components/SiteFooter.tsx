@@ -4,6 +4,7 @@ import githubIcon from "~/assets/svg/github.svg";
 import mediumIcon from "~/assets/svg/medium.svg";
 import twitterIcon from "~/assets/svg/twitter.svg";
 import {BrandMark} from "~/components/BrandMark";
+import {ReportIssueButton} from "~/components/ReportIssueButton";
 import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
 
 const SOCIAL = [
@@ -48,6 +49,7 @@ export function SiteFooter() {
           © {new Date().getFullYear()}{" "}
           <span className="whitespace-nowrap">Aptos Foundation</span>
         </p>
+        <ReportIssueButton />
         <div className="flex items-center gap-5 md:ml-auto">
           {SOCIAL.map((link) => (
             <a
