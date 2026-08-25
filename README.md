@@ -49,6 +49,10 @@ so secrets are not inlined into the client bundle.
   Labs **server** API key (`aptoslabs_…`) sent as `Authorization: Bearer` on
   fullnode and indexer requests. Create one at https://geomi.dev. This is the
   key that avoids public-endpoint rate limits on Vercel SSR.
+- `APTOS_API_ORIGIN` (optional): Origin header sent on SSR Aptos/Geomi
+  requests. Set this only when you intentionally use a client key (`AG-…`)
+  for SSR; it must match a URL allowlisted on that key. If unset, client
+  keys are not sent from the server (the public endpoint is used instead).
 - `APTOS_FULLNODE_URL` (optional): fullnode override; defaults to hosted mainnet
 - `APTOS_INDEXER_URL` (optional): indexer override; defaults to
   `https://api.mainnet.aptoslabs.com/v1/graphql`
@@ -56,8 +60,11 @@ so secrets are not inlined into the client bundle.
 Geomi keys authenticate against those Aptos Labs hosts. Do not point the
 endpoints at `api.geomi.dev`.
 
-A client key (`AG-…`) will still be sent, but Geomi applies Origin / per-IP
-limits meant for browsers. Prefer a server key for this deployment.
+A client key (`AG-…`) is for browsers. Geomi 401s SSR with
+`Unauthorized: Origin header is required` if it is sent without an Origin.
+This app attaches Origin on the server only when `APTOS_API_ORIGIN` is set
+and otherwise skips the client key so the public endpoint is used instead of
+crashing the proposals page. Prefer a server key for this deployment.
 
 If you already set a key on Vercel under a legacy name, it is still read, in
 this order: `APTOS_BUILD_API_KEY`, `GEOMI_API_KEY`, `VITE_APTOS_BUILD_API_KEY`,
@@ -70,10 +77,11 @@ function logs. You should see one of:
 
 - `[aptos] Using server API key from APTOS_BUILD_API_KEY` — correct.
   Server keys start with `aptoslabs_`.
-- `[aptos] Using client API key from VITE_…` — the value is a browser
-  (`AG-…`) key. It will still be sent, but Geomi applies Origin / per-IP
-  limits meant for wallets, so SSR on Vercel can still 429. Create a
-  **server** key at https://geomi.dev and store it as `APTOS_BUILD_API_KEY`.
+- `[aptos] Using client API key from … with Origin https://…` — a browser
+  (`AG-…`) key is being used for SSR. It works only if that Origin is on the
+  Geomi allowlist. Prefer a **server** key as `APTOS_BUILD_API_KEY`.
+- `[aptos] Ignoring client API key … during SSR` — a client key was found but
+  no Origin could be attached, so the public endpoint is used.
 - `[aptos] No API key found` — the dashboard name does not match any of
   the names above (or the variable is empty). Add `APTOS_BUILD_API_KEY`.
 

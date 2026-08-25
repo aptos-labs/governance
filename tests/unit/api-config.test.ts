@@ -19,6 +19,9 @@ const KEY_ENVS = [
   "VITE_GEOMI_INDEXER_URL",
   "GEOMI_FULLNODE_URL",
   "GEOMI_INDEXER_URL",
+  "APTOS_API_ORIGIN",
+  "VERCEL_URL",
+  "VERCEL_PROJECT_PRODUCTION_URL",
 ] as const;
 
 const originalEnv: Record<string, string | undefined> = {};
@@ -111,5 +114,37 @@ describe("resolveApiConfig", () => {
     const config = resolveApiConfig();
     expect(config.fullnodeUrl).toBe("http://localhost:8081/v1");
     expect(config.indexerUrl).toBe("http://localhost:8081/graphql");
+  });
+
+  it("does not send a Geomi client key from Node SSR", () => {
+    clearKeyEnvs();
+    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
+    const config = resolveApiConfig();
+    expect(config.kind).toBe("client");
+    expect(config.key).toBe("AG-CLIENTKEYFROMSSR");
+    // Geomi client keys 401 with "Origin header is required" when Node
+    // SSR sends them without a browser Origin. Skip them server-side so
+    // the public endpoint is used instead of taking down the page.
+    expect(config.apiKey).toBeUndefined();
+    expect(config.requestOrigin).toBeUndefined();
+  });
+
+  it("sends a client key from SSR when an Origin can be attached", () => {
+    clearKeyEnvs();
+    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
+    process.env.APTOS_API_ORIGIN = "https://governance-pearl.vercel.app";
+    const config = resolveApiConfig();
+    expect(config.apiKey).toBe("AG-CLIENTKEYFROMSSR");
+    expect(config.requestOrigin).toBe("https://governance-pearl.vercel.app");
+  });
+
+  it("does not guess Origin from Vercel hostnames, which may not be allowlisted", () => {
+    clearKeyEnvs();
+    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = "governance-pearl.vercel.app";
+    process.env.VERCEL_URL = "governance-pearl.vercel.app";
+    const config = resolveApiConfig();
+    expect(config.requestOrigin).toBeUndefined();
+    expect(config.apiKey).toBeUndefined();
   });
 });

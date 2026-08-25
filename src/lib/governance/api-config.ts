@@ -8,6 +8,10 @@ export interface ResolvedApiKey {
 
 export interface ResolvedApiConfig extends ResolvedApiKey {
   apiKey?: string;
+  /** Origin to send on server-side Aptos/Geomi requests. Required for
+   *  client keys (`AG-…`); omitted in the browser where the runtime
+   *  sets Origin itself. */
+  requestOrigin?: string;
   fullnodeUrl?: string;
   indexerUrl: string;
 }
@@ -70,6 +74,57 @@ export function resolveApiKey(): ResolvedApiKey {
   return {kind: "none"};
 }
 
+/**
+ * Origin Geomi should see on SSR requests. Client keys (`AG-…`) 401
+ * with "Unauthorized: Origin header is required" when this is missing.
+ * Only an explicit APTOS_API_ORIGIN is used — it must be on the key's
+ * allowlist. Vercel hostnames are not guessed, because they often are
+ * not allowlisted and would still 401.
+ */
+export function resolveRequestOrigin(): string | undefined {
+  if (typeof window !== "undefined") return undefined;
+
+  const explicit = readEnv("APTOS_API_ORIGIN");
+  if (explicit) return stripTrailingSlash(explicit);
+
+  return undefined;
+}
+
+function stripTrailingSlash(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
+/**
+ * Key to put on outgoing Aptos/Geomi requests. Client keys (`AG-…`)
+ * require a browser `Origin` header; Node SSR does not send one, and
+ * Geomi then 401s with "Unauthorized: Origin header is required",
+ * which takes down the proposals page.
+ *
+ * On the server, send a client key only when we can attach an Origin.
+ * Otherwise skip it and use the public endpoint. The browser still
+ * sends client keys so wallet follow-up calls keep the origin check.
+ */
+export function outgoingApiKey(resolved: ResolvedApiKey): string | undefined {
+  if (!resolved.key) return undefined;
+  if (resolved.kind === "client" && typeof window === "undefined") {
+    return resolveRequestOrigin() ? resolved.key : undefined;
+  }
+  return resolved.key;
+}
+
+export function aptosRequestHeaders(
+  config: ResolvedApiConfig,
+): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (config.apiKey) {
+    headers.Authorization = `Bearer ${config.apiKey}`;
+  }
+  if (config.requestOrigin) {
+    headers.Origin = config.requestOrigin;
+  }
+  return headers;
+}
+
 let loggedApiKey = false;
 
 export function logResolvedApiKey(resolved: ResolvedApiKey): void {
@@ -78,6 +133,21 @@ export function logResolvedApiKey(resolved: ResolvedApiKey): void {
   if (resolved.kind === "none") {
     console.warn(
       "[aptos] No API key found. Set APTOS_BUILD_API_KEY to a Geomi/Aptos Labs server key (aptoslabs_…) on Vercel to avoid public-endpoint rate limits. Legacy names such as VITE_APTOS_API_KEY_MAINNET are also accepted.",
+    );
+    return;
+  }
+  if (resolved.kind === "client" && typeof window === "undefined") {
+    if (outgoingApiKey(resolved)) {
+      console.info(
+        `[aptos] Using client API key from ${resolved.source} with Origin ${resolveRequestOrigin()}`,
+      );
+      console.warn(
+        "[aptos] Prefer a server key (aptoslabs_…) as APTOS_BUILD_API_KEY. Client keys work on SSR only when Origin matches the Geomi allowlist.",
+      );
+      return;
+    }
+    console.warn(
+      `[aptos] Ignoring client API key from ${resolved.source} during SSR. Geomi client keys (AG-…) require an Origin header and 401 without one, which takes down the proposals page. Using the public endpoint instead. Set APTOS_BUILD_API_KEY to a server key (aptoslabs_…) to avoid rate limits, or set APTOS_API_ORIGIN to an allowlisted origin.`,
     );
     return;
   }
@@ -95,7 +165,8 @@ export function resolveApiConfig(): ResolvedApiConfig {
   const resolved = resolveApiKey();
   return {
     ...resolved,
-    apiKey: resolved.key,
+    apiKey: outgoingApiKey(resolved),
+    requestOrigin: resolveRequestOrigin(),
     fullnodeUrl:
       readEnv("APTOS_FULLNODE_URL") || readEnv("VITE_GEOMI_FULLNODE_URL"),
     indexerUrl:

@@ -12,6 +12,9 @@ const ENV_NAMES = [
   "APTOS_API_KEY",
   "APTOS_INDEXER_URL",
   "VITE_GEOMI_INDEXER_URL",
+  "APTOS_API_ORIGIN",
+  "VERCEL_URL",
+  "VERCEL_PROJECT_PRODUCTION_URL",
 ] as const;
 
 const originalEnv: Record<string, string | undefined> = {};
@@ -75,6 +78,46 @@ describe("executeIndexerQuery", () => {
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: "Bearer aptoslabs_server_key",
+        }),
+      }),
+    );
+  });
+
+  it("does not send a Geomi client key from the server", async () => {
+    snapshotEnv();
+    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({data: {ok: true}}),
+    });
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+    await executeIndexerQuery("query Foo { x }");
+
+    const init = mockFetch.mock.calls[0]?.[1] as {
+      headers?: Record<string, string>;
+    };
+    expect(init.headers?.Authorization).toBeUndefined();
+  });
+
+  it("sends a client key with Origin when APTOS_API_ORIGIN is set", async () => {
+    snapshotEnv();
+    process.env.VITE_APTOS_API_KEY_MAINNET = "AG-CLIENTKEYFROMSSR";
+    process.env.APTOS_API_ORIGIN = "https://governance-pearl.vercel.app";
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({data: {ok: true}}),
+    });
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+    await executeIndexerQuery("query Foo { x }");
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://api.mainnet.aptoslabs.com/v1/graphql",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: "Bearer AG-CLIENTKEYFROMSSR",
+          Origin: "https://governance-pearl.vercel.app",
         }),
       }),
     );

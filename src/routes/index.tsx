@@ -2,15 +2,12 @@ import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useQuery} from "@tanstack/react-query";
 import {createFileRoute, useNavigate} from "@tanstack/react-router";
 import {z} from "zod";
+import {ApiErrorAlert} from "~/components/ApiErrorAlert";
 import {PageHeader} from "~/components/PageHeader";
 import {PaginationBar} from "~/components/PaginationBar";
 import {ProposalsTable} from "~/components/ProposalsTable";
 import {fetchMyVotes} from "~/lib/governance/fetch-my-votes";
 import {listProposals} from "~/lib/governance/fetch-proposals";
-import {
-  isRateLimitError,
-  RATE_LIMIT_MESSAGE,
-} from "~/lib/governance/rate-limit";
 import type {ProposalStatus} from "~/lib/governance/types";
 
 const STATUS_FILTERS = [
@@ -138,19 +135,7 @@ function Home() {
           ))}
         </div>
 
-        {isError && (
-          <div
-            role="alert"
-            className="mb-4 rounded border border-[var(--color-error)] p-4 text-[var(--color-error)]"
-          >
-            <p className="font-semibold">
-              {isRateLimitError(error) ? "Rate Limited" : "Error"}
-            </p>
-            <p className="mt-1">
-              {isRateLimitError(error) ? RATE_LIMIT_MESSAGE : String(error)}
-            </p>
-          </div>
-        )}
+        {isError && <ApiErrorAlert error={error} />}
 
         {filteredItems.length === 0 ? (
           <p className="mt-6 text-[var(--color-text-secondary)]">

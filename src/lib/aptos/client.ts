@@ -28,7 +28,12 @@ export function getAptosClient(): Aptos {
       new AptosConfig({
         network: Network.MAINNET,
         fullnode: config.fullnodeUrl,
-        clientConfig: config.apiKey ? {API_KEY: config.apiKey} : undefined,
+        clientConfig: {
+          ...(config.apiKey ? {API_KEY: config.apiKey} : {}),
+          ...(config.requestOrigin
+            ? {HEADERS: {Origin: config.requestOrigin}}
+            : {}),
+        },
       }),
     );
   }
