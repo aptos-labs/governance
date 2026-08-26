@@ -3,6 +3,18 @@ import {expect, test} from "@playwright/test";
 import {ACTIVE_PROPOSAL_ID} from "./fixtures/mock-fullnode-server";
 import {MOCK_ADDRESS, MOCK_WALLET_INIT_SCRIPT} from "./fixtures/mock-wallet";
 
+async function expectNoHorizontalOverflow(
+  page: import("@playwright/test").Page,
+) {
+  const widths = await page.evaluate(() => ({
+    viewport: window.innerWidth,
+    document: document.documentElement.scrollWidth,
+    body: document.body.scrollWidth,
+  }));
+  expect(widths.document).toBeLessThanOrEqual(widths.viewport + 1);
+  expect(widths.body).toBeLessThanOrEqual(widths.viewport + 1);
+}
+
 // The mock fullnode/indexer server is started once, as its own
 // process, before `playwright test` is even invoked — see
 // package.json's `test:e2e` script and tests/e2e/run-with-mock-server.sh
@@ -43,6 +55,27 @@ async function connectMockWallet(page: import("@playwright/test").Page) {
 
   await mockWalletMenuItem.click();
 }
+
+test("keeps connected voting controls within a narrow viewport", async ({
+  page,
+}) => {
+  await page.setViewportSize({width: 320, height: 844});
+  await page.addInitScript(MOCK_WALLET_INIT_SCRIPT);
+  await page.goto(`/proposal/${ACTIVE_PROPOSAL_ID}`);
+  await connectMockWallet(page);
+
+  await expect(
+    page.getByText(MOCK_ADDRESS.slice(0, 8), {exact: false}).first(),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.getByRole("button", {name: /^yes$/i}).click();
+  await page.getByRole("button", {name: /review vote/i}).click();
+  await expect(
+    page.getByText("0x1::aptos_governance::partial_vote"),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
 
 test("connect wallet, view proposal, and cast a vote", async ({page}) => {
   // Inject the mock AIP-62 wallet before any app script runs, so the
