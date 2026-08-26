@@ -28,7 +28,13 @@ test("proposals list does not overflow on desktop and stacks on mobile", async (
     path: "tests/e2e/artifacts/proposals-desktop.png",
   });
 
-  await page.setViewportSize({width: 390, height: 844});
+  await page.setViewportSize({width: 320, height: 844});
+  await expect(
+    page.getByRole("img", {name: "Aptos Governance"}),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", {name: "Connect Wallet"}),
+  ).toBeVisible();
   await expect(page.getByTestId("proposals-mobile-list")).toBeVisible();
   await expect(page.getByTestId("proposals-table")).toBeHidden();
   await expect(

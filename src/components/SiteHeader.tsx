@@ -10,12 +10,12 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-transparent bg-[var(--color-canvas)]/80 backdrop-blur-[10px]">
       <div
-        className={`mx-auto flex h-20 ${PAGE_SHELL_WIDTH_CLASS} items-center gap-4 px-6`}
+        className={`mx-auto flex h-20 ${PAGE_SHELL_WIDTH_CLASS} items-center gap-2 px-4 sm:gap-4 sm:px-6`}
       >
         <Link
           to="/"
           search={{page: 0, status: "all"}}
-          className="mr-auto block"
+          className="mr-auto block shrink-0"
         >
           <BrandMark
             src={logoIcon}
@@ -24,7 +24,7 @@ export function SiteHeader() {
           />
         </Link>
         <span
-          className="rounded border border-[var(--color-border)] px-3 py-1 text-sm capitalize text-[var(--color-text-primary)]"
+          className="hidden rounded border border-[var(--color-border)] px-2 py-1 text-sm capitalize text-[var(--color-text-primary)] min-[360px]:inline sm:px-3"
           title="This app reads mainnet governance state"
         >
           mainnet
@@ -38,7 +38,7 @@ export function SiteHeader() {
         <ReportIssueButton className="hidden sm:inline-flex" />
         <ThemeToggle />
         <div className="sm:hidden">
-          <WalletConnectButton />
+          <WalletConnectButton compact />
         </div>
       </div>
     </header>
