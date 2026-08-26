@@ -1,0 +1,15 @@
+[Unit]
+Description=Aptos governance Slack #governance poller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/governance
+ExecStart=/usr/bin/pnpm notifications:worker --env-file /opt/governance/.env.notifications
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

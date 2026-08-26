@@ -39,6 +39,21 @@ describe("deployment config", () => {
     expect(example).toMatch(/^VITE_APTOS_API_KEY=/m);
     // A VITE_ backend key would inline the secret into the public bundle.
     expect(example).not.toMatch(/^VITE_APTOS_BUILD_API_KEY=/m);
+    expect(example).toMatch(/^CRON_SECRET=/m);
+    expect(example).toMatch(/^NOTIFICATIONS_SLACK_WEBHOOK_URL=/m);
+    expect(example).toMatch(/^NOTIFICATIONS_SLACK_BOT_TOKEN=/m);
+    expect(example).toMatch(/^NOTIFICATIONS_STORE_PATH=/m);
+    expect(example).not.toMatch(/^NOTIFICATIONS_TELEGRAM_/m);
+    expect(example).not.toMatch(/^NOTIFICATIONS_DISCORD_/m);
+    expect(example).not.toMatch(/^UPSTASH_/m);
+    expect(example).not.toMatch(/^VITE_CRON_SECRET=/m);
+    expect(example).not.toMatch(/^VITE_NOTIFICATIONS_/m);
+    expect(example).not.toMatch(/^VITE_UPSTASH_/m);
+  });
+
+  it("does not schedule Vercel Cron for notifications", () => {
+    const vercel = readJson("vercel.json");
+    expect(vercel.crons).toBeUndefined();
   });
 
   it("asks Vercel to cache SSR HTML briefly so Aptos is not hit on every request", () => {

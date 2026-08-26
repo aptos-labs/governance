@@ -17,6 +17,7 @@ dist/
 .env
 .env.local
 .DS_Store
+.data/
 tests/e2e/artifacts/
 test-results/
 playwright-report/

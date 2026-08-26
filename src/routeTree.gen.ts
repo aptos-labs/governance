@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DelegationRouteImport } from './routes/delegation'
 import { Route as ProposalProposalIdRouteImport } from './routes/proposal.$proposalId'
+import { Route as ApiCronNotificationsRouteImport } from './routes/api/cron.notifications'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,50 @@ const ProposalProposalIdRoute = ProposalProposalIdRouteImport.update({
   path: '/proposal/$proposalId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronNotificationsRoute = ApiCronNotificationsRouteImport.update({
+  id: '/api/cron/notifications',
+  path: '/api/cron/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/delegation': typeof DelegationRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/delegation': typeof DelegationRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/delegation': typeof DelegationRoute
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/delegation' | '/proposal/$proposalId'
+  fullPaths:
+    '/' | '/delegation' | '/proposal/$proposalId' | '/api/cron/notifications'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/delegation' | '/proposal/$proposalId'
-  id: '__root__' | '/' | '/delegation' | '/proposal/$proposalId'
+  to: '/' | '/delegation' | '/proposal/$proposalId' | '/api/cron/notifications'
+  id:
+    | '__root__'
+    | '/'
+    | '/delegation'
+    | '/proposal/$proposalId'
+    | '/api/cron/notifications'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DelegationRoute: typeof DelegationRoute
   ProposalProposalIdRoute: typeof ProposalProposalIdRoute
+  ApiCronNotificationsRoute: typeof ApiCronNotificationsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProposalProposalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/notifications': {
+      id: '/api/cron/notifications'
+      path: '/api/cron/notifications'
+      fullPath: '/api/cron/notifications'
+      preLoaderRoute: typeof ApiCronNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +112,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DelegationRoute: DelegationRoute,
   ProposalProposalIdRoute: ProposalProposalIdRoute,
+  ApiCronNotificationsRoute: ApiCronNotificationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

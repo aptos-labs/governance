@@ -15,6 +15,7 @@ Repository operating guide for AI coding agents working on Aptos Governance.
 
 - Install: `pnpm install`
 - Dev server: `pnpm dev`
+- Notifications worker: `pnpm notifications:worker`
 - Type check: `pnpm typecheck`
 - Test: `pnpm test`
 - Build: `pnpm build`
