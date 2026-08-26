@@ -1,6 +1,7 @@
 import {Link} from "@tanstack/react-router";
 import logoIcon from "~/assets/svg/aptos_logo_icon.svg";
 import {BrandMark} from "~/components/BrandMark";
+import {ReportIssueButton} from "~/components/ReportIssueButton";
 import {ThemeToggle} from "~/components/ThemeToggle";
 import {WalletConnectButton} from "~/components/WalletConnectButton";
 import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
@@ -34,6 +35,7 @@ export function SiteHeader() {
         >
           My Delegation
         </Link>
+        <ReportIssueButton className="hidden sm:inline-flex" />
         <ThemeToggle />
         <div className="sm:hidden">
           <WalletConnectButton />

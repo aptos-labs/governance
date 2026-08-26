@@ -1,8 +1,24 @@
 import {useWallet, type WalletInfo} from "@aptos-labs/wallet-adapter-react";
 import {useState} from "react";
 import {AddressChip} from "~/components/AddressChip";
+import {aip62WalletIconSrc} from "~/lib/wallet/aip62-icon";
 
 const FEATURED_WALLETS = ["Petra", "Petra Web"];
+
+function WalletIcon({icon}: {icon: unknown}) {
+  const src = aip62WalletIconSrc(icon);
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      width={20}
+      height={20}
+      className="h-5 w-5 shrink-0 rounded object-contain"
+      aria-hidden="true"
+    />
+  );
+}
 
 function sortWithFeaturedFirst(wallets: readonly WalletInfo[]) {
   return [...wallets].sort((a, b) => {
@@ -46,7 +62,7 @@ export function WalletConnectButton() {
       {pickerOpen && (
         <ul
           role="menu"
-          className="absolute right-0 z-30 mt-2 w-48 rounded-lg border border-[var(--color-border-light)] bg-[var(--color-paper)] p-1 shadow-lg"
+          className="absolute right-0 z-30 mt-2 min-w-56 rounded-lg border border-[var(--color-border-light)] bg-[var(--color-paper)] p-1 shadow-lg"
         >
           {sortWithFeaturedFirst(wallets).map((wallet) => (
             <li key={wallet.name} role="none">
@@ -57,9 +73,10 @@ export function WalletConnectButton() {
                   connect(wallet.name);
                   setPickerOpen(false);
                 }}
-                className="w-full rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-border-light)]"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-border-light)]"
               >
-                {wallet.name}
+                <WalletIcon icon={wallet.icon} />
+                <span>{wallet.name}</span>
               </button>
             </li>
           ))}

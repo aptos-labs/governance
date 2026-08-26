@@ -28,6 +28,7 @@ import { Route as Oauth2UserinfoRouteImport } from './routes/oauth2.userinfo'
 import { Route as ProposalProposalIdRouteImport } from './routes/proposal.$proposalId'
 import { Route as AgentEventNotifyRouteImport } from './routes/agent.event.notify'
 import { Route as AgentIdentityClaimRouteImport } from './routes/agent.identity.claim'
+import { Route as ApiCronNotificationsRouteImport } from './routes/api/cron.notifications'
 import { Route as ApiProposalsProposalIdRouteImport } from './routes/api.proposals.$proposalId'
 import { Route as ApiProposalsProposalIdVotesRouteImport } from './routes/api.proposals.$proposalId.votes'
 
@@ -126,6 +127,11 @@ const AgentIdentityClaimRoute = AgentIdentityClaimRouteImport.update({
   path: '/claim',
   getParentRoute: () => AgentIdentityRoute,
 } as any)
+const ApiCronNotificationsRoute = ApiCronNotificationsRouteImport.update({
+  id: '/api/cron/notifications',
+  path: '/api/cron/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProposalsProposalIdRoute = ApiProposalsProposalIdRouteImport.update({
   id: '/$proposalId',
   path: '/$proposalId',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
   '/agent/event/notify': typeof AgentEventNotifyRoute
   '/agent/identity/claim': typeof AgentIdentityClaimRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
   '/api/proposals/$proposalId': typeof ApiProposalsProposalIdRouteWithChildren
   '/api/proposals/$proposalId/votes': typeof ApiProposalsProposalIdVotesRoute
 }
@@ -181,6 +188,7 @@ export interface FileRoutesByTo {
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
   '/agent/event/notify': typeof AgentEventNotifyRoute
   '/agent/identity/claim': typeof AgentIdentityClaimRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
   '/api/proposals/$proposalId': typeof ApiProposalsProposalIdRouteWithChildren
   '/api/proposals/$proposalId/votes': typeof ApiProposalsProposalIdVotesRoute
 }
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/proposal/$proposalId': typeof ProposalProposalIdRoute
   '/agent/event/notify': typeof AgentEventNotifyRoute
   '/agent/identity/claim': typeof AgentIdentityClaimRoute
+  '/api/cron/notifications': typeof ApiCronNotificationsRoute
   '/api/proposals/$proposalId': typeof ApiProposalsProposalIdRouteWithChildren
   '/api/proposals/$proposalId/votes': typeof ApiProposalsProposalIdVotesRoute
 }
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/proposal/$proposalId'
     | '/agent/event/notify'
     | '/agent/identity/claim'
+    | '/api/cron/notifications'
     | '/api/proposals/$proposalId'
     | '/api/proposals/$proposalId/votes'
   fileRoutesByTo: FileRoutesByTo
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/proposal/$proposalId'
     | '/agent/event/notify'
     | '/agent/identity/claim'
+    | '/api/cron/notifications'
     | '/api/proposals/$proposalId'
     | '/api/proposals/$proposalId/votes'
   id:
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/proposal/$proposalId'
     | '/agent/event/notify'
     | '/agent/identity/claim'
+    | '/api/cron/notifications'
     | '/api/proposals/$proposalId'
     | '/api/proposals/$proposalId/votes'
   fileRoutesById: FileRoutesById
@@ -299,6 +311,7 @@ export interface RootRouteChildren {
   Oauth2UserinfoRoute: typeof Oauth2UserinfoRoute
   ProposalProposalIdRoute: typeof ProposalProposalIdRoute
   AgentEventNotifyRoute: typeof AgentEventNotifyRoute
+  ApiCronNotificationsRoute: typeof ApiCronNotificationsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -436,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentIdentityClaimRouteImport
       parentRoute: typeof AgentIdentityRoute
     }
+    '/api/cron/notifications': {
+      id: '/api/cron/notifications'
+      path: '/api/cron/notifications'
+      fullPath: '/api/cron/notifications'
+      preLoaderRoute: typeof ApiCronNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proposals/$proposalId': {
       id: '/api/proposals/$proposalId'
       path: '/$proposalId'
@@ -510,6 +530,7 @@ const rootRouteChildren: RootRouteChildren = {
   Oauth2UserinfoRoute: Oauth2UserinfoRoute,
   ProposalProposalIdRoute: ProposalProposalIdRoute,
   AgentEventNotifyRoute: AgentEventNotifyRoute,
+  ApiCronNotificationsRoute: ApiCronNotificationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

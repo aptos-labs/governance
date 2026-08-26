@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import {SiteFooter} from "~/components/SiteFooter";
 import {SiteHeader} from "~/components/SiteHeader";
+import {VercelAnalytics} from "~/components/VercelAnalytics";
 import {WebMcpTools} from "~/components/WebMcpTools";
 import {PAGE_SHELL_WIDTH_CLASS} from "~/lib/layout";
 import {AppWalletProvider} from "~/lib/wallet/provider";
@@ -85,6 +86,7 @@ function RootDocument({children}: {children: React.ReactNode}) {
       <body>
         <script dangerouslySetInnerHTML={{__html: THEME_BOOTSTRAP}} />
         {children}
+        <VercelAnalytics />
         <Scripts />
       </body>
     </html>

@@ -80,6 +80,43 @@ List and proposal HTML is cached at the Vercel edge for 15 seconds
 (`s-maxage=15`, `stale-while-revalidate=45`), matching the in-process TTL
 cache used by the fullnode/indexer loaders.
 
+## Governance notifications
+
+The poller posts alerts to Aptos Labs Slack **`#governance`** when a proposal
+is created, when voting closes (pass or fail), when a proposal is executed,
+and when voting is about to end (3d / 2d / 1d / 6h countdown reminders).
+There is no public subscribe page.
+
+Run it as a **persistent process** on any machine with disk (a VM, a home
+server, systemd). The proposal snapshot is a local JSON file, so Upstash
+is not required.
+
+```bash
+# long-running (polls every 5 minutes)
+pnpm notifications:worker
+
+# one shot (cron / systemd timer)
+pnpm notifications:worker --once
+
+# preview without posting or writing the snapshot
+pnpm notifications:worker --once --dry-run
+```
+
+Copy `.env.example` to `.env.notifications` (or `.env.local`) on that
+machine and set:
+
+- `APTOS_BUILD_API_KEY` — Geomi server key
+- `NOTIFICATIONS_PUBLIC_APP_URL` — origin used in Slack links
+- `NOTIFICATIONS_SLACK_WEBHOOK_URL` or `NOTIFICATIONS_SLACK_BOT_TOKEN`
+- `NOTIFICATIONS_STORE_PATH` — defaults to `.data/notifications.json`
+
+A sample systemd unit is in `deploy/governance-notifications.service`.
+Point `WorkingDirectory` and `--env-file` at that machine's checkout.
+
+The first successful poll records the current on-chain state and does **not**
+fan out historical proposals. Do not also hit `/api/cron/notifications` on
+the same snapshot or you can double-post.
+
 ## Deployment
 
 Production hosting is Vercel. The app is server-rendered and uses TanStack
@@ -95,6 +132,12 @@ Start server functions, so it cannot be deployed to a static host.
 `vercel.json` pins the framework preset to `tanstack-start` and the pnpm
 install/build commands so the settings do not depend on dashboard state. Set
 the variables above in the Vercel project's environment variable settings.
+
+Vercel Web Analytics and Speed Insights are wired in the document shell via
+`@vercel/analytics` and `@vercel/speed-insights`. Enable **Web Analytics**
+and **Speed Insights** on the project in the Vercel dashboard so
+`/_vercel/insights/*` and `/_vercel/speed-insights/*` are served after the
+next deploy.
 
 ## Agent discovery
 
