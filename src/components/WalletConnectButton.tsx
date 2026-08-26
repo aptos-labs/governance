@@ -31,20 +31,21 @@ function sortWithFeaturedFirst(wallets: readonly WalletInfo[]) {
   });
 }
 
-export function WalletConnectButton() {
+export function WalletConnectButton({compact = false}: {compact?: boolean}) {
   const {connected, account, wallets, connect, disconnect} = useWallet();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   if (connected && account) {
     return (
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center ${compact ? "gap-1" : "gap-2"}`}>
         <AddressChip address={account.address.toString()} />
         <button
           type="button"
           onClick={() => disconnect()}
-          className="rounded border border-[var(--color-border)] px-3 py-1 text-sm"
+          aria-label={compact ? "Disconnect wallet" : undefined}
+          className={`rounded border border-[var(--color-border)] py-1 text-sm ${compact ? "px-2" : "px-3"}`}
         >
-          Disconnect
+          {compact ? <span aria-hidden="true">×</span> : "Disconnect"}
         </button>
       </div>
     );
@@ -55,9 +56,10 @@ export function WalletConnectButton() {
       <button
         type="button"
         onClick={() => setPickerOpen((open) => !open)}
-        className="rounded-lg bg-[var(--color-accent)] px-[25px] py-[10px] text-[1.1rem] font-normal text-[#121615] hover:brightness-[0.98]"
+        aria-label={compact ? "Connect Wallet" : undefined}
+        className={`rounded-lg bg-[var(--color-accent)] font-normal text-[#121615] hover:brightness-[0.98] ${compact ? "px-3 py-2 text-sm" : "px-[25px] py-[10px] text-[1.1rem]"}`}
       >
-        Connect Wallet
+        {compact ? "Connect" : "Connect Wallet"}
       </button>
       {pickerOpen && (
         <ul
