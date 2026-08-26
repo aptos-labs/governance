@@ -33,6 +33,10 @@ describe("deployment config", () => {
     }
   });
 
+  it("does not keep a static robots.txt that would shadow the generated file", () => {
+    expect(existsSync(resolve(rootDir, "public/robots.txt"))).toBe(false);
+  });
+
   it("keeps the backend key unprefixed and the frontend key Vite-prefixed", () => {
     const example = readFileSync(resolve(rootDir, ".env.example"), "utf8");
     expect(example).toMatch(/^APTOS_BUILD_API_KEY=/m);
@@ -63,12 +67,22 @@ describe("deployment config", () => {
       headers: Array<{key: string; value: string}>;
     }>;
     expect(headers.length).toBeGreaterThan(0);
-    for (const entry of headers) {
+    const pageRules = headers.filter((entry) =>
+      ["/", "/proposal/:path*"].includes(entry.source),
+    );
+    expect(pageRules.length).toBeGreaterThan(0);
+    for (const entry of pageRules) {
       const cacheControl = entry.headers.find(
         (header) => header.key === "Cache-Control",
       );
       expect(cacheControl?.value).toBe(PUBLIC_PAGE_CACHE_CONTROL);
     }
+
+    const homepage = headers.find((entry) => entry.source === "/");
+    const link = homepage?.headers.find((header) => header.key === "Link");
+    expect(link?.value).toMatch(/rel="api-catalog"/);
+    expect(link?.value).toMatch(/rel="service-desc"/);
+    expect(link?.value).toMatch(/rel="service-doc"/);
   });
 
   it("includes Vercel Web Analytics and Speed Insights in the document shell", () => {

@@ -38,6 +38,8 @@ If any fail, report exact failure and do not claim success.
   into the browser bundle. Do not put a server key (`aptoslabs_…`) there.
 - Current supported vars are listed in `.env.example`.
 - Production hosting is Vercel; set the same vars in the Vercel project.
+- `SITE_ORIGIN` is the optional canonical origin for sitemap/robots/discovery
+  URLs. Leave unset to use the request's forwarded host.
 
 ## Code Editing Guidance
 

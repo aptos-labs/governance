@@ -59,6 +59,10 @@ SSR: a browser client key (`AG-…`) sent from Node has no `Origin` header.
 - `APTOS_FULLNODE_URL` (optional): fullnode override; defaults to hosted mainnet
 - `APTOS_INDEXER_URL` (optional): indexer override; defaults to
   `https://api.mainnet.aptoslabs.com/v1/graphql`
+- `SITE_ORIGIN` (optional): canonical origin used in `/sitemap.xml`,
+  `/robots.txt`, and `/.well-known/*` discovery documents. Defaults to
+  the request's forwarded host. Production:
+  `https://governance.aptosfoundation.org`
 
 Geomi keys authenticate against those Aptos Labs hosts. Do not point
 `APTOS_FULLNODE_URL` / `APTOS_INDEXER_URL` at `api.geomi.dev`.
@@ -134,6 +138,23 @@ Vercel Web Analytics and Speed Insights are wired in the document shell via
 and **Speed Insights** on the project in the Vercel dashboard so
 `/_vercel/insights/*` and `/_vercel/speed-insights/*` are served after the
 next deploy.
+
+## Agent discovery
+
+The app publishes machine-readable discovery for AI agents:
+
+- `/sitemap.xml` and `/robots.txt` (Content-Signal + Sitemap)
+- `Link` headers on `/` (`api-catalog`, `service-desc`, `service-doc`)
+- `/.well-known/api-catalog`, `/.well-known/ai-catalog.json`
+- `/.well-known/mcp/server-card.json` and Streamable HTTP `/mcp`
+- `/.well-known/agent-skills/index.json`
+- `/auth.md`, `/.well-known/oauth-protected-resource`,
+  `/.well-known/oauth-authorization-server`
+- `Accept: text/markdown` on HTML pages
+- WebMCP tools registered in the browser on page load
+
+DNS-AID `SVCB` records cannot be served by the app. Operators must publish
+the zone file in `dns/agents.zone` — see `docs/dns-aid.md`.
 
 ## Quality Gates
 

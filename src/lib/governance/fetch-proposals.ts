@@ -53,50 +53,56 @@ async function loadRawProposal(
  * resource on mainnet on 2026-08-20) — "listing" means picking a slice
  * of that id range and fetching each proposal from the proposals table.
  */
+export async function loadProposalListPage(
+  page: number,
+): Promise<ListProposalsResult> {
+  return proposalListCache.getOrSet(`page:${page}`, async () => {
+    const forum = await loadVotingForum();
+
+    const totalCount = Number(forum.next_proposal_id);
+    const nowSecs = BigInt(Math.floor(Date.now() / 1000));
+
+    const highestId = totalCount - 1 - page * PAGE_SIZE;
+    const lowestId = Math.max(0, highestId - PAGE_SIZE + 1);
+
+    if (highestId < 0) {
+      return {items: [], totalCount, page, pageSize: PAGE_SIZE};
+    }
+
+    const ids: number[] = [];
+    for (let id = highestId; id >= lowestId; id--) {
+      ids.push(id);
+    }
+
+    const items = await Promise.all(
+      ids.map(async (id) => {
+        const raw = await loadRawProposal(
+          forum.proposals.handle,
+          id.toString(),
+        );
+        const core = parseRawProposalCore(id.toString(), raw);
+
+        const metadataResult =
+          core.metadataLocation && core.metadataHashHex
+            ? await fetchAndVerifyProposalMetadata(
+                core.metadataLocation,
+                core.metadataHashHex,
+              )
+            : {
+                verified: false as const,
+                reason: "proposal has no metadata_location/metadata_hash set",
+              };
+
+        return buildProposalListItem(core, metadataResult, nowSecs);
+      }),
+    );
+
+    return {items, totalCount, page, pageSize: PAGE_SIZE};
+  }) as Promise<ListProposalsResult>;
+}
+
 export const listProposals = createServerFn({method: "GET"})
   .validator(listProposalsInputSchema)
   .handler(async ({data}): Promise<ListProposalsResult> => {
-    return proposalListCache.getOrSet(`page:${data.page}`, async () => {
-      const forum = await loadVotingForum();
-
-      const totalCount = Number(forum.next_proposal_id);
-      const nowSecs = BigInt(Math.floor(Date.now() / 1000));
-
-      const highestId = totalCount - 1 - data.page * PAGE_SIZE;
-      const lowestId = Math.max(0, highestId - PAGE_SIZE + 1);
-
-      if (highestId < 0) {
-        return {items: [], totalCount, page: data.page, pageSize: PAGE_SIZE};
-      }
-
-      const ids: number[] = [];
-      for (let id = highestId; id >= lowestId; id--) {
-        ids.push(id);
-      }
-
-      const items = await Promise.all(
-        ids.map(async (id) => {
-          const raw = await loadRawProposal(
-            forum.proposals.handle,
-            id.toString(),
-          );
-          const core = parseRawProposalCore(id.toString(), raw);
-
-          const metadataResult =
-            core.metadataLocation && core.metadataHashHex
-              ? await fetchAndVerifyProposalMetadata(
-                  core.metadataLocation,
-                  core.metadataHashHex,
-                )
-              : {
-                  verified: false as const,
-                  reason: "proposal has no metadata_location/metadata_hash set",
-                };
-
-          return buildProposalListItem(core, metadataResult, nowSecs);
-        }),
-      );
-
-      return {items, totalCount, page: data.page, pageSize: PAGE_SIZE};
-    }) as Promise<ListProposalsResult>;
+    return loadProposalListPage(data.page);
   });

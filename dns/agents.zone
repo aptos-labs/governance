@@ -1,0 +1,12 @@
+; DNS for AI Discovery (DNS-AID) — operator-published records
+; Scanner: DoH against _index._agents.<apex> and _a2a._agents.<apex>
+; Sign this zone with DNSSEC. Grey-cloud / DNS-only (do not HTTP-proxy the names).
+;
+; Replace governance.aptosfoundation.org if this deployment uses another apex.
+
+$TTL 3600
+
+_index._agents.governance.aptosfoundation.org.  3600 IN SVCB 1 governance.aptosfoundation.org. alpn="h2,http/1.1" port=443
+_a2a._agents.governance.aptosfoundation.org.    3600 IN SVCB 1 governance.aptosfoundation.org. alpn="h2,http/1.1" port=443
+_mcp._agents.governance.aptosfoundation.org.    3600 IN HTTPS 1 governance.aptosfoundation.org. alpn="h2,http/1.1" port=443
+_catalog._agents.governance.aptosfoundation.org. 3600 IN TXT "url=https://governance.aptosfoundation.org/.well-known/ai-catalog.json"
