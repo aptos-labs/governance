@@ -25,9 +25,9 @@
     "@aptos-labs/wallet-adapter-react": "^8.3.3",
     "@noble/hashes": "^2.3.0",
     "@tanstack/react-query": "^5.101.4",
-    "@tanstack/react-router": "^1.170.31",
+    "@tanstack/react-router": "^1.170.41",
     "@tanstack/react-router-ssr-query": "^1.167.1",
-    "@tanstack/react-start": "^1.168.48",
+    "@tanstack/react-start": "^1.168.60",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "react": "^19.0.0",
@@ -44,12 +44,12 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "jsdom": "^30.0.1",
+    "jsdom": "^30.1.1",
     "nitro": "3.0.260429-beta",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.2",
     "vite": "^8.0.14",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@10.33.2",
   "pnpm": {
