@@ -4,6 +4,7 @@ import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useState} from "react";
 import {AddressChip} from "~/components/AddressChip";
+import {VoteAllPoolsPanel} from "~/components/VoteAllPoolsPanel";
 import {getAptosClient} from "~/lib/aptos/client";
 import {
   buildVoteTransactionPayload,
@@ -174,8 +175,35 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
     );
   }
 
+  // Pools that can still cast power right now — the only ones the
+  // "all pools at once" shortcut could act on. A pool with no
+  // remaining power is excluded as well as one that has entirely
+  // voted: buildVoteTransactionPayload rejects a zero amount, so
+  // including it would make the whole batch unbuildable.
+  const votablePools = pools.filter(
+    (pool) => !pool.hasEntirelyVoted && pool.remainingVotingPower > 0n,
+  );
+
   return (
     <div className="space-y-4">
+      {/* Keyed on account + proposal so a wallet switch or a
+          client-side proposal navigation starts this panel from
+          scratch rather than carrying a review or a run summary into
+          a context it was never meant for — the same scoping the
+          per-pool draft keys below use. */}
+      <VoteAllPoolsPanel
+        key={`${accountAddress}:${proposalId}`}
+        pools={votablePools}
+        proposalId={proposalId}
+        accountAddress={accountAddress!}
+      />
+
+      {votablePools.length > 1 && (
+        <p className="text-xs text-[var(--color-text-secondary)]">
+          Or vote pool by pool:
+        </p>
+      )}
+
       {pools.map((pool) => {
         // Composite key: account + proposal + pool. See the comment
         // above accountAddress for why the account must be included —
