@@ -14,6 +14,7 @@ import {
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {VotingPanel} from "~/components/VotingPanel";
 import {getAptosClient} from "~/lib/aptos/client";
+import {BATCH_VOTE_FUNCTION_ID} from "~/lib/governance/build-batch-vote-payload";
 import {getEligiblePools} from "~/lib/governance/get-eligible-pools";
 
 vi.mock("@aptos-labs/wallet-adapter-react", async () => {
@@ -49,6 +50,18 @@ function renderWithClient(ui: React.ReactElement) {
   const client = new QueryClient({defaultOptions: {queries: {retry: false}}});
   return render(
     <QueryClientProvider client={client}>{ui}</QueryClientProvider>,
+  );
+}
+
+function panel() {
+  return screen.getByTestId("vote-all-pools");
+}
+
+async function reviewAllPools(direction: RegExp = /yes to all/i) {
+  await waitFor(() => screen.getByTestId("vote-all-pools"));
+  fireEvent.click(within(panel()).getByRole("button", {name: direction}));
+  fireEvent.click(
+    within(panel()).getByRole("button", {name: /review vote across all/i}),
   );
 }
 
@@ -90,12 +103,10 @@ describe("vote with all voting power across pools", () => {
     renderWithClient(<VotingPanel proposalId="42" />);
     await waitFor(() => screen.getByText(/0xstakepool1/i));
 
-    // Only one pool can actually still vote, so the shortcut would just
-    // duplicate that pool's own controls.
     expect(screen.queryByTestId("vote-all-pools")).not.toBeInTheDocument();
   });
 
-  it("submits one full-power transaction per pool, in order, from a single confirmation", async () => {
+  it("casts every pool's full power in ONE transaction through the batch contract", async () => {
     const signAndSubmitTransaction = vi
       .fn()
       .mockResolvedValue({hash: "0xhash"});
@@ -109,53 +120,45 @@ describe("vote with all voting power across pools", () => {
     renderWithClient(<VotingPanel proposalId="42" />);
     await waitFor(() => screen.getByTestId("vote-all-pools"));
 
-    const panel = screen.getByTestId("vote-all-pools");
     // Combined power across both pools is surfaced before any click.
-    expect(panel).toHaveTextContent("750 APT");
+    expect(panel()).toHaveTextContent("750 APT");
 
-    fireEvent.click(within(panel).getByRole("button", {name: /yes to all/i}));
-    fireEvent.click(
-      within(panel).getByRole("button", {name: /review vote across all/i}),
-    );
+    await reviewAllPools();
 
-    // The review step names every pool, the per-pool entry function and
-    // the combined total, before anything is signed.
-    const review = screen.getByTestId("vote-all-pools");
-    expect(review).toHaveTextContent("0x1::aptos_governance::partial_vote");
-    expect(review).toHaveTextContent("0x1::delegation_pool::vote");
-    expect(review).toHaveTextContent("750 APT");
-    expect(review).toHaveTextContent("#42");
+    // The review step names the contract being called, the combined
+    // total and every pool, before anything is signed.
+    expect(panel()).toHaveTextContent(BATCH_VOTE_FUNCTION_ID);
+    expect(panel()).toHaveTextContent("750 APT");
+    expect(panel()).toHaveTextContent("#42");
     expect(signAndSubmitTransaction).not.toHaveBeenCalled();
 
     fireEvent.click(
-      within(review).getByRole("button", {name: /confirm and sign/i}),
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
     );
 
     await waitFor(() =>
-      expect(signAndSubmitTransaction).toHaveBeenCalledTimes(2),
+      expect(signAndSubmitTransaction).toHaveBeenCalledTimes(1),
     );
 
-    // Each pool votes its own full remaining power through its own
-    // entry function — the chain takes one pool per transaction.
-    expect(signAndSubmitTransaction).toHaveBeenNthCalledWith(1, {
+    // One transaction, carrying the proposal id, the combined budget,
+    // the direction, and the pools split into the module's two
+    // address vectors.
+    expect(signAndSubmitTransaction).toHaveBeenCalledWith({
       data: {
-        function: "0x1::aptos_governance::partial_vote",
+        function: BATCH_VOTE_FUNCTION_ID,
         typeArguments: [],
-        functionArguments: ["0xstakepool1", "42", "50000000000", true],
-      },
-    });
-    expect(signAndSubmitTransaction).toHaveBeenNthCalledWith(2, {
-      data: {
-        function: "0x1::delegation_pool::vote",
-        typeArguments: [],
-        functionArguments: ["0xdelegationpool2", "42", "25000000000", true],
+        functionArguments: [
+          "42",
+          "75000000000",
+          true,
+          ["0xstakepool1"],
+          ["0xdelegationpool2"],
+        ],
       },
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("vote-all-pools")).toHaveTextContent(
-        "2 of 2 pools voted",
-      ),
+      expect(panel()).toHaveTextContent(/cast across 2 pools in one/i),
     );
   });
 
@@ -171,32 +174,23 @@ describe("vote with all voting power across pools", () => {
     mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
 
     renderWithClient(<VotingPanel proposalId="42" />);
-    await waitFor(() => screen.getByTestId("vote-all-pools"));
-
-    const panel = screen.getByTestId("vote-all-pools");
-    fireEvent.click(within(panel).getByRole("button", {name: /no to all/i}));
+    await reviewAllPools(/no to all/i);
     fireEvent.click(
-      within(panel).getByRole("button", {name: /review vote across all/i}),
-    );
-    fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /confirm and sign/i,
-      }),
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
     );
 
     await waitFor(() =>
-      expect(signAndSubmitTransaction).toHaveBeenCalledTimes(2),
+      expect(signAndSubmitTransaction).toHaveBeenCalledTimes(1),
     );
-    for (const call of signAndSubmitTransaction.mock.calls) {
-      expect(call[0].data.functionArguments[3]).toBe(false);
-    }
+    expect(
+      signAndSubmitTransaction.mock.calls[0][0].data.functionArguments[2],
+    ).toBe(false);
   });
 
-  it("stops at the first failure, reports which pools voted, and retries only the rest", async () => {
+  it("surfaces a rejected signature without claiming any vote was cast", async () => {
     const signAndSubmitTransaction = vi
       .fn()
-      .mockResolvedValueOnce({hash: "0xhash1"})
-      .mockRejectedValueOnce(new Error("User rejected the request"));
+      .mockRejectedValue(new Error("User rejected the request"));
     mockedUseWallet.mockReturnValue({
       connected: true,
       account: {address: "0xvoter"},
@@ -205,67 +199,24 @@ describe("vote with all voting power across pools", () => {
     mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
 
     renderWithClient(<VotingPanel proposalId="42" />);
-    await waitFor(() => screen.getByTestId("vote-all-pools"));
-
+    await reviewAllPools();
     fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /yes to all/i,
-      }),
-    );
-    fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /review vote across all/i,
-      }),
-    );
-    fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /confirm and sign/i,
-      }),
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
     );
 
     await waitFor(() =>
       expect(screen.getByText(/user rejected/i)).toBeInTheDocument(),
     );
+    expect(panel()).not.toHaveTextContent(/cast across/i);
 
-    // The partial outcome is stated per pool, not as a single opaque
-    // "batch failed" — the first pool's vote really is on chain.
-    expect(screen.getByTestId("vote-all-pools")).toHaveTextContent(
-      "1 of 2 pools voted",
-    );
+    // Still on the review step, so the same vote can be retried with
+    // one click rather than rebuilt from scratch.
     expect(
-      screen.getByTestId("vote-all-status-0xstakepool1"),
-    ).toHaveTextContent("Voted");
-    expect(
-      screen.getByTestId("vote-all-status-0xdelegationpool2"),
-    ).toHaveTextContent("Failed");
-
-    // Retrying must re-submit ONLY the pool that did not vote, never
-    // the one that already did — a second transaction for pool 1 would
-    // double-spend its power.
-    signAndSubmitTransaction.mockResolvedValue({hash: "0xhash2"});
-    fireEvent.click(
-      screen.getByRole("button", {name: /retry remaining 1 pool/i}),
-    );
-
-    await waitFor(() =>
-      expect(signAndSubmitTransaction).toHaveBeenCalledTimes(3),
-    );
-    expect(signAndSubmitTransaction).toHaveBeenNthCalledWith(3, {
-      data: {
-        function: "0x1::delegation_pool::vote",
-        typeArguments: [],
-        functionArguments: ["0xdelegationpool2", "42", "25000000000", true],
-      },
-    });
-
-    await waitFor(() =>
-      expect(screen.getByTestId("vote-all-pools")).toHaveTextContent(
-        "2 of 2 pools voted",
-      ),
-    );
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    ).toBeInTheDocument();
   });
 
-  it("keeps the run summary visible after every pool has voted", async () => {
+  it("keeps the confirmation visible after every pool has voted", async () => {
     const signAndSubmitTransaction = vi
       .fn()
       .mockResolvedValue({hash: "0xhash"});
@@ -274,11 +225,11 @@ describe("vote with all voting power across pools", () => {
       account: {address: "0xvoter"},
       signAndSubmitTransaction,
     } as never);
-    // First load offers both pools; every load after the run (the
-    // completed batch invalidates the eligible-pools query) reports
-    // them as entirely voted, which drops the votable count below two.
-    // The summary must survive that, or the user never gets to read
-    // the outcome of what they just signed.
+    // First load offers both pools; every load after the vote (the
+    // completed transaction invalidates the eligible-pools query)
+    // reports them as entirely voted, which drops the votable count
+    // below two. The confirmation must survive that, or the user never
+    // gets to read the outcome of what they just signed.
     mockedGetEligiblePools
       .mockResolvedValueOnce(TWO_POOLS as never)
       .mockResolvedValue(
@@ -290,41 +241,23 @@ describe("vote with all voting power across pools", () => {
       );
 
     renderWithClient(<VotingPanel proposalId="42" />);
-    await waitFor(() => screen.getByTestId("vote-all-pools"));
-
+    await reviewAllPools();
     fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /yes to all/i,
-      }),
-    );
-    fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /review vote across all/i,
-      }),
-    );
-    fireEvent.click(
-      within(screen.getByTestId("vote-all-pools")).getByRole("button", {
-        name: /confirm and sign/i,
-      }),
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId("vote-all-pools")).toHaveTextContent(
-        "2 of 2 pools voted",
-      ),
+      expect(panel()).toHaveTextContent(/cast across 2 pools in one/i),
     );
-
     await waitFor(() =>
       expect(
         screen.getAllByText(/already used all its voting power/i).length,
       ).toBeGreaterThan(0),
     );
-    expect(screen.getByTestId("vote-all-pools")).toHaveTextContent(
-      "2 of 2 pools voted",
-    );
+    expect(panel()).toHaveTextContent(/cast across 2 pools in one/i);
 
-    // Dismissing it returns to a clean panel — and with no votable
-    // pools left, the shortcut correctly disappears entirely.
+    // Dismissing returns to a clean panel — and with no votable pools
+    // left, the shortcut correctly disappears entirely.
     fireEvent.click(screen.getByRole("button", {name: /^done$/i}));
     expect(screen.queryByTestId("vote-all-pools")).not.toBeInTheDocument();
   });

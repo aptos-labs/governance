@@ -6,17 +6,12 @@ import {useState} from "react";
 import {AddressChip} from "~/components/AddressChip";
 import {getAptosClient} from "~/lib/aptos/client";
 import {
-  buildVoteTransactionPayload,
-  type VoteTransactionPayload,
-} from "~/lib/governance/build-vote-payload";
+  BATCH_VOTE_FUNCTION_ID,
+  buildBatchVoteTransactionPayload,
+} from "~/lib/governance/build-batch-vote-payload";
+import type {VoteTransactionPayload} from "~/lib/governance/build-vote-payload";
 import {formatOctasToApt} from "~/lib/governance/format";
 import type {EligiblePool} from "~/lib/governance/types";
-
-interface BatchEntry {
-  poolAddress: string;
-  amountOctas: bigint;
-  payload: VoteTransactionPayload;
-}
 
 /**
  * The frozen snapshot of everything the review step shows AND
@@ -29,27 +24,12 @@ interface BatchEntry {
  * client-side proposal navigation).
  */
 interface ReviewedBatch {
+  payload: VoteTransactionPayload;
   proposalId: string;
   shouldPass: boolean;
   totalOctas: bigint;
-  entries: BatchEntry[];
+  pools: Array<{poolAddress: string; amountOctas: bigint}>;
 }
-
-/**
- * Per-pool outcome within one batch run. There is deliberately no
- * single batch-wide "done/failed" flag: the chain requires one
- * transaction per pool (see build-vote-payload.ts), so a run can end
- * partially applied, and the UI must be able to say exactly which
- * pools voted and which did not.
- */
-type EntryStatus = "pending" | "signing" | "confirmed" | "failed";
-
-const STATUS_LABEL: Record<EntryStatus, string> = {
-  pending: "Not submitted yet",
-  signing: "Waiting for signature...",
-  confirmed: "Voted",
-  failed: "Failed",
-};
 
 export function VoteAllPoolsPanel({
   pools,
@@ -67,21 +47,18 @@ export function VoteAllPoolsPanel({
 
   const [direction, setDirection] = useState<"for" | "against" | null>(null);
   const [reviewed, setReviewed] = useState<ReviewedBatch | null>(null);
-  const [statuses, setStatuses] = useState<Record<string, EntryStatus>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // A run has started once per-pool statuses exist. This is what keeps
-  // the result panel on screen after a run: a successful batch makes
-  // every pool "entirely voted", so the caller's votable-pool list
-  // drops below two and would otherwise unmount this panel — taking
-  // the success/failure summary with it before it could be read.
-  const runStarted = Object.keys(statuses).length > 0;
+  const [votedBatch, setVotedBatch] = useState<ReviewedBatch | null>(null);
 
   // Only worth offering when there is genuinely more than one pool to
   // combine; with one pool this would just duplicate that pool's own
-  // controls one row below.
-  if (pools.length < 2 && !runStarted) {
+  // controls one row below. `votedBatch` keeps the result on screen
+  // past that check: a successful vote makes every pool "entirely
+  // voted", so the caller's votable-pool list drops below two and
+  // would otherwise unmount this panel — taking the confirmation with
+  // it before it could be read.
+  if (pools.length < 2 && !votedBatch) {
     return null;
   }
 
@@ -90,135 +67,57 @@ export function VoteAllPoolsPanel({
     0n,
   );
 
-  function invalidateAfterRun(submittedProposalId: string) {
-    queryClient.invalidateQueries({
-      queryKey: ["proposal", submittedProposalId],
-    });
-    queryClient.invalidateQueries({queryKey: ["proposal-votes"]});
-    queryClient.invalidateQueries({queryKey: ["proposals"]});
-    queryClient.invalidateQueries({
-      queryKey: ["eligible-pools", accountAddress, submittedProposalId],
-    });
-  }
-
-  /**
-   * Submits one transaction per pool, strictly in sequence, waiting for
-   * each to be confirmed on chain before asking the wallet for the next
-   * signature. Sequential rather than concurrent on purpose: every pool
-   * needs its own wallet approval, and firing several approval prompts
-   * at once is both hostile to the user and unreliable across wallets.
-   *
-   * On the first failure the run stops rather than continuing to prompt
-   * — a rejection is most often the user changing their mind, and the
-   * remaining pools stay untouched and retryable.
-   */
-  async function runBatch(entries: BatchEntry[], submittedProposalId: string) {
+  async function submitBatch(batch: ReviewedBatch) {
     setSubmitting(true);
     setSubmitError(null);
-
-    for (const entry of entries) {
-      setStatuses((prev) => ({...prev, [entry.poolAddress]: "signing"}));
-      try {
-        const {hash} = await signAndSubmitTransaction(entry.payload);
-        await getAptosClient().waitForTransaction({transactionHash: hash});
-        setStatuses((prev) => ({...prev, [entry.poolAddress]: "confirmed"}));
-      } catch (error) {
-        setStatuses((prev) => ({...prev, [entry.poolAddress]: "failed"}));
-        setSubmitError(error instanceof Error ? error.message : String(error));
-        setSubmitting(false);
-        // Still invalidate: any pools that already succeeded in this
-        // run have changed on chain and their cached power is stale.
-        invalidateAfterRun(submittedProposalId);
-        return;
-      }
+    try {
+      const {hash} = await signAndSubmitTransaction(batch.payload);
+      await getAptosClient().waitForTransaction({transactionHash: hash});
+      setVotedBatch(batch);
+      setReviewed(null);
+      // Invalidate against the proposal/account this vote was actually
+      // submitted under (taken from the frozen snapshot and the props
+      // this keyed instance was mounted with), never a live value that
+      // could have moved on while the transaction was in flight.
+      queryClient.invalidateQueries({
+        queryKey: ["proposal", batch.proposalId],
+      });
+      queryClient.invalidateQueries({queryKey: ["proposal-votes"]});
+      queryClient.invalidateQueries({queryKey: ["proposals"]});
+      queryClient.invalidateQueries({
+        queryKey: ["eligible-pools", accountAddress, batch.proposalId],
+      });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
-    invalidateAfterRun(submittedProposalId);
   }
 
-  if (runStarted && reviewed) {
-    const confirmedCount = reviewed.entries.filter(
-      (entry) => statuses[entry.poolAddress] === "confirmed",
-    ).length;
-    const remaining = reviewed.entries.filter(
-      (entry) => statuses[entry.poolAddress] !== "confirmed",
-    );
-    const allDone = remaining.length === 0;
-
+  if (votedBatch) {
     return (
       <section
         data-testid="vote-all-pools"
         className="rounded-lg border border-[var(--color-border)] bg-[var(--color-paper)] p-4"
       >
         <h3 className="text-sm font-semibold">
-          Voting {reviewed.shouldPass ? "Yes" : "No"} with all pools
+          Voted {votedBatch.shouldPass ? "Yes" : "No"} with all voting power
         </h3>
-        <p
-          aria-live="polite"
-          className="mt-1 text-xs text-[var(--color-text-secondary)]"
-        >
-          {confirmedCount} of {reviewed.entries.length} pools voted
-          {submitting ? " - approve the next transaction in your wallet." : "."}
+        <p aria-live="polite" className="mt-1 text-xs">
+          {formatOctasToApt(votedBatch.totalOctas, 8)} APT cast across{" "}
+          {votedBatch.pools.length} pools in one transaction.
         </p>
-
-        <ul className="mt-3 space-y-1.5">
-          {reviewed.entries.map((entry) => {
-            const status = statuses[entry.poolAddress] ?? "pending";
-            return (
-              <li
-                key={entry.poolAddress}
-                data-testid={`vote-all-status-${entry.poolAddress}`}
-                className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-xs"
-              >
-                <AddressChip address={entry.poolAddress} />
-                <span
-                  className={`min-w-0 break-all ${
-                    status === "failed"
-                      ? "text-[var(--color-error)]"
-                      : "text-[var(--color-text-secondary)]"
-                  }`}
-                >
-                  {formatOctasToApt(entry.amountOctas, 8)} APT -{" "}
-                  {STATUS_LABEL[status]}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-
-        {submitError && (
-          <p role="alert" className="mt-3 text-sm text-[var(--color-error)]">
-            {submitError}
-          </p>
-        )}
-
-        {!submitting && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {!allDone && (
-              <button
-                type="button"
-                onClick={() => runBatch(remaining, reviewed.proposalId)}
-                className="rounded-full bg-[var(--color-text-primary)] px-4 py-1.5 text-sm font-semibold text-[var(--color-canvas)]"
-              >
-                Retry remaining {remaining.length} pool
-                {remaining.length === 1 ? "" : "s"}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setStatuses({});
-                setReviewed(null);
-                setDirection(null);
-                setSubmitError(null);
-              }}
-              className="rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm"
-            >
-              {allDone ? "Done" : "Dismiss"}
-            </button>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={() => {
+            setVotedBatch(null);
+            setDirection(null);
+            setSubmitError(null);
+          }}
+          className="mt-3 rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm"
+        >
+          Done
+        </button>
       </section>
     );
   }
@@ -233,6 +132,14 @@ export function VoteAllPoolsPanel({
           Review: {reviewed.shouldPass ? "Yes" : "No"} with all voting power
         </h3>
         <dl className="mt-2 space-y-1 text-sm">
+          <div>
+            <dt className="inline text-[var(--color-text-secondary)]">
+              Function:{" "}
+            </dt>
+            <dd className="mt-0.5 break-all font-mono text-xs">
+              {reviewed.payload.data.function}
+            </dd>
+          </div>
           <div>
             <dt className="inline text-[var(--color-text-secondary)]">
               Proposal:{" "}
@@ -256,16 +163,15 @@ export function VoteAllPoolsPanel({
         </dl>
 
         <ul className="mt-3 space-y-1.5">
-          {reviewed.entries.map((entry) => (
-            <li key={entry.poolAddress} className="text-xs">
-              <AddressChip address={entry.poolAddress} />
-              {/* Block, not a flex row beside the chip: an entry
-                  function id is one long unbreakable token, and the
-                  vote panel lives in a narrow sidebar column. */}
-              <p className="mt-0.5 break-all font-mono text-[var(--color-text-secondary)]">
-                {entry.payload.data.function} -{" "}
-                {formatOctasToApt(entry.amountOctas, 8)} APT
-              </p>
+          {reviewed.pools.map((pool) => (
+            <li
+              key={pool.poolAddress}
+              className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-xs"
+            >
+              <AddressChip address={pool.poolAddress} />
+              <span className="min-w-0 break-all text-[var(--color-text-secondary)]">
+                {formatOctasToApt(pool.amountOctas, 8)} APT
+              </span>
             </li>
           ))}
         </ul>
@@ -279,27 +185,19 @@ export function VoteAllPoolsPanel({
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
+            disabled={submitting}
             onClick={() => setReviewed(null)}
-            className="rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm"
+            className="rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm disabled:opacity-40"
           >
             Back
           </button>
           <button
             type="button"
-            onClick={() => {
-              setStatuses(
-                Object.fromEntries(
-                  reviewed.entries.map((entry) => [
-                    entry.poolAddress,
-                    "pending" as const,
-                  ]),
-                ),
-              );
-              runBatch(reviewed.entries, reviewed.proposalId);
-            }}
-            className="rounded-full bg-[var(--color-text-primary)] px-4 py-1.5 text-sm font-semibold text-[var(--color-canvas)]"
+            disabled={submitting}
+            onClick={() => submitBatch(reviewed)}
+            className="rounded-full bg-[var(--color-text-primary)] px-4 py-1.5 text-sm font-semibold text-[var(--color-canvas)] disabled:opacity-40"
           >
-            Confirm and sign {reviewed.entries.length} transactions
+            {submitting ? "Confirming..." : "Confirm and sign"}
           </button>
         </div>
       </section>
@@ -314,8 +212,8 @@ export function VoteAllPoolsPanel({
       <h3 className="text-sm font-semibold">Vote with all voting power</h3>
       <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
         Cast the full {formatOctasToApt(totalOctas)} APT available across all{" "}
-        {pools.length} of your pools at once. Each pool is a separate
-        transaction, so your wallet will ask for {pools.length} signatures.
+        {pools.length} of your pools in a single transaction — one signature,
+        not one per pool.
       </p>
 
       <div className="mt-3 flex gap-2">
@@ -364,30 +262,28 @@ export function VoteAllPoolsPanel({
         disabled={!direction}
         onClick={() => {
           if (!direction) return;
-          // Build every pool's payload in one pass. If any single pool
-          // cannot produce a valid payload, nothing is reviewed at all
-          // — a half-built batch would be worse than none, since the
-          // user would approve signatures for a set they never saw.
           try {
             const shouldPass = direction === "for";
-            const entries = pools.map((pool) => ({
-              poolAddress: pool.poolAddress,
-              amountOctas: pool.remainingVotingPower,
-              payload: buildVoteTransactionPayload(
-                pool,
-                proposalId,
-                pool.remainingVotingPower,
-                shouldPass,
-              ),
-            }));
+            const payload = buildBatchVoteTransactionPayload(
+              pools,
+              proposalId,
+              totalOctas,
+              shouldPass,
+            );
             setReviewed({
+              payload,
               proposalId,
               shouldPass,
-              totalOctas: entries.reduce(
-                (sum, entry) => sum + entry.amountOctas,
-                0n,
-              ),
-              entries,
+              totalOctas,
+              // Per-pool amounts are shown for review only. Each pool
+              // casts its own full remaining power here because the
+              // budget is the exact sum of all of them, so the
+              // contract's greedy fill gives every pool its whole
+              // share before the budget runs out.
+              pools: pools.map((pool) => ({
+                poolAddress: pool.poolAddress,
+                amountOctas: pool.remainingVotingPower,
+              })),
             });
             setSubmitError(null);
           } catch (error) {
@@ -400,6 +296,10 @@ export function VoteAllPoolsPanel({
       >
         Review vote across all {pools.length} pools
       </button>
+
+      <p className="mt-2 break-all font-mono text-[10px] text-[var(--color-text-secondary)]">
+        via {BATCH_VOTE_FUNCTION_ID}
+      </p>
     </section>
   );
 }
