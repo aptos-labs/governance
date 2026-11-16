@@ -89,11 +89,14 @@ describe("vote with all voting power across pools", () => {
     expect(screen.queryByTestId("vote-all-pools")).not.toBeInTheDocument();
   });
 
-  it("is not offered when the other pools have no power left to cast", async () => {
+  it("stays visible with several pools even when some have no power left, and batches only the ones that can still vote", async () => {
+    const signAndSubmitTransaction = vi
+      .fn()
+      .mockResolvedValue({hash: "0xhash"});
     mockedUseWallet.mockReturnValue({
       connected: true,
       account: {address: "0xvoter"},
-      signAndSubmitTransaction: vi.fn(),
+      signAndSubmitTransaction,
     } as never);
     mockedGetEligiblePools.mockResolvedValue([
       TWO_POOLS[0],
@@ -101,9 +104,60 @@ describe("vote with all voting power across pools", () => {
     ] as never);
 
     renderWithClient(<VotingPanel proposalId="42" />);
-    await waitFor(() => screen.getByText(/0xstakepool1/i));
+    await waitFor(() => screen.getByTestId("vote-all-pools"));
 
-    expect(screen.queryByTestId("vote-all-pools")).not.toBeInTheDocument();
+    // Visibility follows the account's pool count, not its remaining
+    // power, so the control does not vanish once a pool has voted.
+    expect(panel()).toHaveTextContent(/1 of your 2 pools/i);
+    expect(panel()).toHaveTextContent(/no voting power left on this proposal/i);
+
+    await reviewAllPools();
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(signAndSubmitTransaction).toHaveBeenCalledTimes(1),
+    );
+    // The spent-out pool is left out of the payload entirely rather
+    // than sent with a zero amount.
+    expect(signAndSubmitTransaction).toHaveBeenCalledWith({
+      data: {
+        function: BATCH_VOTE_FUNCTION_ID,
+        typeArguments: [],
+        functionArguments: ["42", "50000000000", true, ["0xstakepool1"], []],
+      },
+    });
+  });
+
+  it("shows a disabled state, not a broken button, when no pool has power left", async () => {
+    const signAndSubmitTransaction = vi.fn();
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction,
+    } as never);
+    mockedGetEligiblePools.mockResolvedValue(
+      TWO_POOLS.map((pool) => ({
+        ...pool,
+        remainingVotingPower: "0",
+        hasEntirelyVoted: true,
+      })) as never,
+    );
+
+    renderWithClient(<VotingPanel proposalId="42" />);
+    await waitFor(() => screen.getByTestId("vote-all-pools"));
+
+    expect(panel()).toHaveTextContent(
+      /none of your 2 pools has voting power left/i,
+    );
+    expect(
+      within(panel()).getByRole("button", {name: /yes to all/i}),
+    ).toBeDisabled();
+    expect(
+      within(panel()).getByRole("button", {name: /no voting power left/i}),
+    ).toBeDisabled();
+    expect(signAndSubmitTransaction).not.toHaveBeenCalled();
   });
 
   it("casts every pool's full power in ONE transaction through the batch contract", async () => {
@@ -256,9 +310,12 @@ describe("vote with all voting power across pools", () => {
     );
     expect(panel()).toHaveTextContent(/cast across 2 pools in one/i);
 
-    // Dismissing returns to a clean panel — and with no votable pools
-    // left, the shortcut correctly disappears entirely.
+    // Dismissing returns to the panel's resting state. It stays on
+    // screen (the account still has two pools) but has nothing left
+    // to cast, so it says so rather than offering a dead button.
     fireEvent.click(screen.getByRole("button", {name: /^done$/i}));
-    expect(screen.queryByTestId("vote-all-pools")).not.toBeInTheDocument();
+    expect(panel()).toHaveTextContent(
+      /none of your 2 pools has voting power left/i,
+    );
   });
 });

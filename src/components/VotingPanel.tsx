@@ -175,15 +175,6 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
     );
   }
 
-  // Pools that can still cast power right now — the only ones the
-  // "all pools at once" shortcut could act on. A pool with no
-  // remaining power is excluded as well as one that has entirely
-  // voted: buildVoteTransactionPayload rejects a zero amount, so
-  // including it would make the whole batch unbuildable.
-  const votablePools = pools.filter(
-    (pool) => !pool.hasEntirelyVoted && pool.remainingVotingPower > 0n,
-  );
-
   return (
     <div className="space-y-4">
       {/* Keyed on account + proposal so a wallet switch or a
@@ -193,12 +184,12 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
           per-pool draft keys below use. */}
       <VoteAllPoolsPanel
         key={`${accountAddress}:${proposalId}`}
-        pools={votablePools}
+        pools={pools}
         proposalId={proposalId}
         accountAddress={accountAddress!}
       />
 
-      {votablePools.length > 1 && (
+      {pools.length > 1 && (
         <p className="text-xs text-[var(--color-text-secondary)]">
           Or vote pool by pool:
         </p>

@@ -36,8 +36,11 @@ export function VoteAllPoolsPanel({
   proposalId,
   accountAddress,
 }: {
-  /** Pools that can still cast power on this proposal — already
-   *  filtered by the caller, so every entry here is votable. */
+  /** EVERY pool this address can vote through on this proposal,
+   *  including ones with nothing left to cast. The panel needs the
+   *  full list because its visibility is decided by how many pools
+   *  the account has, while what it submits is decided by how much
+   *  power those pools have left — two different questions. */
   pools: EligiblePool[];
   proposalId: string;
   accountAddress: string;
@@ -51,18 +54,28 @@ export function VoteAllPoolsPanel({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [votedBatch, setVotedBatch] = useState<ReviewedBatch | null>(null);
 
-  // Only worth offering when there is genuinely more than one pool to
-  // combine; with one pool this would just duplicate that pool's own
-  // controls one row below. `votedBatch` keeps the result on screen
-  // past that check: a successful vote makes every pool "entirely
-  // voted", so the caller's votable-pool list drops below two and
-  // would otherwise unmount this panel — taking the confirmation with
-  // it before it could be read.
+  // Shown whenever the account has more than one pool, whether or not
+  // those pools still have power to cast. Deliberately NOT gated on
+  // remaining power: a multi-pool voter who sees this control on one
+  // proposal should see it on every proposal, rather than having it
+  // vanish once some or all of their pools have voted and be left
+  // wondering where it went. With nothing left to cast it renders in
+  // a disabled state that says so. `votedBatch` keeps a completed
+  // run's confirmation on screen even if the pool list itself shrinks
+  // underneath it.
   if (pools.length < 2 && !votedBatch) {
     return null;
   }
 
-  const totalOctas = pools.reduce(
+  // What the batch can actually act on. A pool with no power left is
+  // skipped rather than sent: buildBatchVoteTransactionPayload rejects
+  // a zero amount, and the contract would skip it on chain anyway.
+  const votablePools = pools.filter(
+    (pool) => !pool.hasEntirelyVoted && pool.remainingVotingPower > 0n,
+  );
+  const hasVotablePower = votablePools.length > 0;
+
+  const totalOctas = votablePools.reduce(
     (sum, pool) => sum + pool.remainingVotingPower,
     0n,
   );
@@ -210,15 +223,29 @@ export function VoteAllPoolsPanel({
       className="rounded-lg border border-[var(--color-border)] bg-[var(--color-paper)] p-4"
     >
       <h3 className="text-sm font-semibold">Vote with all voting power</h3>
-      <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-        Cast the full {formatOctasToApt(totalOctas)} APT available across all{" "}
-        {pools.length} of your pools in a single transaction — one signature,
-        not one per pool.
-      </p>
+      {hasVotablePower ? (
+        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+          Cast the full {formatOctasToApt(totalOctas)} APT available across{" "}
+          {votablePools.length}
+          {votablePools.length === pools.length
+            ? ` of your pools`
+            : ` of your ${pools.length} pools`}{" "}
+          in a single transaction — one signature, not one per pool.
+          {votablePools.length === pools.length
+            ? ""
+            : " The rest have no voting power left on this proposal."}
+        </p>
+      ) : (
+        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+          None of your {pools.length} pools has voting power left on this
+          proposal.
+        </p>
+      )}
 
       <div className="mt-3 flex gap-2">
         <button
           type="button"
+          disabled={!hasVotablePower}
           onClick={() => setDirection("for")}
           style={
             direction === "for"
@@ -229,12 +256,13 @@ export function VoteAllPoolsPanel({
               : undefined
           }
           aria-pressed={direction === "for"}
-          className={`rounded-full px-4 py-1 text-sm ${direction === "for" ? "" : "border border-[var(--color-border)]"}`}
+          className={`rounded-full px-4 py-1 text-sm disabled:opacity-40 ${direction === "for" ? "" : "border border-[var(--color-border)]"}`}
         >
           Yes to all
         </button>
         <button
           type="button"
+          disabled={!hasVotablePower}
           onClick={() => setDirection("against")}
           style={
             direction === "against"
@@ -245,7 +273,7 @@ export function VoteAllPoolsPanel({
               : undefined
           }
           aria-pressed={direction === "against"}
-          className={`rounded-full px-4 py-1 text-sm ${direction === "against" ? "" : "border border-[var(--color-border)]"}`}
+          className={`rounded-full px-4 py-1 text-sm disabled:opacity-40 ${direction === "against" ? "" : "border border-[var(--color-border)]"}`}
         >
           No to all
         </button>
@@ -259,13 +287,13 @@ export function VoteAllPoolsPanel({
 
       <button
         type="button"
-        disabled={!direction}
+        disabled={!direction || !hasVotablePower}
         onClick={() => {
-          if (!direction) return;
+          if (!direction || !hasVotablePower) return;
           try {
             const shouldPass = direction === "for";
             const payload = buildBatchVoteTransactionPayload(
-              pools,
+              votablePools,
               proposalId,
               totalOctas,
               shouldPass,
@@ -280,7 +308,7 @@ export function VoteAllPoolsPanel({
               // budget is the exact sum of all of them, so the
               // contract's greedy fill gives every pool its whole
               // share before the budget runs out.
-              pools: pools.map((pool) => ({
+              pools: votablePools.map((pool) => ({
                 poolAddress: pool.poolAddress,
                 amountOctas: pool.remainingVotingPower,
               })),
@@ -294,7 +322,9 @@ export function VoteAllPoolsPanel({
         }}
         className="mt-3 w-full rounded-full bg-[var(--color-text-primary)] py-2 text-sm font-semibold text-[var(--color-canvas)] disabled:opacity-40"
       >
-        Review vote across all {pools.length} pools
+        {hasVotablePower
+          ? `Review vote across all ${votablePools.length} pools`
+          : "No voting power left"}
       </button>
 
       <p className="mt-2 break-all font-mono text-[10px] text-[var(--color-text-secondary)]">
