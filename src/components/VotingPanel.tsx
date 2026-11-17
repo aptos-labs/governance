@@ -4,6 +4,7 @@ import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useState} from "react";
 import {AddressChip} from "~/components/AddressChip";
+import {VoteAllPoolsPanel} from "~/components/VoteAllPoolsPanel";
 import {getAptosClient} from "~/lib/aptos/client";
 import {
   buildVoteTransactionPayload,
@@ -176,6 +177,24 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
 
   return (
     <div className="space-y-4">
+      {/* Keyed on account + proposal so a wallet switch or a
+          client-side proposal navigation starts this panel from
+          scratch rather than carrying a review or a run summary into
+          a context it was never meant for — the same scoping the
+          per-pool draft keys below use. */}
+      <VoteAllPoolsPanel
+        key={`${accountAddress}:${proposalId}`}
+        pools={pools}
+        proposalId={proposalId}
+        accountAddress={accountAddress!}
+      />
+
+      {pools.length > 1 && (
+        <p className="text-xs text-[var(--color-text-secondary)]">
+          Or vote pool by pool:
+        </p>
+      )}
+
       {pools.map((pool) => {
         // Composite key: account + proposal + pool. See the comment
         // above accountAddress for why the account must be included —
