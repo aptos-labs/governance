@@ -154,26 +154,9 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
     );
   }
 
-  if (poolsQuery.isError) {
-    return (
-      <p role="alert" className="text-sm text-[var(--color-error)]">
-        Couldn't check your voting power:{" "}
-        {poolsQuery.error instanceof Error
-          ? poolsQuery.error.message
-          : String(poolsQuery.error)}
-      </p>
-    );
-  }
-
-  const pools = poolsQuery.data ?? [];
-
-  if (pools.length === 0) {
-    return (
-      <p className="text-sm text-[var(--color-text-secondary)]">
-        No voting power found for this address.
-      </p>
-    );
-  }
+  // Keep the batch instance mounted through failed refetches, but do
+  // not offer new votes using the stale pool data while showing an error.
+  const pools = poolsQuery.isError ? [] : (poolsQuery.data ?? []);
 
   return (
     <div className="space-y-4">
@@ -188,6 +171,21 @@ export function VotingPanel({proposalId}: {proposalId: string}) {
         proposalId={proposalId}
         accountAddress={accountAddress!}
       />
+
+      {poolsQuery.isError && (
+        <p role="alert" className="text-sm text-[var(--color-error)]">
+          Couldn't check your voting power:{" "}
+          {poolsQuery.error instanceof Error
+            ? poolsQuery.error.message
+            : String(poolsQuery.error)}
+        </p>
+      )}
+
+      {!poolsQuery.isError && pools.length === 0 && (
+        <p className="text-sm text-[var(--color-text-secondary)]">
+          No voting power found for this address.
+        </p>
+      )}
 
       {pools.length > 1 && (
         <p className="text-xs text-[var(--color-text-secondary)]">

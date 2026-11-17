@@ -52,7 +52,9 @@ export function VoteAllPoolsPanel({
   const [reviewed, setReviewed] = useState<ReviewedBatch | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [votedBatch, setVotedBatch] = useState<ReviewedBatch | null>(null);
+  const [votedBatch, setVotedBatch] = useState<
+    (ReviewedBatch & {requestedOctas: bigint}) | null
+  >(null);
 
   // Shown whenever the account has more than one pool, whether or not
   // those pools still have power to cast. Deliberately NOT gated on
@@ -63,7 +65,7 @@ export function VoteAllPoolsPanel({
   // a disabled state that says so. `votedBatch` keeps a completed
   // run's confirmation on screen even if the pool list itself shrinks
   // underneath it.
-  if (pools.length < 2 && !votedBatch) {
+  if (pools.length < 2 && !reviewed && !votedBatch) {
     return null;
   }
 
@@ -85,8 +87,53 @@ export function VoteAllPoolsPanel({
     setSubmitError(null);
     try {
       const {hash} = await signAndSubmitTransaction(batch.payload);
-      await getAptosClient().waitForTransaction({transactionHash: hash});
-      setVotedBatch(batch);
+      const transaction = await getAptosClient().waitForTransaction({
+        transactionHash: hash,
+      });
+      // Delegation votes also emit aptos_governance::Vote, so count only
+      // framework events (not delegation_pool::Vote) to avoid doubling.
+      const normalizeAddress = (address: string) =>
+        address.toLowerCase().replace(/^0x0*/, "0x");
+      const poolAddresses = new Set(
+        batch.pools.map((pool) => normalizeAddress(pool.poolAddress)),
+      );
+      const castByPool = new Map<string, bigint>();
+      const events = "events" in transaction ? transaction.events : [];
+      for (const event of events) {
+        if (!/^0x0*1::aptos_governance::Vote(?:Event)?$/.test(event.type)) {
+          continue;
+        }
+        const data = event.data;
+        if (
+          BigInt(data.proposal_id) !== BigInt(batch.proposalId) ||
+          data.should_pass !== batch.shouldPass ||
+          typeof data.stake_pool !== "string"
+        ) {
+          continue;
+        }
+        const poolAddress = normalizeAddress(data.stake_pool);
+        if (!poolAddresses.has(poolAddress)) continue;
+        const amount = BigInt(data.num_votes);
+        if (amount > 0n) {
+          castByPool.set(
+            poolAddress,
+            (castByPool.get(poolAddress) ?? 0n) + amount,
+          );
+        }
+      }
+      const castPools = Array.from(
+        castByPool,
+        ([poolAddress, amountOctas]) => ({
+          poolAddress,
+          amountOctas,
+        }),
+      );
+      setVotedBatch({
+        ...batch,
+        requestedOctas: batch.totalOctas,
+        totalOctas: castPools.reduce((sum, pool) => sum + pool.amountOctas, 0n),
+        pools: castPools,
+      });
       setReviewed(null);
       // Invalidate against the proposal/account this vote was actually
       // submitted under (taken from the frozen snapshot and the props
@@ -114,12 +161,30 @@ export function VoteAllPoolsPanel({
         className="rounded-lg border border-[var(--color-border)] bg-[var(--color-paper)] p-4"
       >
         <h3 className="text-sm font-semibold">
-          Voted {votedBatch.shouldPass ? "Yes" : "No"} with all voting power
+          {votedBatch.totalOctas > 0n
+            ? `Voted ${votedBatch.shouldPass ? "Yes" : "No"}`
+            : "Transaction confirmed"}
         </h3>
         <p aria-live="polite" className="mt-1 text-xs">
-          {formatOctasToApt(votedBatch.totalOctas, 8)} APT cast across{" "}
-          {votedBatch.pools.length} pools in one transaction.
+          {votedBatch.totalOctas > 0n ? (
+            <>
+              {formatOctasToApt(votedBatch.totalOctas, 8)} APT cast across{" "}
+              {votedBatch.pools.length}{" "}
+              {votedBatch.pools.length === 1 ? "pool" : "pools"} in one
+              transaction.
+            </>
+          ) : (
+            "No votes were cast. Your pools may no longer have eligible voting power."
+          )}
         </p>
+        {votedBatch.totalOctas > 0n &&
+          votedBatch.totalOctas < votedBatch.requestedOctas && (
+            <p role="status" className="mt-2 text-xs">
+              Less voting power than reviewed was cast. Pool eligibility or
+              remaining power changed before execution. Review any remaining
+              voting power before voting again.
+            </p>
+          )}
         <button
           type="button"
           onClick={() => {

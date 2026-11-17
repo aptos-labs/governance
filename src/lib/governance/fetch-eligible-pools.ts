@@ -81,7 +81,9 @@ async function findEligibleDelegationPools(
 
   // Indexer rows are per delegator, but fullnode power is per voter and pool.
   const poolAddresses = [
-    ...new Set(current_delegated_voter.map((row) => row.delegation_pool_address)),
+    ...new Set(
+      current_delegated_voter.map((row) => row.delegation_pool_address),
+    ),
   ];
 
   return Promise.all(

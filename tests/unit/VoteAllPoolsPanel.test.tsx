@@ -4,6 +4,7 @@ import "@testing-library/jest-dom/vitest";
 import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -48,9 +49,10 @@ const TWO_POOLS = [
 
 function renderWithClient(ui: React.ReactElement) {
   const client = new QueryClient({defaultOptions: {queries: {retry: false}}});
-  return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>,
-  );
+  return {
+    ...render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>),
+    client,
+  };
 }
 
 function panel() {
@@ -69,7 +71,18 @@ describe("vote with all voting power across pools", () => {
   const waitForTransaction = vi.fn();
 
   beforeEach(() => {
-    waitForTransaction.mockReset().mockResolvedValue(undefined);
+    mockedGetEligiblePools.mockReset();
+    waitForTransaction.mockReset().mockResolvedValue({
+      events: TWO_POOLS.map((pool) => ({
+        type: "0x1::aptos_governance::Vote",
+        data: {
+          proposal_id: "42",
+          stake_pool: pool.poolAddress,
+          num_votes: pool.remainingVotingPower,
+          should_pass: true,
+        },
+      })),
+    });
     mockedGetAptosClient.mockReturnValue({waitForTransaction} as never);
   });
 
@@ -317,5 +330,219 @@ describe("vote with all voting power across pools", () => {
     expect(panel()).toHaveTextContent(
       /none of your 2 pools has voting power left/i,
     );
+  });
+
+  it("reports the executed voting power rather than the requested budget", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn().mockResolvedValue({hash: "0xhash"}),
+    } as never);
+    mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
+    waitForTransaction.mockResolvedValue({
+      events: [
+        {
+          type: "0x1::aptos_governance::Vote",
+          data: {
+            proposal_id: "42",
+            stake_pool: "0xstakepool1",
+            num_votes: "10000000000",
+            should_pass: true,
+          },
+        },
+      ],
+    });
+
+    renderWithClient(<VotingPanel proposalId="42" />);
+    await reviewAllPools();
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(panel()).toHaveTextContent("100 APT cast across 1 pool"),
+    );
+    expect(panel()).not.toHaveTextContent("750 APT cast");
+    expect(panel()).toHaveTextContent(/less voting power than reviewed/i);
+    expect(panel()).not.toHaveTextContent(/voted yes with all voting power/i);
+  });
+
+  it("counts canonical and legacy framework events once, ignoring unrelated events", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn().mockResolvedValue({hash: "0xhash"}),
+    } as never);
+    mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
+    const vote = {
+      proposal_id: "42",
+      stake_pool: "0xdelegationpool2",
+      num_votes: "25000000000",
+      should_pass: false,
+    };
+    waitForTransaction.mockResolvedValue({
+      events: [
+        {
+          type: "0x1::aptos_governance::Vote",
+          data: {...vote, stake_pool: "0xstakepool1", num_votes: "50000000000"},
+        },
+        {type: `0x${"0".repeat(63)}1::aptos_governance::VoteEvent`, data: vote},
+        // Delegation votes emit both events; count the framework one only.
+        {
+          type: "0x1::delegation_pool::Vote",
+          data: {...vote, delegation_pool: vote.stake_pool},
+        },
+        {type: "0x2::aptos_governance::Vote", data: vote},
+        {
+          type: "0x1::aptos_governance::Vote",
+          data: {...vote, proposal_id: "43"},
+        },
+        {
+          type: "0x1::aptos_governance::Vote",
+          data: {...vote, should_pass: true},
+        },
+        {
+          type: "0x1::aptos_governance::Vote",
+          data: {...vote, stake_pool: "0xotherpool"},
+        },
+      ],
+    });
+
+    renderWithClient(<VotingPanel proposalId="42" />);
+    await reviewAllPools(/no to all/i);
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(panel()).toHaveTextContent("750 APT cast across 2 pools"),
+    );
+    expect(panel()).toHaveTextContent("Voted No");
+    expect(panel()).not.toHaveTextContent(/less voting power than reviewed/i);
+  });
+
+  it("does not claim a vote when a successful transaction emits no vote events", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn().mockResolvedValue({hash: "0xhash"}),
+    } as never);
+    mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
+    waitForTransaction.mockResolvedValue({events: []});
+
+    renderWithClient(<VotingPanel proposalId="42" />);
+    await reviewAllPools();
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(panel()).toHaveTextContent(/no votes were cast/i),
+    );
+    expect(panel()).not.toHaveTextContent(/voted yes/i);
+  });
+
+  it("matches numeric proposal IDs even when the route has leading zeros", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn().mockResolvedValue({hash: "0xhash"}),
+    } as never);
+    mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
+
+    renderWithClient(<VotingPanel proposalId="042" />);
+    await reviewAllPools();
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(panel()).toHaveTextContent("750 APT cast across 2 pools"),
+    );
+  });
+
+  it("keeps the confirmation when the post-vote pool refetch fails", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn().mockResolvedValue({hash: "0xhash"}),
+    } as never);
+    mockedGetEligiblePools
+      .mockResolvedValueOnce(TWO_POOLS as never)
+      .mockRejectedValue(new Error("Fullnode unavailable"));
+
+    renderWithClient(<VotingPanel proposalId="42" />);
+    await reviewAllPools();
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Fullnode unavailable",
+      ),
+    );
+    expect(panel()).toHaveTextContent("750 APT cast across 2 pools");
+    expect(
+      screen.queryByTestId("vote-pool-0xstakepool1"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the frozen review visible when the live pool list shrinks", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn(),
+    } as never);
+    mockedGetEligiblePools.mockResolvedValue(TWO_POOLS as never);
+    const {client} = renderWithClient(<VotingPanel proposalId="42" />);
+    await reviewAllPools();
+
+    await act(async () => {
+      client.setQueryData(
+        ["eligible-pools", "0xvoter", "42"],
+        [
+          {
+            ...TWO_POOLS[0],
+            remainingVotingPower: 50000000000n,
+          },
+        ],
+      );
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.queryByTestId("vote-pool-0xdelegationpool2"),
+      ).not.toBeInTheDocument(),
+    );
+    expect(panel()).toHaveTextContent(/review: yes with all voting power/i);
+    expect(panel()).toHaveTextContent("750 APT");
+    expect(
+      within(panel()).getByRole("button", {name: /^back$/i}),
+    ).toBeEnabled();
+  });
+
+  it("keeps the confirmation mounted when a refetch returns no pools", async () => {
+    mockedUseWallet.mockReturnValue({
+      connected: true,
+      account: {address: "0xvoter"},
+      signAndSubmitTransaction: vi.fn().mockResolvedValue({hash: "0xhash"}),
+    } as never);
+    mockedGetEligiblePools
+      .mockResolvedValueOnce(TWO_POOLS as never)
+      .mockResolvedValue([]);
+
+    renderWithClient(<VotingPanel proposalId="42" />);
+    await reviewAllPools();
+    fireEvent.click(
+      within(panel()).getByRole("button", {name: /confirm and sign/i}),
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/no voting power found for this address/i),
+      ).toBeInTheDocument(),
+    );
+    expect(panel()).toHaveTextContent(/cast across 2 pools in one/i);
   });
 });

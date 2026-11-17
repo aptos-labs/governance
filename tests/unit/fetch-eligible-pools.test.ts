@@ -109,14 +109,18 @@ describe("findEligiblePools", () => {
     );
 
     const mockView = vi.fn(
-      async ({payload}: {
+      async ({
+        payload,
+      }: {
         payload: {function: string; functionArguments: string[]};
       }) => {
         if (
           payload.function ===
           "0x1::delegation_pool::calculate_and_update_remaining_voting_power"
         ) {
-          return [payload.functionArguments[0] === "0xdelegpool2" ? "500" : "300"];
+          return [
+            payload.functionArguments[0] === "0xdelegpool2" ? "500" : "300",
+          ];
         }
         if (
           payload.function ===
@@ -145,16 +149,18 @@ describe("findEligiblePools", () => {
         hasEntirelyVoted: false,
       },
     ]);
-    expect.soft(
-      pools.reduce((sum, pool) => sum + pool.remainingVotingPower, 0n),
-    ).toBe(800n);
+    expect
+      .soft(pools.reduce((sum, pool) => sum + pool.remainingVotingPower, 0n))
+      .toBe(800n);
     expect.soft(mockView).toHaveBeenCalledTimes(4);
     for (const poolAddress of ["0xdelegpool2", "0xdelegpool1"]) {
-      expect.soft(
-        mockView.mock.calls.filter(
-          ([{payload}]) => payload.functionArguments[0] === poolAddress,
-        ),
-      ).toHaveLength(2);
+      expect
+        .soft(
+          mockView.mock.calls.filter(
+            ([{payload}]) => payload.functionArguments[0] === poolAddress,
+          ),
+        )
+        .toHaveLength(2);
       expect(mockView).toHaveBeenCalledWith({
         payload: {
           function:
