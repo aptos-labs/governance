@@ -79,10 +79,15 @@ async function findEligibleDelegationPools(
       voter: voterAddress,
     });
 
-  return Promise.all(
-    current_delegated_voter.map(async (row) => {
-      const poolAddress = row.delegation_pool_address;
+  // Indexer rows are per delegator, but fullnode power is per voter and pool.
+  const poolAddresses = [
+    ...new Set(
+      current_delegated_voter.map((row) => row.delegation_pool_address),
+    ),
+  ];
 
+  return Promise.all(
+    poolAddresses.map(async (poolAddress) => {
       const [remainingPowerResult, totalPowerResult] = await Promise.all([
         aptos.view<[string]>({
           payload: {
